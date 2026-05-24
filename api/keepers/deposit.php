@@ -3,6 +3,8 @@
 
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
+require_once '../middleware/auth.php';
+require_once '../helpers/logger.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -59,6 +61,8 @@ try {
             'weight_grams' => $weightGrams,
             'ownership_status' => 'keeper_held'
         ];
+        
+        log_activity($pdo, $current_user_id ?? null, 'DEPOSIT_KEEPER', 'gold_vault', $insertedId, null, ['grams' => $weightGrams, 'type' => $goldType]);
         
         // Return JSON success response using the standard helper function
         sendResponse('success', 'Gold deposited successfully into the vault.', $responseData, 201);

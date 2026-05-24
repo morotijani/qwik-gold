@@ -3,6 +3,9 @@
 
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
+require_once '../middleware/auth.php';
+require_once '../helpers/logger.php';
+
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -49,6 +52,8 @@ try {
     $insertLedgerStmt = $pdo->prepare("INSERT INTO capital_ledger (transaction_type, amount_ghs, running_balance, description) VALUES ('external_capital_in', ?, ?, ?)");
     $insertLedgerStmt->execute([$amountGhs, $newBalance, $sourceDescription]);
 
+    
+    log_activity($pdo, $current_user_id ?? null, 'INJECT_CAPITAL', 'capital_ledger', 1, null, ['amount' => $amountGhs, 'source' => $sourceDescription]);
     // 4. Commit Transaction
     $pdo->commit();
 

@@ -3,6 +3,9 @@
 
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
+require_once '../middleware/auth.php';
+require_once '../helpers/logger.php';
+
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -107,6 +110,8 @@ try {
     $insertPurchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (customer_id, gold_type, weight_grams, total_paid_ghs, origin) VALUES (?, ?, ?, ?, 'loan_offset')");
     $insertPurchaseStmt->execute([$customerId, $goldType, $weightGrams, $goldValueGhs]);
 
+    
+    log_activity($pdo, $current_user_id ?? null, 'OFFSET_LOAN_GOLD', 'loans', $loanId, ['old_principal' => $currentPrincipal], ['new_principal' => $newPrincipal]);
     // Commit Transaction
     $pdo->commit();
 
