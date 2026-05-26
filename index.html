@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qwik Gold | Enterprise Ledger</title>
+    <!-- Modern Font: Ubuntu -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Google Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <!-- Custom Design System -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="dark-theme">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Global Modal -->
+    <div id="global-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Modal Title</h3>
+                <span class="material-symbols-outlined modal-close" onclick="window.closeModal()">close</span>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- 1. LOGIN OVERLAY (Visible by default until token is verified) -->
+    <div id="login-overlay" class="auth-overlay active">
+        <div class="auth-card">
+            <div class="auth-brand">
+                <img src="assets/img/logo.png" alt="Qwik Gold Logo" class="auth-logo">
+                <h2>Qwik Gold</h2>
+                <p>Enterprise Ledger Access</p>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="text" id="username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">lock</span>
+                        <input type="password" id="password" required autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span>Authenticate</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MAIN APPLICATION SHELL (Hidden until logged in) -->
+    <div id="app-shell" class="app-shell hidden">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img src="assets/img/logo.png" alt="Qwik Gold Logo" class="sidebar-logo">
+                <span>Qwik Gold</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-link active" data-route="dashboard">
+                    <span class="material-symbols-outlined">monitoring</span> Dashboard
+                </a>
+                <a href="#customers" class="nav-link" data-route="customers">
+                    <span class="material-symbols-outlined">group</span> Customers
+                </a>
+                <a href="#transactions" class="nav-link" data-route="transactions">
+                    <span class="material-symbols-outlined">sync_alt</span> Transactions
+                </a>
+                <a href="#ledger" class="nav-link" data-route="ledger">
+                    <span class="material-symbols-outlined">menu_book</span> Capital Ledger
+                </a>
+                <!-- Admin Only Links will be injected via JS if role === 'admin' -->
+                <div id="admin-nav" class="hidden">
+                    <div class="nav-section-title">Administration</div>
+                    <a href="#audit" class="nav-link" data-route="audit">
+                        <span class="material-symbols-outlined">shield</span> Audit Trail
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Sidebar footer removed, moved to topbar -->
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            <!-- Top Navigation / Header -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div class="mobile-menu-toggle">
+                        <span class="material-symbols-outlined">menu</span>
+                    </div>
+                    <h1 id="page-title" class="page-title">Dashboard</h1>
+                </div>
+                <div class="topbar-search">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" placeholder="Search anything...">
+                </div>
+                <div class="topbar-right">
+                    <span id="clock" class="clock hidden"></span>
+                    <button class="btn-icon notification-btn"><span class="material-symbols-outlined">notifications</span></button>
+                    <div class="user-profile-top">
+                        <div class="user-avatar-small">
+                            <span class="material-symbols-outlined">account_circle</span>
+                        </div>
+                        <div class="user-info-small hidden">
+                            <span id="current-user-name" class="user-name">Staff</span>
+                            <span id="current-user-role" class="user-role">staff</span>
+                        </div>
+                    </div>
+                    <button id="logout-btn" class="btn-icon btn-logout" title="Secure Logout">
+                        <span class="material-symbols-outlined">logout</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic View Container (Modules inject their UI here) -->
+            <div id="view-container" class="view-container">
+                <!-- Views will be loaded via JS router -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/app.js"></script>
+    
+    <!-- Module Scripts (Loaded dynamically or pre-loaded) -->
+    <script src="assets/js/modules/dashboard.js"></script>
+    <script src="assets/js/modules/customers.js"></script>
+    <script src="assets/js/modules/transactions.js"></script>
+    <script src="assets/js/modules/audit.js"></script>
+</body>
+</html>
