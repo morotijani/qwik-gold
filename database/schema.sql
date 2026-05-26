@@ -48,11 +48,13 @@ CREATE TABLE loans (
 -- gold_purchases (The Sales Desk)
 CREATE TABLE gold_purchases (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    transaction_ref VARCHAR(50) UNIQUE DEFAULT NULL,
     customer_id INT DEFAULT NULL,
     gold_type ENUM('refined', 'balls') NOT NULL,
     weight_grams DECIMAL(10, 4) NOT NULL,
     total_paid_ghs DECIMAL(15, 2) NOT NULL,
     origin ENUM('walk_in', 'from_keeper', 'loan_offset') NOT NULL,
+    notes VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
