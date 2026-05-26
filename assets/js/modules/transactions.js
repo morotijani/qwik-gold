@@ -6,31 +6,31 @@ window.addEventListener('route-changed', (e) => {
 
     container.innerHTML = `
         <div style="max-width: 800px; margin: 0 auto;">
-            <h2 style="margin-bottom: 24px;">New Transaction</h2>
+            <h2 class="page-title">New Transaction</h2>
             
             <div class="metric-grid" style="grid-template-columns: repeat(2, 1fr);">
                 <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('purchase')">
-                    <h3 class="gold-text"><span class="material-symbols-outlined">shopping_cart</span> Walk-In Purchase</h3>
+                    <h3><span class="material-symbols-outlined" style="vertical-align: middle;">shopping_cart</span> Walk-In Purchase</h3>
                     <p style="margin-top: 8px; font-size: 0.9rem;">Buy gold over the counter.</p>
                 </button>
                 
                 <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('issue_loan')">
-                    <h3 class="info-text" style="color: var(--info);"><span class="material-symbols-outlined">payments</span> Issue Loan</h3>
+                    <h3><span class="material-symbols-outlined" style="vertical-align: middle; color: var(--info);">payments</span> Issue Loan</h3>
                     <p style="margin-top: 8px; font-size: 0.9rem;">Give cash to a customer.</p>
                 </button>
                 
                 <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('offset_loan')">
-                    <h3 class="success-text" style="color: var(--success);"><span class="material-symbols-outlined">balance</span> Walk-in Offset</h3>
+                    <h3><span class="material-symbols-outlined" style="vertical-align: middle; color: var(--success);">balance</span> Walk-in Offset</h3>
                     <p style="margin-top: 8px; font-size: 0.9rem;">Accept new gold to pay down a debt.</p>
                 </button>
                 
                 <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('offset_collateral')">
-                    <h3 class="gold-text"><span class="material-symbols-outlined">key</span> Collateral Offset</h3>
+                    <h3><span class="material-symbols-outlined" style="vertical-align: middle;">key</span> Collateral Offset</h3>
                     <p style="margin-top: 8px; font-size: 0.9rem;">Use deposited gold to pay down a debt.</p>
                 </button>
                 
                 <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('market_sale')">
-                    <h3 class="danger-text" style="color: var(--danger);"><span class="material-symbols-outlined">account_balance</span> Market Execution</h3>
+                    <h3><span class="material-symbols-outlined" style="vertical-align: middle; color: var(--danger);">account_balance</span> Market Execution</h3>
                     <p style="margin-top: 8px; font-size: 0.9rem;">Liquidate inventory at the main market.</p>
                 </button>
             </div>
@@ -38,9 +38,10 @@ window.addEventListener('route-changed', (e) => {
             <div id="tx-form-container" style="margin-top: 32px;"></div>
         </div>
     `;
+});
 
-    window.loadTxForm = (type) => {
-        const formContainer = document.getElementById('tx-form-container');
+window.loadTxForm = (type) => {
+    const formContainer = document.getElementById('tx-form-container');
         
         if (type === 'purchase') {
             formContainer.innerHTML = `
@@ -109,7 +110,7 @@ window.addEventListener('route-changed', (e) => {
                             <label>Actual Revenue Received (GHS)</label>
                             <input type="number" step="0.01" id="m_revenue" required>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--danger);">Confirm Liquidation</button>
+                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--danger); border-color: var(--danger);">Confirm Liquidation</button>
                     </form>
                 </div>
             `;
@@ -136,81 +137,115 @@ window.addEventListener('route-changed', (e) => {
             });
         }
         else if (type === 'issue_loan') {
-            let wizardState = {
+            window.wizardState = {
                 type: null,
                 customerId: '',
                 amount: '',
                 goldType: 'balls',
                 weight: ''
             };
+            const wizardState = window.wizardState;
 
-            formContainer.innerHTML = `
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3>Issue Loan Wizard</h3>
+            const modalHtml = `
+                <div id="issue-loan-modal" class="modal-overlay active">
+                    <div class="modal-card" style="padding: 32px; max-width: 500px; position: relative;">
+                        <span class="material-symbols-outlined modal-close" style="position: absolute; right: 24px; top: 24px; z-index: 10;" onclick="document.getElementById('issue-loan-modal').remove()">close</span>
+                        <h3 style="margin-bottom: 20px; text-align: left; font-size: 1.1rem;">Issue Loan</h3>
                     
+                    <!-- Progress Bar -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+                        <div id="wiz-prog-1" style="height: 4px; width: 40px; background: var(--info); border-radius: 2px; transition: var(--transition);"></div>
+                        <div id="wiz-prog-2" style="height: 4px; width: 40px; background: var(--border); border-radius: 2px; transition: var(--transition);"></div>
+                        <div id="wiz-prog-3" style="height: 4px; width: 40px; background: var(--border); border-radius: 2px; transition: var(--transition);"></div>
+                        <div id="wiz-prog-4" style="height: 4px; width: 40px; background: var(--border); border-radius: 2px; transition: var(--transition);"></div>
+                    </div>
+
                     <!-- Step 1: Loan Type -->
-                    <div id="wiz-step-1">
-                        <h4 style="margin: 16px 0;">Step 1: Select Loan Type</h4>
-                        <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                            <button type="button" class="btn btn-outline" style="flex: 1; text-align: left; padding: 24px;" onclick="window.wizSelectType('standard')">
-                                <strong>Pay Later Customer</strong><br>
-                                <small style="opacity: 0.8;">Take money and pay later</small>
+                    <div id="wiz-step-1" class="wiz-step" style="animation: fadeIn 0.3s ease;">
+                        <h4 style="margin-bottom: 12px; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.9rem;">Select Loan Type</h4>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button type="button" class="btn btn-outline" style="text-align: left; padding: 12px 16px; border-radius: 8px; display: flex; gap: 12px; align-items: center;" onclick="window.wizSelectType('standard')">
+                                <div style="width: 36px; height: 36px; min-width: 36px; background: var(--info-bg); color: var(--info); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">payments</span>
+                                </div>
+                                <div>
+                                    <strong style="font-size: 0.95rem; display: block; margin-bottom: 2px;">Standard Loan</strong>
+                                    <span style="opacity: 0.8; font-size: 0.8rem; font-weight: 400;">Give money, customer pays later. No collateral required.</span>
+                                </div>
                             </button>
-                            <button type="button" class="btn btn-outline" style="flex: 1; text-align: left; padding: 24px;" onclick="window.wizSelectType('collateral')">
-                                <strong>Collateral Loan</strong><br>
-                                <small style="opacity: 0.8;">Take money, leave gold as collateral</small>
+                            <button type="button" class="btn btn-outline" style="text-align: left; padding: 12px 16px; border-radius: 8px; display: flex; gap: 12px; align-items: center;" onclick="window.wizSelectType('collateral')">
+                                <div style="width: 36px; height: 36px; min-width: 36px; background: rgba(245, 158, 11, 0.1); color: #d97706; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">key</span>
+                                </div>
+                                <div>
+                                    <strong style="font-size: 0.95rem; display: block; margin-bottom: 2px;">Collateral Loan</strong>
+                                    <span style="opacity: 0.8; font-size: 0.8rem; font-weight: 400;">Give money, hold customer's gold in the vault.</span>
+                                </div>
                             </button>
                         </div>
                     </div>
 
                     <!-- Step 2: Core Details -->
-                    <div id="wiz-step-2" style="display: none;">
-                        <h4 style="margin: 16px 0;">Step 2: Core Details</h4>
+                    <div id="wiz-step-2" class="wiz-step" style="display: none; animation: fadeIn 0.3s ease;">
+                        <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Customer & Amount</h4>
                         <div class="form-group">
                             <label>Customer ID</label>
-                            <input type="number" id="w_cust" required>
+                            <div class="input-with-icon">
+                                <span class="material-symbols-outlined">person</span>
+                                <input type="number" id="w_cust" required placeholder="Enter ID">
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>Amount (GHS)</label>
-                            <input type="number" step="0.01" id="w_amount" required>
+                            <label>Principal Amount (GHS)</label>
+                            <div class="input-with-icon">
+                                <span class="material-symbols-outlined">payments</span>
+                                <input type="number" step="0.01" id="w_amount" required placeholder="0.00">
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 16px; margin-top: 24px;">
+                        <div style="display: flex; gap: 8px; margin-top: 32px; justify-content: flex-end;">
                             <button type="button" class="btn btn-outline" onclick="window.wizGoToStep(1)">Back</button>
-                            <button type="button" class="btn btn-primary" onclick="window.wizNextFromStep2()">Next</button>
+                            <button type="button" class="btn btn-primary" onclick="window.wizNextFromStep2()">Next Step</button>
                         </div>
                     </div>
 
                     <!-- Step 3: Collateral -->
-                    <div id="wiz-step-3" style="display: none;">
-                        <h4 style="margin: 16px 0;">Step 3: Collateral Details</h4>
+                    <div id="wiz-step-3" class="wiz-step" style="display: none; animation: fadeIn 0.3s ease;">
+                        <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Collateral Details</h4>
                         <div class="form-group">
-                            <label>Gold Type</label>
+                            <label>Gold Type Deposited</label>
                             <select id="w_gold">
-                                <option value="balls">Balls</option>
-                                <option value="refined">Refined</option>
+                                <option value="balls">Gold Balls</option>
+                                <option value="refined">Refined Gold</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Weight (Grams)</label>
-                            <input type="number" step="0.01" id="w_weight">
+                            <div class="input-with-icon">
+                                <span class="material-symbols-outlined">scale</span>
+                                <input type="number" step="0.01" id="w_weight" placeholder="0.00">
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 16px; margin-top: 24px;">
+                        <div style="display: flex; gap: 8px; margin-top: 32px; justify-content: flex-end;">
                             <button type="button" class="btn btn-outline" onclick="window.wizGoToStep(2)">Back</button>
-                            <button type="button" class="btn btn-primary" onclick="window.wizNextFromStep3()">Next</button>
+                            <button type="button" class="btn btn-primary" onclick="window.wizNextFromStep3()">Review Setup</button>
                         </div>
                     </div>
 
                     <!-- Step 4: Summary -->
-                    <div id="wiz-step-4" style="display: none;">
-                        <h4 style="margin: 16px 0;">Step 4: Summary & Confirm</h4>
-                        <div id="wiz-summary-box" style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; margin-bottom: 24px;"></div>
-                        <div style="display: flex; gap: 16px;">
-                            <button type="button" id="wiz-btn-back-sum" class="btn btn-outline" onclick="window.wizGoToStep(wizardState.type === 'collateral' ? 3 : 2)">Back</button>
-                            <button type="button" id="wiz-btn-confirm" class="btn btn-primary" style="background: var(--info);" onclick="window.wizSubmit()">Confirm & Execute</button>
+                    <div id="wiz-step-4" class="wiz-step" style="display: none; animation: fadeIn 0.3s ease;">
+                        <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Summary & Confirm</h4>
+                        <div id="wiz-summary-box" style="background: var(--bg-hover); padding: 24px; border-radius: 12px; margin-bottom: 32px; border: 1px solid var(--border);"></div>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button type="button" id="wiz-btn-back-sum" class="btn btn-outline" onclick="window.wizBackFromSummary()">Back</button>
+                            <button type="button" id="wiz-btn-confirm" class="btn btn-primary" onclick="window.wizSubmit()">Confirm & Issue</button>
                         </div>
                     </div>
                 </div>
+                <style>
+                    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+                </style>
             `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
 
             window.wizSelectType = (type) => {
                 wizardState.type = type;
@@ -218,11 +253,20 @@ window.addEventListener('route-changed', (e) => {
             };
 
             window.wizGoToStep = (step) => {
-                document.getElementById('wiz-step-1').style.display = 'none';
-                document.getElementById('wiz-step-2').style.display = 'none';
-                document.getElementById('wiz-step-3').style.display = 'none';
-                document.getElementById('wiz-step-4').style.display = 'none';
+                document.querySelectorAll('.wiz-step').forEach(el => el.style.display = 'none');
                 document.getElementById('wiz-step-' + step).style.display = 'block';
+                
+                // Update Progress Bar
+                for(let i=1; i<=4; i++) {
+                    const prog = document.getElementById('wiz-prog-' + i);
+                    if (prog) {
+                        prog.style.background = i <= step ? 'var(--info)' : 'var(--border)';
+                    }
+                }
+            };
+
+            window.wizBackFromSummary = () => {
+                window.wizGoToStep(wizardState.type === 'collateral' ? 3 : 2);
             };
 
             window.wizNextFromStep2 = () => {
@@ -288,7 +332,7 @@ window.addEventListener('route-changed', (e) => {
                 try {
                     await window.api.post('/loans/issue.php', payload);
                     window.showToast('Loan successfully issued', 'success');
-                    document.getElementById('tx-form-container').innerHTML = '';
+                    document.getElementById('issue-loan-modal').remove();
                 } catch (e) {
                     window.showToast(e.message, 'error');
                     btn.disabled = false;
@@ -403,5 +447,4 @@ window.addEventListener('route-changed', (e) => {
                 }
             });
         }
-    };
-});
+};

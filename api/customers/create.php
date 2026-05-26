@@ -36,8 +36,8 @@ if (empty($name)) {
     sendResponse('error', 'Customer name cannot be empty', [], 400);
 }
 
-if ($type !== 'individual' && $type !== 'group') {
-    sendResponse('error', 'Invalid type. Must be either "individual" or "group"', [], 400);
+if ($type !== 'individual' && $type !== 'group' && $type !== 'keeper') {
+    sendResponse('error', 'Invalid type. Must be either "individual", "group", or "keeper"', [], 400);
 }
 
 try {

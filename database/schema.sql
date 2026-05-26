@@ -5,7 +5,7 @@ USE gold_ledger;
 CREATE TABLE customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    type ENUM('individual', 'group') NOT NULL DEFAULT 'individual',
+    type ENUM('individual', 'group', 'keeper') NOT NULL DEFAULT 'individual',
     contact_info VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -38,6 +38,7 @@ CREATE TABLE loans (
     id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     principal_amount DECIMAL(15, 2) NOT NULL,
+    type ENUM('standard', 'collateral') NOT NULL DEFAULT 'standard',
     status ENUM('active', 'settled') NOT NULL DEFAULT 'active',
     settlement_note TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

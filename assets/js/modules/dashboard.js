@@ -11,7 +11,10 @@ window.addEventListener('route-changed', async (e) => {
 
     // Build the skeleton structure for the dashboard
     container.innerHTML = `
-        <div class="metric-grid">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h2 class="page-title">Office Overview</h2>
+            
+            <div class="metric-grid">
             <div class="metric-card">
                 <div class="metric-header">
                     <h3>Office Capital</h3>
@@ -44,10 +47,10 @@ window.addEventListener('route-changed', async (e) => {
                 <div class="metric-value" id="dash-gold-keeper">... g</div>
                 <div class="metric-sub">Physical gold held for Keepers</div>
             </div>
-        </div>
-        
-        <div class="glass-panel" style="padding: 24px;">
-            <h3 style="margin-bottom: 16px;">Quick Actions</h3>
+            </div>
+
+            <div class="glass-panel" style="padding: 24px; margin-top: 32px;">
+                <h3 style="margin-bottom: 16px;">Inject External Capital</h3>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                 <button class="btn btn-primary" onclick="window.showInjectCapitalModal()">
                     <span class="material-symbols-outlined">payments</span> Inject Capital

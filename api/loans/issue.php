@@ -56,8 +56,9 @@ try {
     $pdo->beginTransaction();
 
     // 1. INSERT a new record into the loans table
-    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, status) VALUES (?, ?, 'active')");
-    $stmt->execute([$customerId, $principalAmount]);
+    $loanType = $hasCollateral ? 'collateral' : 'standard';
+    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, type, status) VALUES (?, ?, ?, 'active')");
+    $stmt->execute([$customerId, $principalAmount, $loanType]);
     $loanId = $pdo->lastInsertId();
 
     // 1b. If collateral is provided, add it to gold_vault

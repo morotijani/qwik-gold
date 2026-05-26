@@ -152,50 +152,107 @@ window.addEventListener('route-changed', async (e) => {
         try {
             const data = await window.api.get(`/customers/view.php?customer_id=${id}`);
             
+            let loansHtml = '';
+            if (data.all_loans && data.all_loans.length > 0) {
+                loansHtml = `
+                    <div class="table-container" style="margin-top: 16px;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.all_loans.map(l => `
+                                    <tr>
+                                        <td>${new Date(l.created_at).toLocaleDateString()}</td>
+                                        <td><strong>GHS ${parseFloat(l.principal_amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</strong></td>
+                                        <td><span class="badge badge-outline">${l.type}</span></td>
+                                        <td><span style="font-weight: 600; font-size: 0.85rem; color: ${l.status === 'active' ? 'var(--danger)' : 'var(--success)'};">${l.status.toUpperCase()}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                loansHtml = '<div style="padding: 32px; text-align: center; color: var(--text-muted); background: var(--bg-main); border-radius: 8px; margin-top: 16px;">No loan history found.</div>';
+            }
+
             // Render Profile
             container.innerHTML = `
-                <div style="display: flex; gap: 24px; flex-wrap: wrap;">
-                    <!-- Left: Profile Info -->
-                    <div class="glass-panel" style="padding: 24px; flex: 1; min-width: 300px;">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <h2 style="font-size: 2rem; margin-bottom: 8px;">${data.profile.name}</h2>
-                                <span class="badge badge-outline" style="margin-bottom: 16px; display: inline-block;">${data.profile.type}</span>
+                <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Header Bar -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--gold-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold;">
+                                ${data.profile.name.charAt(0).toUpperCase()}
                             </div>
-                            <button class="btn btn-outline" onclick="window.dispatchEvent(new CustomEvent('route-changed', {detail:{route:'customers', container: document.getElementById('view-container')}}))">
-                                <span class="material-symbols-outlined">arrow_back</span> Back
-                            </button>
+                            <div>
+                                <h2 style="font-size: 2rem; margin-bottom: 4px;">${data.profile.name}</h2>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span class="badge badge-outline">${data.profile.type}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Joined ${new Date(data.profile.created_at).toLocaleDateString()}</span>
+                                </div>
+                            </div>
                         </div>
-                        <p style="margin-bottom: 24px;"><strong>Contact:</strong> <br>${data.profile.contact_info || 'No contact provided'}</p>
-                        <p style="font-size: 0.8rem;">Joined: ${new Date(data.profile.created_at).toLocaleDateString()}</p>
+                        <button class="btn btn-outline" onclick="window.location.hash = '#customers'; window.dispatchEvent(new CustomEvent('route-changed', {detail:{route:'customers', container: document.getElementById('view-container')}}))">
+                            <span class="material-symbols-outlined">arrow_back</span> Return
+                        </button>
                     </div>
 
-                    <!-- Right: Financial Summary -->
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 24px; min-width: 300px;">
+                    <!-- Main Content Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
                         
-                        <!-- Debt Card -->
-                        <div class="glass-panel" style="padding: 24px; border-left: 4px solid var(--danger);">
-                            <h3 style="margin-bottom: 8px;">Active Debt</h3>
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--danger); margin-bottom: 8px;">
-                                GHS ${Number(data.active_debt.total_amount_ghs).toFixed(2)}
+                        <!-- Left Sidebar (Contact & Inventory) -->
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                            <div class="glass-panel" style="padding: 24px;">
+                                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Contact Information</h3>
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                    <span class="material-symbols-outlined" style="color: var(--text-muted);">contact_phone</span>
+                                    <div style="line-height: 1.5; color: var(--text-main);">
+                                        ${data.profile.contact_info ? data.profile.contact_info.replace(/\n/g, '<br>') : '<span style="color: var(--text-muted);">No contact provided</span>'}
+                                    </div>
+                                </div>
                             </div>
-                            <div style="font-size: 0.9rem; color: var(--text-muted);">
-                                Spread across ${data.active_debt.loans.length} active loan(s)
+
+                            <div class="glass-panel" style="padding: 24px;">
+                                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Vault Inventory</h3>
+                                <div style="display: flex; flex-direction: column; gap: 16px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: var(--text-muted);">Balls Gold</span>
+                                        <strong style="font-size: 1.1rem;">${parseFloat(data.current_kept_gold.balls_grams).toFixed(2)} g</strong>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: var(--text-muted);">Refined Gold</span>
+                                        <strong style="font-size: 1.1rem;">${parseFloat(data.current_kept_gold.refined_grams).toFixed(2)} g</strong>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Kept Gold Card -->
-                        <div class="glass-panel" style="padding: 24px; border-left: 4px solid var(--gold-primary);">
-                            <h3 style="margin-bottom: 8px;">Vault Inventory</h3>
-                            <div style="display: flex; justify-content: space-between; margin-top: 16px;">
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--text-muted);">Balls</div>
-                                    <div style="font-size: 1.5rem; font-weight: 600;">${data.current_kept_gold.balls_grams.toFixed(2)} g</div>
+                        <!-- Right Main Content (Debt & History) -->
+                        <div style="display: flex; flex-direction: column; gap: 24px;">
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="glass-panel" style="padding: 24px; border-top: 4px solid var(--danger);">
+                                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Total Active Debt</div>
+                                    <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">GHS ${Number(data.active_debt.total_amount_ghs).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">Spread across ${data.active_debt.loans ? data.active_debt.loans.length : 0} active loan(s)</div>
                                 </div>
-                                <div>
-                                    <div style="font-size: 0.9rem; color: var(--text-muted);">Refined</div>
-                                    <div style="font-size: 1.5rem; font-weight: 600;">${data.current_kept_gold.refined_grams.toFixed(2)} g</div>
+                                <div class="glass-panel" style="padding: 24px; border-top: 4px solid var(--success);">
+                                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px;">Total Settled Loans</div>
+                                    <div style="font-size: 2rem; font-weight: bold; color: var(--success);">GHS ${Number(data.total_settled_ghs || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">Historical lifetime value</div>
                                 </div>
+                            </div>
+
+                            <div style="margin-top: 8px;">
+                                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Complete Loan History</h3>
+                                ${loansHtml}
                             </div>
                         </div>
 

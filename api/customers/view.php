@@ -33,14 +33,22 @@ try {
         sendResponse('error', 'Customer not found', [], 404);
     }
 
-    // 2) SELECT all active loans
-    $loansStmt = $pdo->prepare("SELECT id, principal_amount, created_at FROM loans WHERE customer_id = ? AND status = 'active' ORDER BY created_at DESC");
+    // 2) SELECT all loans (active and settled)
+    $loansStmt = $pdo->prepare("SELECT id, principal_amount, type, status, created_at FROM loans WHERE customer_id = ? ORDER BY created_at DESC");
     $loansStmt->execute([$customerId]);
-    $activeLoans = $loansStmt->fetchAll(PDO::FETCH_ASSOC);
+    $allLoans = $loansStmt->fetchAll(PDO::FETCH_ASSOC);
     
     $totalActiveDebt = 0.0;
-    foreach ($activeLoans as $loan) {
-        $totalActiveDebt += (float)$loan['principal_amount'];
+    $totalSettled = 0.0;
+    $activeLoans = [];
+
+    foreach ($allLoans as $loan) {
+        if ($loan['status'] === 'active') {
+            $totalActiveDebt += (float)$loan['principal_amount'];
+            $activeLoans[] = $loan;
+        } else {
+            $totalSettled += (float)$loan['principal_amount'];
+        }
     }
 
     // 3) SELECT the sum of their keeper gold
@@ -73,6 +81,8 @@ try {
             'total_amount_ghs' => $totalActiveDebt,
             'loans' => $activeLoans
         ],
+        'all_loans' => $allLoans,
+        'total_settled_ghs' => $totalSettled,
         'current_kept_gold' => $vaultTotals
     ], 200);
 
