@@ -529,6 +529,46 @@ tbody tr:last-child td {
 }
 .spin { animation: spin 1s linear infinite; display: inline-block; } @keyframes spin { 100% { transform: rotate(360deg); } }
 
+/* Segmented Control / Modern Radio */
+.segmented-control {
+    display: flex;
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    padding: 4px;
+    border-radius: 8px;
+    gap: 4px;
+}
+.segment-label {
+    flex: 1;
+    margin: 0 !important;
+    position: relative;
+    cursor: pointer;
+}
+.segment-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+.segment-label span {
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+.segment-label input[type="radio"]:checked ~ span {
+    background: var(--bg-panel);
+    color: var(--gold-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    font-weight: 600;
+}
+
 /* Print Styles */
 @media print {
     body * {
