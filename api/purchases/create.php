@@ -22,6 +22,12 @@ $totalPaid = isset($input['total_paid_ghs']) ? (float)$input['total_paid_ghs'] :
 $notes = isset($input['notes']) ? trim($input['notes']) : null;
 $customerId = !empty($input['customer_id']) ? (int)$input['customer_id'] : null;
 
+$localPrice = isset($input['local_price']) ? (float)$input['local_price'] : null;
+$density = isset($input['density']) ? (float)$input['density'] : null;
+$karat = isset($input['karat']) ? (float)$input['karat'] : null;
+$pounds = isset($input['pounds']) ? (float)$input['pounds'] : null;
+$totalBlades = isset($input['total_blades']) ? (float)$input['total_blades'] : null;
+
 // Validation
 if ($goldType !== 'balls' && $goldType !== 'refined') {
     sendResponse('error', 'Invalid gold type', [], 400);
@@ -43,8 +49,8 @@ try {
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
 
     // 2. Insert into gold_purchases
-    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, origin, notes) VALUES (?, ?, ?, ?, ?, 'walk_in', ?)");
-    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $totalPaid, $notes]);
+    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?)");
+    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $notes]);
     $purchaseId = $pdo->lastInsertId();
 
     // 3. Deduct from capital_ledger

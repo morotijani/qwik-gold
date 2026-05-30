@@ -17,6 +17,11 @@ try {
             p.gold_type, 
             p.weight_grams, 
             p.total_paid_ghs, 
+            p.local_price,
+            p.density,
+            p.karat,
+            p.pounds,
+            p.total_blades,
             p.notes, 
             p.created_at,
             c.name as customer_name

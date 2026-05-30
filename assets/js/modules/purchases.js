@@ -196,7 +196,7 @@ window.renderWizardStep = () => {
             <!-- Current Price Info -->
             ${state.goldType === 'refined' ? `
                 <div style="margin-bottom: 6px; font-weight: 700; color: #4b5563; font-size: 0.85rem;">
-                    Local Price per Pound
+                    Local Price
                 </div>
                 <div class="swap-input-card" style="margin-bottom: 25px;">
                     <div class="swap-input-body">
@@ -337,11 +337,11 @@ window.renderWizardStep = () => {
                     </div>
                     <div style="flex: 1;">
                         <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem;">Density & Karat</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Density: ${(Number(state.calculatedDensity) || 0).toFixed(2)} &bull; Est. Karat: ${(Number(state.calculatedKarat) || 0).toFixed(2)} &bull; Pounds: ${(Number(state.calculatedPounds) || 0).toFixed(2)}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Density: ${(Number(state.calculatedDensity) || 0).toFixed(2)} &bull; Karat: ${(Number(state.calculatedKarat) || 0).toFixed(2)} &bull; Pounds: ${(Number(state.calculatedPounds) || 0).toFixed(2)}</div>
                     </div>
                     <div style="text-align: right;">
                         <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem;">₵ ${parseFloat(state.pricePerPound).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">per Pound</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Local Price</div>
                     </div>
                 </div>
                 ` : `
@@ -414,13 +414,13 @@ window.renderWizardStep = () => {
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${state.goldType}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(state.grams).toFixed(4)} g</td></tr>
                     ${state.goldType === 'refined' ? `
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(state.pricePerPound).toLocaleString(undefined, {minimumFractionDigits: 2})} / Pound</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedDensity)||0).toFixed(2)}</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Est. Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedKarat)||0).toFixed(2)}</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedPounds)||0).toFixed(2)}</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(state.pricePerPound).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Pound</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedDensity) || 0).toFixed(2)}</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedKarat) || 0).toFixed(2)}</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedPounds) || 0).toFixed(2)}</td></tr>
                     ` : `
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(state.pricePerBlade).toLocaleString(undefined, {minimumFractionDigits: 2})} / Blade</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedBlades)||0).toFixed(4)}</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(state.pricePerBlade).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Blade</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedBlades) || 0).toFixed(4)}</td></tr>
                     `}
                 </table>
                 
@@ -542,6 +542,11 @@ window.submitWizardPurchase = async () => {
         gold_type: state.goldType,
         weight_grams: state.grams,
         total_paid_ghs: state.totalPayout,
+        local_price: state.goldType === 'refined' ? state.pricePerPound : state.pricePerBlade,
+        density: state.calculatedDensity || null,
+        karat: typeof state.calculatedKarat === 'number' ? state.calculatedKarat : null,
+        pounds: state.calculatedPounds || null,
+        total_blades: state.calculatedBlades || null,
         customer_id: state.sellerType === 'registered' ? state.customerId : null,
         notes: finalNotes || null
     };
@@ -587,6 +592,15 @@ window.viewPurchaseReceipt = (purchaseId) => {
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Seller:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.seller_display}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${purchase.gold_type}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.weight_grams).toFixed(4)} g</td></tr>
+                    ${purchase.gold_type === 'refined' ? `
+                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, {minimumFractionDigits: 2})} / Pound</td></tr>` : ''}
+                    ${purchase.density ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.density).toFixed(2)}</td></tr>` : ''}
+                    ${purchase.karat ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.karat).toFixed(2)}</td></tr>` : ''}
+                    ${purchase.pounds ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.pounds).toFixed(2)}</td></tr>` : ''}
+                    ` : `
+                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, {minimumFractionDigits: 2})} / Blade</td></tr>` : ''}
+                    ${purchase.total_blades ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.total_blades).toFixed(4)}</td></tr>` : ''}
+                    `}
                 </table>
                 
                 <div style="background: var(--bg-hover); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
