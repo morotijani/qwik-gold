@@ -5,12 +5,18 @@ window.addEventListener('route-changed', async (e) => {
     const container = e.detail.container;
 
     if (!window._expensesState) {
-        window._expensesState = { statusFilter: 'active' };
+        window._expensesState = { statusFilter: 'active', page: 1, limit: 50 };
     }
 
     window.setExpenseFilter = (status) => {
         window._expensesState.statusFilter = status;
-        window.loadExpensesDashboard(); // Assuming we export render as loadExpensesDashboard
+        window._expensesState.page = 1; // Reset to first page on filter change
+        window.loadExpensesDashboard();
+    };
+
+    window.changeExpensesPage = (newPage) => {
+        window._expensesState.page = newPage;
+        window.loadExpensesDashboard();
     };
 
     // Loading State
@@ -23,24 +29,27 @@ window.addEventListener('route-changed', async (e) => {
     window.loadExpensesDashboard = async () => {
         try {
             const status = window._expensesState.statusFilter;
-            const response = await window.api.get(`/expenses/list.php?status=${status}`);
+            const limit = window._expensesState.limit;
+            const offset = (window._expensesState.page - 1) * limit;
+            
+            const response = await window.api.get(`/expenses/list.php?status=${status}&limit=${limit}&offset=${offset}`);
 
             let expensesHtml = '';
             if (!response.expenses || response.expenses.length === 0) {
                 expensesHtml = `
                     <tr>
-                        <td colspan="5" style="padding: 48px 24px; text-align: center; color: var(--text-muted);">
+                        <td colspan="6" style="padding: 48px 24px; text-align: center; color: var(--text-muted);">
                             <span class="material-symbols-outlined" style="font-size: 3rem; color: var(--border); margin-bottom: 12px; display: block;">receipt_long</span>
-                            <p style="margin: 0; font-size: 1rem;">No expenses recorded yet.</p>
-                            <p style="margin: 4px 0 0 0; font-size: 0.85rem;">Click "Record Expense" to add your first office expenditure.</p>
+                            <p style="margin: 0; font-size: 1rem;">No expenses found.</p>
                         </td>
                     </tr>
                 `;
             } else {
-                expensesHtml = response.expenses.map(exp => {
+                expensesHtml = response.expenses.map((exp, index) => {
                     const isVoided = exp.status === 'voided';
                     const rowStyle = isVoided ? 'background: #fafafa; opacity: 0.8;' : 'background: white;';
                     const textStyle = isVoided ? 'text-decoration: line-through; color: var(--text-muted);' : 'color: var(--danger);';
+                    const rowNumber = offset + index + 1;
                     
                     let actionsHtml = '';
                     if (isVoided) {
@@ -59,6 +68,9 @@ window.addEventListener('route-changed', async (e) => {
 
                     return `
                     <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s; ${rowStyle}" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='${isVoided ? '#fafafa' : 'white'}'">
+                        <td style="padding: 16px; color: var(--text-muted); font-weight: 500; width: 50px;">
+                            ${rowNumber}
+                        </td>
                         <td style="padding: 16px; color: var(--text-main); font-weight: 500;">
                             ${new Date(exp.date).toLocaleDateString()}
                         </td>
@@ -134,6 +146,7 @@ window.addEventListener('route-changed', async (e) => {
                     <table style="width: 100%; border-collapse: collapse; min-width: 700px;">
                         <thead>
                             <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); width: 50px;">#</th>
                                 <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">Date</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Reference</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Description</th>
@@ -145,6 +158,22 @@ window.addEventListener('route-changed', async (e) => {
                             ${expensesHtml}
                         </tbody>
                     </table>
+                    
+                    ${response.total_count > limit ? `
+                    <div style="padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); border-radius: 0 0 12px 12px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">
+                            Showing ${offset + 1} to ${Math.min(offset + limit, response.total_count)} of ${response.total_count} expenses
+                        </span>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" 
+                                ${window._expensesState.page === 1 ? 'disabled' : ''} 
+                                onclick="window.changeExpensesPage(${window._expensesState.page - 1})">Previous</button>
+                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" 
+                                ${offset + limit >= response.total_count ? 'disabled' : ''} 
+                                onclick="window.changeExpensesPage(${window._expensesState.page + 1})">Next</button>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
             `;
         } catch (error) {
@@ -164,14 +193,29 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
                 </div>
                 
+                <style>
+                    #expense_amount:focus {
+                        outline: none !important;
+                        border-color: transparent !important;
+                        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+                    }
+                    #expense_amount::-webkit-outer-spin-button,
+                    #expense_amount::-webkit-inner-spin-button {
+                        -webkit-appearance: none;
+                        margin: 0;
+                    }
+                    #expense_amount[type=number] {
+                        -moz-appearance: textfield;
+                    }
+                </style>
+                <div class="form-group" style="text-align: center; margin-bottom: 24px;">
+                    <label style="display: block; font-size: 1rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">Amount (GHS) <span style="color: var(--danger);">*</span></label>
+                    <input type="number" id="expense_amount" required step="0.01" min="0.01" placeholder="0.00" style="padding: 24px 16px; font-size: 3.5rem; font-weight: 800; text-align: center; height: 100px; border-radius: 16px; border: none; outline: none; color: var(--danger); background: var(--bg-main); letter-spacing: -1px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                </div>
+
                 <div class="form-group">
                     <label>Expense Description <span style="color: var(--danger);">*</span></label>
                     <input type="text" id="expense_description" required placeholder="e.g. Fuel, Light Bill, Food..." style="padding: 12px; font-size: 1rem;">
-                </div>
-                
-                <div class="form-group">
-                    <label>Amount (GHS) <span style="color: var(--danger);">*</span></label>
-                    <input type="number" id="expense_amount" required step="0.01" min="0.01" placeholder="0.00" style="padding: 12px; font-size: 1.1rem; font-weight: 600;">
                 </div>
                 
                 <div class="form-group">

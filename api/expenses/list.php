@@ -14,14 +14,30 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 try {
     $statusFilter = isset($_GET['status']) ? $_GET['status'] : 'active';
+    $limit = isset($_GET['limit']) ? max(1, (int)$_GET['limit']) : 50;
+    $offset = isset($_GET['offset']) ? max(0, (int)$_GET['offset']) : 0;
     
-    // 1) Fetch expenses based on filter
+    // 1) Fetch total count and expenses based on filter
     if ($statusFilter === 'all') {
-        $stmt = $pdo->query("SELECT id, description, amount, date, created_at, status FROM expenses ORDER BY date DESC, created_at DESC");
+        $countStmt = $pdo->query("SELECT COUNT(*) FROM expenses");
+        $totalCount = (int)$countStmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT id, description, amount, date, created_at, status FROM expenses ORDER BY date DESC, created_at DESC LIMIT :limit OFFSET :offset");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
     } else {
         $validStatus = $statusFilter === 'voided' ? 'voided' : 'active';
-        $stmt = $pdo->prepare("SELECT id, description, amount, date, created_at, status FROM expenses WHERE status = ? ORDER BY date DESC, created_at DESC");
-        $stmt->execute([$validStatus]);
+        
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM expenses WHERE status = ?");
+        $countStmt->execute([$validStatus]);
+        $totalCount = (int)$countStmt->fetchColumn();
+
+        $stmt = $pdo->prepare("SELECT id, description, amount, date, created_at, status FROM expenses WHERE status = :status ORDER BY date DESC, created_at DESC LIMIT :limit OFFSET :offset");
+        $stmt->bindValue(':status', $validStatus, PDO::PARAM_STR);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
     }
     
     $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -63,6 +79,7 @@ try {
     }
 
     sendResponse('success', 'Expenses retrieved successfully', [
+        'total_count' => $totalCount,
         'total_lifetime_ghs' => $totalLifetime,
         'total_month_ghs' => $totalThisMonth,
         'total_today_ghs' => $totalToday,
