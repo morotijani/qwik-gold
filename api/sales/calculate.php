@@ -77,34 +77,27 @@ if ($goldType === 'balls') {
     }
     
     // Calculations for refined gold
-    $density = $grams / $volume;
+    $truncate2 = function($num) {
+        return floor($num * 100) / 100;
+    };
     
-    // Basic array mapping common densities to Karats
-    $karatMap = [
-        19.32 => '24K',
-        17.70 => '22K',
-        15.60 => '18K',
-        13.50 => '14K',
-        11.50 => '10K'
-    ];
-    
-    // Find the closest Karat match based on density
-    $closestKarat = 'Unknown';
-    $minDiff = null;
-    foreach ($karatMap as $mapDensity => $k) {
-        $diff = abs($density - $mapDensity);
-        if ($minDiff === null || $diff < $minDiff) {
-            $minDiff = $diff;
-            $closestKarat = $k;
-        }
+    $density = 0;
+    if ($volume > 0) {
+        $density = $truncate2($grams / $volume);
     }
     
-    $pounds = $grams / 8; // Assuming 1 pound = 8g local rule still applies
-    $totalPayout = $pounds * $pricePerPound;
+    $pounds = $truncate2($grams / 7.75);
+    
+    $karat = 0;
+    if ($density > 0) {
+        $karat = $truncate2((($density - 10.51) * 52.838) / $density);
+    }
+    
+    $totalPayout = ($karat * $pricePerPound / 23) * $pounds;
     
     $responseData['breakdown'] = [
-        'density' => round($density, 2),
-        'karat' => $closestKarat,
+        'density' => $density,
+        'karat' => $karat,
         'pounds' => $pounds
     ];
     $responseData['total_payout_ghs'] = $totalPayout;

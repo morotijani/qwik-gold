@@ -34,7 +34,7 @@ window.addEventListener('route-changed', async (e) => {
         <div style="max-width: 1100px; margin: 0 auto;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h2 class="page-title" style="margin-bottom: 0;">Walk-In Purchases</h2>
-                <button class="btn btn-primary" onclick="window.openNewPurchaseModal()">
+                <button class="btn" onclick="window.openNewPurchaseModal()">
                     <span class="material-symbols-outlined">add_shopping_cart</span> New Purchase
                 </button>
             </div>
@@ -374,21 +374,19 @@ window.calculatePurchaseMath = () => {
         
         state.volume = volume;
         state.pricePerPound = pricePerPound;
-        state.calculatedPounds = grams / 8;
-        state.calculatedDensity = volume > 0 ? (grams / volume) : 0;
         
-        const karatMap = { 19.32: '24K', 17.70: '22K', 15.60: '18K', 13.50: '14K', 11.50: '10K' };
-        let closestKarat = 'Unknown';
-        let minDiff = null;
-        for(let d in karatMap) {
-            let diff = Math.abs(state.calculatedDensity - parseFloat(d));
-            if (minDiff === null || diff < minDiff) {
-                minDiff = diff;
-                closestKarat = karatMap[d];
-            }
+        const truncate2 = (num) => Math.floor(num * 100) / 100;
+        
+        state.calculatedPounds = truncate2(grams / 7.75);
+        state.calculatedDensity = volume > 0 ? truncate2(grams / volume) : 0;
+        
+        if (state.calculatedDensity > 0) {
+            state.calculatedKarat = truncate2(((state.calculatedDensity - 10.51) * 52.838) / state.calculatedDensity);
+        } else {
+            state.calculatedKarat = 0;
         }
-        state.calculatedKarat = closestKarat;
-        state.totalPayout = state.calculatedPounds * pricePerPound;
+        
+        state.totalPayout = (state.calculatedKarat * pricePerPound / 23) * state.calculatedPounds;
         
         if (document.getElementById('calc_pounds')) {
             document.getElementById('calc_pounds').value = state.calculatedPounds.toFixed(4);
