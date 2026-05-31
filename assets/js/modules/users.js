@@ -70,7 +70,7 @@
             let html = '';
             res.forEach((user, index) => {
                 const date = new Date(user.created_at).toLocaleDateString();
-                
+
                 let roleBadge = '';
                 if (user.role === 'admin') {
                     roleBadge = `<span style="background: rgba(16, 185, 129, 0.1); color: #059669; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; text-transform: uppercase;"><span class="material-symbols-outlined" style="font-size: 14px;">admin_panel_settings</span> Admin</span>`;
@@ -80,13 +80,13 @@
                     roleBadge = `<span style="background: rgba(59, 130, 246, 0.1); color: #2563eb; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; text-transform: uppercase;"><span class="material-symbols-outlined" style="font-size: 14px;">badge</span> Staff</span>`;
                 }
 
-                let statusBadge = user.status === 'active' 
+                let statusBadge = user.status === 'active'
                     ? `<span style="color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active</span>`
                     : `<span style="color: #ef4444; font-weight: 600; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">block</span> Suspended</span>`;
 
                 const isCurrentUser = user.id === JSON.parse(localStorage.getItem('qwik_gold_user')).id;
 
-                let actionBtn = isCurrentUser ? `<span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">(You)</span>` : 
+                let actionBtn = isCurrentUser ? `<span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">(You)</span>` :
                     `<button class="btn btn-outline" onclick="window.toggleUserStatus(${user.id}, '${user.status}', '${user.name.replace(/'/g, "\\'")}')" style="padding: 6px 12px; font-size: 0.85rem; border-color: ${user.status === 'active' ? 'var(--danger)' : 'var(--success)'}; color: ${user.status === 'active' ? 'var(--danger)' : 'var(--success)'}; border-radius: 8px;">
                         ${user.status === 'active' ? 'Suspend' : 'Reactivate'}
                     </button>`;
@@ -133,7 +133,7 @@
                     <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">Full Name</label>
                     <div class="input-with-icon">
                         <span class="material-symbols-outlined">badge</span>
-                        <input type="text" id="new_user_name" required placeholder="E.g., Jane Doe" style="padding-left: 44px; width: 100%;">
+                        <input type="text" id="new_user_name" required placeholder="E.g., Kofi Agyei" style="padding-left: 44px; width: 100%;">
                     </div>
                 </div>
 
@@ -141,7 +141,7 @@
                     <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">Username</label>
                     <div class="input-with-icon">
                         <span class="material-symbols-outlined">account_circle</span>
-                        <input type="text" id="new_user_username" required placeholder="E.g., janedoe" style="padding-left: 44px; width: 100%;">
+                        <input type="text" id="new_user_username" required placeholder="E.g., kofiagyei" style="padding-left: 44px; width: 100%;">
                     </div>
                 </div>
 
@@ -215,14 +215,14 @@
                 </div>
             </div>
         `;
-        
+
         window.openModal('Change Access Status', modalHtml);
-        
-        document.getElementById('confirm-status-btn').onclick = async function() {
+
+        document.getElementById('confirm-status-btn').onclick = async function () {
             const btn = this;
             btn.disabled = true;
             btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-            
+
             try {
                 await window.api.post('/users/toggle_status.php', { user_id: userId });
                 window.showToast('User status updated successfully', 'success');

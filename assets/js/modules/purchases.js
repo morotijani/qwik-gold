@@ -258,7 +258,7 @@ window.renderWizardStep = () => {
                     <label>Walk-In Name</label>
                     <div class="input-with-icon">
                         <span class="material-symbols-outlined">person_add</span>
-                        <input type="text" id="wiz_walkin_name" placeholder="e.g. John Doe" value="${state.walkinName}" oninput="window.updateWizardState('walkinName', this.value)">
+                        <input type="text" id="wiz_walkin_name" placeholder="e.g. Kofi Boakye" value="${state.walkinName}" oninput="window.updateWizardState('walkinName', this.value)">
                     </div>
                 </div>
             `}
@@ -559,16 +559,33 @@ window.renderWizardStep = () => {
 
         document.getElementById('modal-title').textContent = 'Transaction Successful';
         body.innerHTML = `
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px;">
-                ${generateReceiptHTML('MERCHANT COPY')}
-                ${generateReceiptHTML('SELLER COPY')}
+            <div class="no-print">
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px;">
+                    ${generateReceiptHTML('MERCHANT COPY')}
+                    ${generateReceiptHTML('SELLER COPY')}
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-primary" onclick="window.print()" style="padding: 12px 24px;">
+                        <span class="material-symbols-outlined">print</span> Print Receipts
+                    </button>
+                </div>
             </div>
-            
-            <div class="no-print" style="text-align: center;">
-                <button class="btn btn-primary" onclick="window.print()" style="padding: 12px 24px;">
-                    <span class="material-symbols-outlined">print</span> Print Receipts
-                </button>
-            </div>
+            ${window.getThermalPrintHTML(
+            {
+                gold_type: state.goldType,
+                weight_grams: state.grams,
+                pounds: state.calculatedPounds,
+                volume: state.volume,
+                density: state.calculatedDensity,
+                karat: state.calculatedKarat,
+                total_blades: state.calculatedBlades,
+                local_price: state.pricePerPound || state.pricePerBlade,
+                total_paid_ghs: state.totalPayout
+            },
+            new Date(),
+            state.sellerType === 'registered' ? state.customerName : state.walkinName + ' (Walk-In)'
+        )}
         `;
     }
 };
@@ -712,6 +729,76 @@ window.submitWizardPurchase = async () => {
     }
 };
 
+window.getThermalPrintHTML = (purchaseObj, dateObj, sellerName) => {
+    return `
+    <div class="print-only thermal-receipt" style="display: none; position: fixed; top: 0; left: 0; font-family: monospace !important; color: black; background: white; width: 100%; max-width: 300px; padding: 20px; z-index: 999999; box-sizing: border-box;">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div style="font-size: 1.2rem; font-weight: bold;">Mukhlis Farhan Trading Limited</div>
+            <div style="font-size: 0.9rem;">AC-0064-9566, Konongo - Odumase</div>
+            <div style="font-size: 0.9rem;">+233 55 400 1608 / +233 55 369 8903</div>
+            <div style="margin-top: 5px; font-weight: bold;">PURCHASE INVOICE</div>
+        </div>
+        
+        <div style="font-size: 1.1rem; margin-bottom: 15px;">
+            ${purchaseObj.gold_type === 'refined' ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>${parseFloat(purchaseObj.weight_grams).toFixed(2)}</span>
+                <span>---</span>
+                <span>${(parseFloat(purchaseObj.pounds) || 0).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>${purchaseObj.density ? (purchaseObj.weight_grams / purchaseObj.density).toFixed(2) : (purchaseObj.volume ? parseFloat(purchaseObj.volume).toFixed(2) : '0.00')}</span>
+                <span>---</span>
+                <span>${(parseFloat(purchaseObj.density) || 0).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Karat</span>
+                <span>---</span>
+                <span>${(parseFloat(purchaseObj.karat) || 0).toFixed(2)}</span>
+            </div>
+            ` : `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span>Weight (g)</span>
+                <span>---</span>
+                <span>${parseFloat(purchaseObj.weight_grams).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Total Blades</span>
+                <span>---</span>
+                <span>${(parseFloat(purchaseObj.total_blades) || 0).toFixed(4)}</span>
+            </div>
+            `}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold;">
+                <span>Price:</span>
+                <span>₵${parseFloat(purchaseObj.local_price || purchaseObj.pricePerBlade || purchaseObj.pricePerPound || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.3rem;">
+                <span>Amount:</span>
+                <span>₵${parseFloat(purchaseObj.total_paid_ghs || purchaseObj.totalPayout || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+        </div>
+        
+        <div style="border-top: 1px dashed black; margin: 10px 0;"></div>
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span>Name of Customer,</span>
+            <span>${sellerName}</span>
+        </div>
+        
+        <div style="border-top: 1px dashed black; margin: 10px 0;"></div>
+        
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span>Date,</span>
+            <span>${dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} ${dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+            Thank you!
+        </div>
+    </div>
+    `;
+};
+
 window.viewPurchaseReceipt = (purchaseId) => {
     const purchase = window._walkInPurchases.find(p => p.id === purchaseId);
     if (!purchase) return;
@@ -723,45 +810,48 @@ window.viewPurchaseReceipt = (purchaseId) => {
     const dateObj = new Date(purchase.created_at);
 
     modalBody.innerHTML = `
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-            <div class="receipt-box" style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; width: 100%; max-width: 400px;">
-                <div style="text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px;">
-                    <h2 style="margin: 0; color: var(--gold-primary); font-family: 'Outfit', sans-serif;">QWIK GOLD</h2>
-                    <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Purchase Receipt</p>
-                </div>
-                
-                <table style="width: 100%; margin-bottom: 15px; font-size: 0.85rem;">
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Txn Ref:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; font-family: monospace;">${txnId}</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Date:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Seller:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.seller_display}</td></tr>
-                    ${purchase.handled_by ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Handled By:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.handled_by}</td></tr>` : ''}
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${purchase.gold_type}</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.weight_grams).toFixed(4)} g</td></tr>
-                    ${purchase.gold_type === 'refined' ? `
-                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Pound</td></tr>` : ''}
-                    ${purchase.density ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.density).toFixed(2)}</td></tr>` : ''}
-                    ${purchase.karat ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.karat).toFixed(2)}</td></tr>` : ''}
-                    ${purchase.pounds ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.pounds).toFixed(2)}</td></tr>` : ''}
-                    ` : `
-                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Blade</td></tr>` : ''}
-                    ${purchase.total_blades ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.total_blades).toFixed(4)}</td></tr>` : ''}
-                    `}
-                </table>
-                
-                <div style="background: var(--bg-hover); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <span style="font-weight: 600; font-size: 0.9rem;">Amount Paid:</span>
-                    <span style="font-size: 1.1rem; font-weight: 700; color: var(--danger);">₵${parseFloat(purchase.total_paid_ghs).toLocaleString()}</span>
-                </div>
-                
-                <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
-                    Thank you for doing business with Qwik Gold!
+        <div class="no-print">
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <div class="receipt-box" style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; width: 100%; max-width: 400px;">
+                    <div style="text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px;">
+                        <h2 style="margin: 0; color: var(--gold-primary); font-family: 'Outfit', sans-serif;">QWIK GOLD</h2>
+                        <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Purchase Receipt</p>
+                    </div>
+                    
+                    <table style="width: 100%; margin-bottom: 15px; font-size: 0.85rem;">
+                        <tr><td style="padding: 3px 0; color: var(--text-muted);">Txn Ref:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; font-family: monospace;">${txnId}</td></tr>
+                        <tr><td style="padding: 3px 0; color: var(--text-muted);">Date:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}</td></tr>
+                        <tr><td style="padding: 3px 0; color: var(--text-muted);">Seller:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.seller_display}</td></tr>
+                        ${purchase.handled_by ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Handled By:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.handled_by}</td></tr>` : ''}
+                        <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${purchase.gold_type}</td></tr>
+                        <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.weight_grams).toFixed(4)} g</td></tr>
+                        ${purchase.gold_type === 'refined' ? `
+                        ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Pound</td></tr>` : ''}
+                        ${purchase.density ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.density).toFixed(2)}</td></tr>` : ''}
+                        ${purchase.karat ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.karat).toFixed(2)}</td></tr>` : ''}
+                        ${purchase.pounds ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.pounds).toFixed(2)}</td></tr>` : ''}
+                        ` : `
+                        ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Blade</td></tr>` : ''}
+                        ${purchase.total_blades ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.total_blades).toFixed(4)}</td></tr>` : ''}
+                        `}
+                    </table>
+                    
+                    <div style="background: var(--bg-hover); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span style="font-weight: 600; font-size: 0.9rem;">Amount Paid:</span>
+                        <span style="font-size: 1.1rem; font-weight: 700; color: var(--danger);">₵${parseFloat(purchase.total_paid_ghs).toLocaleString()}</span>
+                    </div>
+                    
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px;">
+                        Thank you for doing business with Qwik Gold!
+                    </div>
                 </div>
             </div>
+    
+            <button class="btn btn-primary btn-block" onclick="window.print()">
+                <span class="material-symbols-outlined">print</span> Print Receipt
+            </button>
         </div>
-
-        <button class="btn btn-primary btn-block no-print" onclick="window.print()">
-            <span class="material-symbols-outlined">print</span> Print Receipt
-        </button>
+        ${window.getThermalPrintHTML(purchase, dateObj, purchase.seller_display)}
     `;
 
     document.getElementById('global-modal').classList.add('active');

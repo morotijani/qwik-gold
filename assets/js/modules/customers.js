@@ -390,7 +390,8 @@ window.addEventListener('route-changed', async (e) => {
                                                 </td>
                                                 <td style="padding: 20px 24px; text-align: right;">
                                                     ${node.status === 'active' 
-                                                        ? `<span style="padding: 6px 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Unpaid</span>` 
+                                                        ? `<span style="padding: 6px 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Unpaid</span>
+                                                           <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px; box-shadow: 0 4px 10px rgba(245,158,11,0.2); border: none;" onclick="window.openSettleLoanWizard(${node.id}, ${id}, '${node.type}', ${node.principal_amount})">Settle</button>` 
                                                         : `<span style="padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Settled</span>`}
                                                     <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px;" onclick="window.openLoanDetailsModal(${node.id})">Details</button>
                                                 </td>

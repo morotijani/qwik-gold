@@ -586,3 +586,65 @@ tbody tr:last-child td { border-bottom: none; }
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
+
+.print-only {
+    display: none;
+}
+
+/* =========================================
+   PRINT STYLES
+   ========================================= */
+@media print {
+    /* Hide everything except the modal */
+    body > :not(#global-modal) {
+        display: none !important;
+    }
+    
+    /* Make modal a normal block element for printing */
+    #global-modal, .modal-overlay {
+        position: static !important;
+        background: transparent !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .modal-card {
+        box-shadow: none !important;
+        border: none !important;
+        background: transparent !important;
+        max-width: none !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    
+    #modal-body {
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+    
+    .modal-header {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}

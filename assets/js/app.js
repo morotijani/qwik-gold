@@ -113,9 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         <div style="text-align: right; position: relative; z-index: 1;">
                             <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Current Outstanding</div>
-                            <div style="font-size: 2.5rem; font-weight: 800; color: ${loan.principal_amount > 0 ? '#ef4444' : '#10b981'};">
+                            <div style="font-size: 2.5rem; font-weight: 800; color: ${loan.principal_amount > 0 ? '#ef4444' : '#10b981'}; margin-bottom: 8px;">
                                 ₵ ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
+                            ${loan.status === 'active' ? `<button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.openSettleLoanWizard(${loan.id}, ${loan.customer_id}, '${loan.type}', ${loan.principal_amount}), 300);" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 15px rgba(245,158,11,0.3); border: none;">Settle Loan</button>` : ''}
                         </div>
                     </div>
 
