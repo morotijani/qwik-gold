@@ -39,7 +39,7 @@ window.addEventListener('route-changed', async (e) => {
                 </button>
             </div>
             
-            <div class="table-container">
+            <div class="table-container" style="overflow: visible;">
                 <table>
                     <thead>
                         <tr>
@@ -57,22 +57,52 @@ window.addEventListener('route-changed', async (e) => {
                     </tbody>
                 </table>
             </div>
+            <div id="purchases-pagination"></div>
         </div>
     `;
 
     try {
         const purchases = await window.api.get('/purchases/list.php');
         window._walkInPurchases = purchases;
-        const tbody = document.getElementById('purchases-tbody');
+        window._purchasesCurrentPage = 1;
+        window._purchasesItemsPerPage = 10;
+        
+        window.renderPurchasesTable();
 
-        if (purchases.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No purchases recorded yet.</td></tr>';
-            return;
-        }
+    } catch (error) {
+        document.getElementById('purchases-tbody').innerHTML =
+            `<tr><td colspan="7" style="text-align: center; color: #ff6b6b;">Error loading purchases.</td></tr>`;
+    }
+});
 
-        tbody.innerHTML = purchases.map((p, index) => `
+window.renderPurchasesTable = () => {
+    const tbody = document.getElementById('purchases-tbody');
+    const paginationContainer = document.getElementById('purchases-pagination');
+    if (!tbody) return;
+
+    const purchases = window._walkInPurchases;
+
+    if (purchases.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No purchases recorded yet.</td></tr>';
+        if (paginationContainer) paginationContainer.innerHTML = '';
+        return;
+    }
+
+    const totalItems = purchases.length;
+    const totalPages = Math.ceil(totalItems / window._purchasesItemsPerPage);
+
+    if (window._purchasesCurrentPage > totalPages) window._purchasesCurrentPage = totalPages;
+    if (window._purchasesCurrentPage < 1) window._purchasesCurrentPage = 1;
+
+    const startIndex = (window._purchasesCurrentPage - 1) * window._purchasesItemsPerPage;
+    const endIndex = startIndex + window._purchasesItemsPerPage;
+    const currentItems = purchases.slice(startIndex, endIndex);
+
+    tbody.innerHTML = currentItems.map((p, index) => {
+        const globalIndex = startIndex + index + 1;
+        return `
             <tr>
-                <td style="font-weight: 500; color: var(--text-muted);">${index + 1}</td>
+                <td style="font-weight: 500; color: var(--text-muted);">${globalIndex}</td>
                 <td>
                     <a href="javascript:void(0)" onclick="window.viewPurchaseReceipt(${p.id})" style="font-family: monospace; font-weight: 600; color: var(--gold-primary); text-decoration: none;">
                         ${p.transaction_ref || '#TXN-' + p.id}
@@ -84,13 +114,27 @@ window.addEventListener('route-changed', async (e) => {
                 <td style="font-weight: 600;">${parseFloat(p.weight_grams).toFixed(2)}g</td>
                 <td style="color: #ff6b6b; font-weight: 600;">₵${parseFloat(p.total_paid_ghs).toLocaleString()}</td>
             </tr>
-        `).join('');
+        `;
+    }).join('');
 
-    } catch (error) {
-        document.getElementById('purchases-tbody').innerHTML =
-            `<tr><td colspan="7" style="text-align: center; color: #ff6b6b;">Error loading purchases.</td></tr>`;
+    if (paginationContainer) {
+        paginationContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Showing ${startIndex + 1} to ${Math.min(endIndex, totalItems)} of ${totalItems} entries
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.9rem;" 
+                            onclick="window._purchasesCurrentPage--; window.renderPurchasesTable();" 
+                            ${window._purchasesCurrentPage === 1 ? 'disabled' : ''}>Previous</button>
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.9rem;" 
+                            onclick="window._purchasesCurrentPage++; window.renderPurchasesTable();" 
+                            ${window._purchasesCurrentPage === totalPages ? 'disabled' : ''}>Next</button>
+                </div>
+            </div>
+        `;
     }
-});
+};
 
 // --- WIZARD LOGIC ---
 
