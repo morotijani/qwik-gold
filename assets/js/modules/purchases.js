@@ -35,7 +35,7 @@ window.addEventListener('route-changed', async (e) => {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
                 <h2 style="margin: 0; font-weight: 600; font-size: initial; color: var(--text-main);">Walk-In Purchases</h2>
                 <button class="btn-text" onclick="window.openNewPurchaseModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
-                    <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">add</span> Add purchase
+                    <span class="material-symbols-outlined" style="font-size: 18px; font-weight: 300;">add</span> Add purchase
                 </button>
             </div>
             
@@ -527,9 +527,9 @@ window.wizardNext = async (targetStep) => {
                 btn.disabled = true;
                 btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Checking Capital...';
             }
-            
+
             const capitalData = await window.api.get('/capital/balance.php');
-            
+
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = 'Review Order <span class="material-symbols-outlined">arrow_forward</span>';
@@ -538,7 +538,7 @@ window.wizardNext = async (targetStep) => {
             if (state.totalPayout > capitalData.available_cash_ghs) {
                 return window.showToast(`Insufficient Office Capital. Available: ₵ ${capitalData.available_cash_ghs.toLocaleString()}`, 'error');
             }
-        } catch(error) {
+        } catch (error) {
             return window.showToast('Failed to verify capital balance', 'error');
         }
     }

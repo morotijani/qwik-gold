@@ -96,7 +96,7 @@ window.viewKeeper = async (keeperId) => {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2 style="font-size: initial; font-weight: 600; margin: 0;">Keeper Profile</h2>
                     <div style="display: flex; gap: 12px;">
-                        <button class="btn" onclick='window.openEditKeeperModal(${JSON.stringify(profile).replace(/'/g, "&#39;")})' style="background: transparent; border: 1px solid var(--border, #333); color: var(--text-main); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                        <button class="btn btn-text" onclick='window.openEditKeeperModal(${JSON.stringify(profile).replace(/'/g, "&#39;")})' style="background: transparent; border: 1px solid var(--border, #333); color: var(--text-main); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
                             <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit
                         </button>
                         <button class="btn btn-secondary" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));" style="background: transparent; border: none; padding: 8px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -231,7 +231,7 @@ window.viewKeeper = async (keeperId) => {
 
             const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
             const p = h.payout_ghs ? '₵' + parseFloat(h.payout_ghs).toLocaleString() : '-';
-            
+
             let extraInfo = '';
             if (isDeposit) {
                 if (h.gold_type === 'refined' && h.volume) {
