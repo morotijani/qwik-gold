@@ -139,7 +139,7 @@ window.renderPurchasesTable = () => {
 // --- WIZARD LOGIC ---
 
 window.openNewPurchaseModal = async () => {
-    document.getElementById('modal-title').textContent = 'Walk-In Purchase Wizard';
+    document.getElementById('modal-title').textContent = 'Walk-In Purchase';
     const modalBody = document.getElementById('modal-body');
     modalBody.innerHTML = '<div style="text-align: center; padding: 20px;">Loading data...</div>';
     document.getElementById('global-modal').classList.add('active');
@@ -503,7 +503,7 @@ window.updateWizardState = (key, value) => {
     }
 };
 
-window.wizardNext = (targetStep) => {
+window.wizardNext = async (targetStep) => {
     const state = window._wizardState;
 
     // Validation before moving
@@ -519,6 +519,28 @@ window.wizardNext = (targetStep) => {
         window.calculatePurchaseMath();
         if (state.grams <= 0) return window.showToast('Weight must be greater than 0', 'error');
         if (state.totalPayout <= 0) return window.showToast('Calculated payout is 0', 'error');
+
+        // Strict Capital Validation
+        try {
+            const btn = document.querySelector(`button[onclick="window.wizardNext(3)"]`);
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Checking Capital...';
+            }
+            
+            const capitalData = await window.api.get('/capital/balance.php');
+            
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Review Order <span class="material-symbols-outlined">arrow_forward</span>';
+            }
+
+            if (state.totalPayout > capitalData.available_cash_ghs) {
+                return window.showToast(`Insufficient Office Capital. Available: ₵ ${capitalData.available_cash_ghs.toLocaleString()}`, 'error');
+            }
+        } catch(error) {
+            return window.showToast('Failed to verify capital balance', 'error');
+        }
     }
 
     state.step = targetStep;
@@ -606,7 +628,7 @@ window.submitWizardPurchase = async () => {
         window.renderWizardStep();
     } catch (error) {
         console.error('Error in purchase:', error);
-        window.showToast('Failed to complete purchase', 'error');
+        window.showToast(error.message || 'Failed to complete purchase', 'error');
         state.step = 3;
         window.renderWizardStep(); // Restore step 3 buttons
     }

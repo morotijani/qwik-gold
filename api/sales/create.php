@@ -63,6 +63,10 @@ try {
     $lastLedger = $balanceStmt->fetch();
     $currentBalance = $lastLedger ? (float)$lastLedger['running_balance'] : 0.0;
     
+    if ($currentBalance < $totalPaidGhs) {
+        throw new \Exception("Insufficient Office Capital. Current available capital is ₵ " . number_format($currentBalance, 2));
+    }
+    
     // Negative deduction
     $deductionAmount = -1 * abs($totalPaidGhs);
     $newBalance = $currentBalance + $deductionAmount;

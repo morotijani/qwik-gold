@@ -73,6 +73,10 @@ try {
     $lastLedger = $balanceStmt->fetch();
     $currentBalance = $lastLedger ? (float)$lastLedger['running_balance'] : 0.0;
     
+    if ($currentBalance < $principalAmount) {
+        throw new \Exception("Insufficient Office Capital to issue loan. Current available capital is ₵ " . number_format($currentBalance, 2));
+    }
+    
     // Calculate the deduction
     $deductionAmount = -1 * abs($principalAmount);
     $newBalance = $currentBalance + $deductionAmount;

@@ -58,6 +58,10 @@ try {
     $lastLedger = $balanceStmt->fetch();
     $currentBalance = $lastLedger ? (float)$lastLedger['running_balance'] : 0.0;
     
+    if ($currentBalance < $totalPaid) {
+        throw new Exception("Insufficient Office Capital. Current available capital is ₵ " . number_format($currentBalance, 2));
+    }
+    
     $deductionAmount = -1 * abs($totalPaid);
     $newBalance = $currentBalance + $deductionAmount;
 
