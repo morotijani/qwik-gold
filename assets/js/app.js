@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const logoutBtn = document.getElementById('logout-btn');
     const viewContainer = document.getElementById('view-container');
-    const pageTitle = document.getElementById('page-title');
     const toastContainer = document.getElementById('toast-container');
 
     // Modal Elements
@@ -149,9 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.add('active');
             }
         });
-
-        // Set Title
-        pageTitle.textContent = route.charAt(0).toUpperCase() + route.slice(1);
 
         // Clear View Container
         viewContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="material-symbols-outlined spin gold-text" style="font-size: 2rem;">sync</span></div>';

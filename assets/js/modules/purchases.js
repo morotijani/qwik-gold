@@ -32,10 +32,10 @@ window.addEventListener('route-changed', async (e) => {
 
     container.innerHTML = `
         <div style="max-width: 1100px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 class="page-title" style="margin-bottom: 0;">Walk-In Purchases</h2>
-                <button class="btn" onclick="window.openNewPurchaseModal()">
-                    <span class="material-symbols-outlined">add_shopping_cart</span> New Purchase
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h2 style="margin: 0; font-weight: 600; font-size: initial; color: var(--text-main);">Walk-In Purchases</h2>
+                <button class="btn-text" onclick="window.openNewPurchaseModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
+                    <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">add</span> Add purchase
                 </button>
             </div>
             
@@ -66,7 +66,7 @@ window.addEventListener('route-changed', async (e) => {
         window._walkInPurchases = purchases;
         window._purchasesCurrentPage = 1;
         window._purchasesItemsPerPage = 10;
-        
+
         window.renderPurchasesTable();
 
     } catch (error) {
@@ -637,12 +637,12 @@ window.viewPurchaseReceipt = (purchaseId) => {
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${purchase.gold_type}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.weight_grams).toFixed(4)} g</td></tr>
                     ${purchase.gold_type === 'refined' ? `
-                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, {minimumFractionDigits: 2})} / Pound</td></tr>` : ''}
+                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Pound</td></tr>` : ''}
                     ${purchase.density ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.density).toFixed(2)}</td></tr>` : ''}
                     ${purchase.karat ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.karat).toFixed(2)}</td></tr>` : ''}
                     ${purchase.pounds ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.pounds).toFixed(2)}</td></tr>` : ''}
                     ` : `
-                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, {minimumFractionDigits: 2})} / Blade</td></tr>` : ''}
+                    ${purchase.local_price ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(purchase.local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Blade</td></tr>` : ''}
                     ${purchase.total_blades ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.total_blades).toFixed(4)}</td></tr>` : ''}
                     `}
                 </table>
