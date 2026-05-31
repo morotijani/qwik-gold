@@ -31,6 +31,8 @@ CREATE TABLE gold_vault (
     gold_type ENUM('refined', 'balls') NOT NULL,
     ownership_status ENUM('company_owned', 'keeper_held') NOT NULL,
     weight_grams DECIMAL(10, 4) NOT NULL,
+    volume DECIMAL(10, 4) DEFAULT NULL,
+    total_blades DECIMAL(10, 2) DEFAULT NULL,
     current_location ENUM('office_vault', 'sold_main_market') NOT NULL DEFAULT 'office_vault',
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

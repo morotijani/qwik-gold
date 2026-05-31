@@ -33,6 +33,8 @@ try {
             'deposit' as action, 
             CAST(JSON_EXTRACT(a.new_data, '$.grams') AS DECIMAL(10,4)) as grams, 
             JSON_UNQUOTE(JSON_EXTRACT(a.new_data, '$.type')) as gold_type,
+            CAST(JSON_EXTRACT(a.new_data, '$.volume') AS DECIMAL(10,4)) as volume,
+            CAST(JSON_EXTRACT(a.new_data, '$.total_blades') AS DECIMAL(10,2)) as total_blades,
             NULL as payout_ghs
         FROM audit_logs a
         JOIN gold_vault g ON a.record_id = g.id

@@ -27,6 +27,8 @@ if (!isset($data['customer_id']) || !isset($data['gold_type']) || !isset($data['
 $customerId = (int)$data['customer_id'];
 $goldType = strtolower($data['gold_type']);
 $weightGrams = (float)$data['weight_grams'];
+$volume = isset($data['volume']) && $data['volume'] !== '' ? (float)$data['volume'] : null;
+$totalBlades = isset($data['total_blades']) && $data['total_blades'] !== '' ? (float)$data['total_blades'] : null;
 
 // Validate specific values
 if ($customerId <= 0) {
@@ -43,12 +45,14 @@ if ($weightGrams <= 0) {
 
 try {
     // Insert new record into the gold_vault table
-    $query = "INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id) 
-              VALUES (:gold_type, 'keeper_held', :weight_grams, 'office_vault', :customer_id)";
+    $query = "INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, total_blades, current_location, customer_id) 
+              VALUES (:gold_type, 'keeper_held', :weight_grams, :volume, :total_blades, 'office_vault', :customer_id)";
               
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':gold_type', $goldType);
     $stmt->bindParam(':weight_grams', $weightGrams);
+    $stmt->bindParam(':volume', $volume);
+    $stmt->bindParam(':total_blades', $totalBlades);
     $stmt->bindParam(':customer_id', $customerId);
     
     if ($stmt->execute()) {
@@ -59,10 +63,18 @@ try {
             'customer_id' => $customerId,
             'gold_type' => $goldType,
             'weight_grams' => $weightGrams,
+            'volume' => $volume,
+            'total_blades' => $totalBlades,
             'ownership_status' => 'keeper_held'
         ];
         
-        log_activity($pdo, $current_user_id ?? null, 'DEPOSIT_KEEPER', 'gold_vault', $insertedId, null, ['grams' => $weightGrams, 'type' => $goldType]);
+        $logPayload = [
+            'grams' => $weightGrams, 
+            'type' => $goldType,
+            'volume' => $volume,
+            'total_blades' => $totalBlades
+        ];
+        log_activity($pdo, $current_user_id ?? null, 'DEPOSIT_KEEPER', 'gold_vault', $insertedId, null, $logPayload);
         
         // Return JSON success response using the standard helper function
         sendResponse('success', 'Gold deposited successfully into the vault.', $responseData, 201);

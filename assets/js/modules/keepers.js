@@ -226,13 +226,25 @@ window.viewKeeper = async (keeperId) => {
 
             const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
             const p = h.payout_ghs ? '₵' + parseFloat(h.payout_ghs).toLocaleString() : '-';
+            
+            let extraInfo = '';
+            if (isDeposit) {
+                if (h.gold_type === 'refined' && h.volume) {
+                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Vol: ${parseFloat(h.volume).toFixed(4)}</div>`;
+                } else if (h.gold_type === 'balls' && h.total_blades) {
+                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Blades: ${parseFloat(h.total_blades).toFixed(2)}</div>`;
+                }
+            }
 
             return `
                                         <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                             <td style="padding: 16px 24px;">${new Date(h.created_at).toLocaleString()}</td>
                                             <td style="padding: 16px 24px;"><span style="${badgeStyle}">${actionLabel}</span></td>
                                             <td style="padding: 16px 24px; text-transform: capitalize;">${h.gold_type}</td>
-                                            <td style="padding: 16px 24px; font-weight: 500; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">${isDeposit ? '+' : '-'}${w}</td>
+                                            <td style="padding: 16px 24px; font-weight: 500; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">
+                                                ${isDeposit ? '+' : '-'}${w}
+                                                ${extraInfo}
+                                            </td>
                                             <td style="padding: 16px 24px;">${p}</td>
                                         </tr>
                                     `;
@@ -260,7 +272,7 @@ window.openKeeperDepositModal = (customerId, customerName) => {
                 <label>Gold Type</label>
                 <div class="input-with-icon">
                     <span class="material-symbols-outlined">category</span>
-                    <select id="deposit_gold_type" required>
+                    <select id="deposit_gold_type" required onchange="window.toggleKeeperDepositFields()">
                         <option value="balls">Gold Balls</option>
                         <option value="refined">Refined Gold</option>
                     </select>
@@ -271,8 +283,27 @@ window.openKeeperDepositModal = (customerId, customerName) => {
                 <label>Weight (Grams)</label>
                 <div class="input-with-icon">
                     <span class="material-symbols-outlined">scale</span>
-                    <input type="number" id="deposit_weight_grams" step="0.01" min="0.01" required placeholder="0.00">
+                    <input type="number" id="deposit_weight_grams" step="0.01" min="0.01" required placeholder="0.00" oninput="window.calculateKeeperBlades()">
                 </div>
+            </div>
+
+            <!-- Dynamic field for Refined Gold -->
+            <div class="form-group" id="deposit_volume_group" style="display: none;">
+                <label>Volume</label>
+                <div class="input-with-icon">
+                    <span class="material-symbols-outlined">water_drop</span>
+                    <input type="number" id="deposit_volume" step="0.0001" min="0.0001" placeholder="0.0000">
+                </div>
+            </div>
+
+            <!-- Dynamic field for Gold Balls -->
+            <div class="form-group" id="deposit_blades_group">
+                <label>Total Blades</label>
+                <div class="input-with-icon" style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
+                    <span class="material-symbols-outlined" style="opacity: 0.5;">calculate</span>
+                    <input type="number" id="deposit_total_blades" step="0.01" readonly placeholder="0.00" style="background: transparent; pointer-events: none; opacity: 0.7;">
+                </div>
+                <small style="color: var(--text-muted); display: block; margin-top: 4px;">Calculated automatically (Grams / 0.8)</small>
             </div>
             
             <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
@@ -284,17 +315,57 @@ window.openKeeperDepositModal = (customerId, customerName) => {
     document.getElementById('global-modal').classList.add('active');
 };
 
+window.toggleKeeperDepositFields = () => {
+    const goldType = document.getElementById('deposit_gold_type').value;
+    const volumeGroup = document.getElementById('deposit_volume_group');
+    const bladesGroup = document.getElementById('deposit_blades_group');
+    const volumeInput = document.getElementById('deposit_volume');
+
+    if (goldType === 'refined') {
+        volumeGroup.style.display = 'block';
+        volumeInput.required = true;
+        bladesGroup.style.display = 'none';
+    } else {
+        volumeGroup.style.display = 'none';
+        volumeInput.required = false;
+        volumeInput.value = ''; // clear out
+        bladesGroup.style.display = 'block';
+        window.calculateKeeperBlades(); // Recalculate
+    }
+};
+
+window.calculateKeeperBlades = () => {
+    const weightInput = document.getElementById('deposit_weight_grams');
+    const bladesInput = document.getElementById('deposit_total_blades');
+    if (!weightInput || !bladesInput) return;
+
+    const grams = parseFloat(weightInput.value);
+    if (!isNaN(grams) && grams > 0) {
+        // Formula: totalBlades = grams / 0.8
+        bladesInput.value = (grams / 0.8).toFixed(2);
+    } else {
+        bladesInput.value = '';
+    }
+};
+
 window.submitKeeperDeposit = async (event, customerId) => {
     event.preventDefault();
     const btn = event.target.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
+    const goldType = document.getElementById('deposit_gold_type').value;
     const payload = {
         customer_id: customerId,
-        gold_type: document.getElementById('deposit_gold_type').value,
+        gold_type: goldType,
         weight_grams: parseFloat(document.getElementById('deposit_weight_grams').value)
     };
+
+    if (goldType === 'refined') {
+        payload.volume = parseFloat(document.getElementById('deposit_volume').value);
+    } else if (goldType === 'balls') {
+        payload.total_blades = parseFloat(document.getElementById('deposit_total_blades').value);
+    }
 
     try {
         await window.api.post('/keepers/deposit.php', payload);
