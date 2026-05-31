@@ -95,9 +95,14 @@ window.viewKeeper = async (keeperId) => {
                 <!-- Header -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                     <h2 style="font-size: initial; font-weight: 600; margin: 0;">Keeper Profile</h2>
-                    <button class="btn btn-secondary" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));" style="background: transparent; border: none; padding: 8px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span> Return
-                    </button>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn" onclick='window.openEditKeeperModal(${JSON.stringify(profile).replace(/'/g, "&#39;")})' style="background: transparent; border: 1px solid var(--border, #333); color: var(--text-main); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));" style="background: transparent; border: none; padding: 8px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span> Return
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Main Profile Card -->
@@ -517,12 +522,88 @@ window.submitCreateKeeper = async (event) => {
         await window.api.post('/customers/create.php', payload);
         window.showToast('Keeper registered successfully', 'success');
         window.closeModal();
-        // Refresh the list view
-        window.dispatchEvent(new Event('hashchange'));
+        window.loadKeepersData(); // Refresh list
     } catch (error) {
         console.error('Error creating keeper:', error);
-        window.showToast('Failed to create keeper', 'error');
+        window.showToast('Network error', 'error');
         btn.disabled = false;
         btn.innerHTML = '<span class="material-symbols-outlined">how_to_reg</span> Register Keeper';
+    }
+};
+
+window.openEditKeeperModal = (profile) => {
+    document.getElementById('modal-title').textContent = 'Update Keeper Details';
+    const modalBody = document.getElementById('modal-body');
+
+    modalBody.innerHTML = `
+        <form id="edit-keeper-form" onsubmit="window.submitEditKeeper(event, ${profile.id})">
+            <div class="form-group">
+                <label>Keeper Full Name <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="edit_keeper_name" required value="${profile.name}">
+            </div>
+            
+            <div class="form-group">
+                <label>Business Name <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                <input type="text" id="edit_keeper_business" value="${profile.business_name || ''}">
+            </div>
+
+            <div class="form-group">
+                <label>Entity Type</label>
+                <select id="edit_keeper_entity" required>
+                    <option value="individual" ${profile.entity_type === 'individual' ? 'selected' : ''}>Individual</option>
+                    <option value="group" ${profile.entity_type === 'group' ? 'selected' : ''}>Group / Company</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="edit_keeper_phone" required value="${profile.phone || ''}">
+            </div>
+
+            <div class="form-group">
+                <label>Email Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                <input type="email" id="edit_keeper_email" value="${profile.email || ''}">
+            </div>
+            
+            <div class="form-group">
+                <label>Physical Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                <textarea id="edit_keeper_address" rows="2">${profile.address || ''}</textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+                <span class="material-symbols-outlined">save</span> Save Changes
+            </button>
+        </form>
+    `;
+
+    document.getElementById('global-modal').classList.add('active');
+};
+
+window.submitEditKeeper = async (event, customerId) => {
+    event.preventDefault();
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Saving...';
+
+    const payload = {
+        id: customerId,
+        name: document.getElementById('edit_keeper_name').value,
+        business_name: document.getElementById('edit_keeper_business').value,
+        entity_type: document.getElementById('edit_keeper_entity').value,
+        phone: document.getElementById('edit_keeper_phone').value,
+        email: document.getElementById('edit_keeper_email').value,
+        address: document.getElementById('edit_keeper_address').value
+    };
+
+    try {
+        await window.api.post('/customers/update.php', payload);
+        window.showToast('Keeper details updated successfully', 'success');
+        window.closeModal();
+        window.viewKeeper(customerId); // Refresh profile view
+    } catch (error) {
+        console.error('Error updating keeper:', error);
+        window.showToast('Network error', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">save</span> Save Changes';
     }
 };
