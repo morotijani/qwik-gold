@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
  * @param array       $data    Optional data payload to return
  * @param int         $httpCode The HTTP status code (default: 200)
  */
-function sendResponse($status, $message, $data = [], $httpCode = 200) {
+function sendResponse($status, $message, $data = null, $httpCode = 200) {
     http_response_code($httpCode);
     
     $response = [
@@ -30,7 +30,7 @@ function sendResponse($status, $message, $data = [], $httpCode = 200) {
         'message' => $message
     ];
     
-    if (!empty($data)) {
+    if ($data !== null) {
         $response['data'] = $data;
     }
     

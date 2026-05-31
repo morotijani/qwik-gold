@@ -9,12 +9,12 @@ async function renderKeepers(container) {
         const keepersData = await window.api.get('/customers/list.php');
         // Filter only keepers
         const keepers = keepersData.filter(c => c.type === 'keeper');
-            
-            let html = `
+
+        let html = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2>Keepers Vault</h2>
-                    <button class="btn btn-primary" onclick="window.openCreateKeeperModal()">
-                        <span class="material-symbols-outlined">person_add</span> Register Keeper
+                    <h2 style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Keepers Vault</h2>
+                    <button class="btn btn-text" onclick="window.openCreateKeeperModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
+                        <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">person_add</span> Register Keeper
                     </button>
                 </div>
                 <div class="table-container">
@@ -30,9 +30,9 @@ async function renderKeepers(container) {
                         <tbody>
             `;
 
-            if (keepers.length > 0) {
-                keepers.forEach((k, index) => {
-                    html += `
+        if (keepers.length > 0) {
+            keepers.forEach((k, index) => {
+                html += `
                         <tr>
                             <td>${index + 1}</td>
                             <td style="font-weight: 500;">
@@ -41,7 +41,7 @@ async function renderKeepers(container) {
                                     ${k.name}
                                 </div>
                             </td>
-                            <td>${k.contact_info || '-'}</td>
+                            <td>${k.phone || '-'}</td>
                             <td style="text-align: right;">
                                 <button class="btn btn-primary" onclick="window.viewKeeper(${k.id})">
                                     Manage Vault
@@ -49,17 +49,17 @@ async function renderKeepers(container) {
                             </td>
                         </tr>
                     `;
-                });
-            } else {
-                html += `<tr><td colspan="4" style="text-align: center;">No keepers found.</td></tr>`;
-            }
+            });
+        } else {
+            html += `<tr><td colspan="4" style="text-align: center;">No keepers found.</td></tr>`;
+        }
 
-            html += `
+        html += `
                         </tbody>
                     </table>
                 </div>
             `;
-            container.innerHTML = html;
+        container.innerHTML = html;
     } catch (error) {
         console.error('Error fetching keepers:', error);
         window.showToast('Network error', 'error');
@@ -85,12 +85,12 @@ window.viewKeeper = async (keeperId) => {
         const profile = data.profile;
         const initial = profile.name.charAt(0).toUpperCase();
 
-            // Balls and Refined amounts
-            const ballsGrams = parseFloat(balanceData.balls_grams || 0).toFixed(2);
-            const refinedGrams = parseFloat(balanceData.refined_grams || 0).toFixed(2);
-            
-            // Build the full-page UI
-            let html = `
+        // Balls and Refined amounts
+        const ballsGrams = parseFloat(balanceData.balls_grams || 0).toFixed(2);
+        const refinedGrams = parseFloat(balanceData.refined_grams || 0).toFixed(2);
+
+        // Build the full-page UI
+        let html = `
                 <div class="profile-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div class="profile-avatar-large" style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #000; font-weight: 700;">
@@ -114,7 +114,7 @@ window.viewKeeper = async (keeperId) => {
                             <div style="display: flex; flex-direction: column; gap: 12px;">
                                 <div style="display: flex; justify-content: space-between;">
                                     <span style="color: var(--text-muted);">Phone/Email</span>
-                                    <span style="font-weight: 500;">${profile.contact_info || 'N/A'}</span>
+                                    <span style="font-weight: 500;">${profile.phone || 'N/A'}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
                                     <span style="color: var(--text-muted);">Customer ID</span>
@@ -185,15 +185,15 @@ window.viewKeeper = async (keeperId) => {
                                     </thead>
                                     <tbody>
                                         ${historyData.length > 0 ? historyData.map(h => {
-                                            const isDeposit = h.action === 'deposit';
-                                            const badgeClass = isDeposit ? 'badge-outline' : 'badge-gold';
-                                            const actionLabel = isDeposit ? 'Deposit' : 'Liquidated (Sold)';
-                                            
-                                            // Format numbers gracefully
-                                            const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
-                                            const p = h.payout_ghs ? '₵' + parseFloat(h.payout_ghs).toLocaleString() : '-';
-                                            
-                                            return `
+            const isDeposit = h.action === 'deposit';
+            const badgeClass = isDeposit ? 'badge-outline' : 'badge-gold';
+            const actionLabel = isDeposit ? 'Deposit' : 'Liquidated (Sold)';
+
+            // Format numbers gracefully
+            const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
+            const p = h.payout_ghs ? '₵' + parseFloat(h.payout_ghs).toLocaleString() : '-';
+
+            return `
                                                 <tr>
                                                     <td>${new Date(h.created_at).toLocaleString()}</td>
                                                     <td><span class="badge ${badgeClass}">${actionLabel}</span></td>
@@ -202,7 +202,7 @@ window.viewKeeper = async (keeperId) => {
                                                     <td>${p}</td>
                                                 </tr>
                                             `;
-                                        }).join('') : '<tr><td colspan="5" style="text-align: center;">No activity recorded yet.</td></tr>'}
+        }).join('') : '<tr><td colspan="5" style="text-align: center;">No activity recorded yet.</td></tr>'}
                                     </tbody>
                                 </table>
                             </div>
@@ -210,7 +210,7 @@ window.viewKeeper = async (keeperId) => {
                     </div>
                 </div>
             `;
-            container.innerHTML = html;
+        container.innerHTML = html;
     } catch (error) {
         console.error('Error fetching keeper details:', error);
         window.showToast('Network error loading keeper', 'error');
@@ -220,7 +220,7 @@ window.viewKeeper = async (keeperId) => {
 window.openKeeperDepositModal = (customerId, customerName) => {
     document.getElementById('modal-title').textContent = 'Deposit Gold - ' + customerName;
     const modalBody = document.getElementById('modal-body');
-    
+
     modalBody.innerHTML = `
         <form id="keeper-deposit-form" onsubmit="window.submitKeeperDeposit(event, ${customerId})">
             <div class="form-group">
@@ -247,7 +247,7 @@ window.openKeeperDepositModal = (customerId, customerName) => {
             </button>
         </form>
     `;
-    
+
     document.getElementById('global-modal').classList.add('active');
 };
 
@@ -279,7 +279,7 @@ window.submitKeeperDeposit = async (event, customerId) => {
 window.openKeeperLiquidateModal = (customerId, customerName) => {
     document.getElementById('modal-title').textContent = 'Liquidate Gold - ' + customerName;
     const modalBody = document.getElementById('modal-body');
-    
+
     modalBody.innerHTML = `
         <form id="keeper-liquidate-form" onsubmit="window.submitKeeperLiquidate(event, ${customerId})">
             <div class="form-group">
@@ -315,7 +315,7 @@ window.openKeeperLiquidateModal = (customerId, customerName) => {
             </button>
         </form>
     `;
-    
+
     document.getElementById('global-modal').classList.add('active');
 };
 
@@ -348,23 +348,40 @@ window.submitKeeperLiquidate = async (event, customerId) => {
 window.openCreateKeeperModal = () => {
     document.getElementById('modal-title').textContent = 'Register New Keeper';
     const modalBody = document.getElementById('modal-body');
-    
+
     modalBody.innerHTML = `
         <form id="create-keeper-form" onsubmit="window.submitCreateKeeper(event)">
             <div class="form-group">
-                <label>Keeper Full Name</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">person</span>
-                    <input type="text" id="new_keeper_name" required placeholder="e.g. Kwame Mensah">
-                </div>
+                <label>Keeper Full Name <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="new_keeper_name" required placeholder="e.g. Kwame Mensah">
             </div>
             
             <div class="form-group">
-                <label>Contact Information</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">call</span>
-                    <input type="text" id="new_keeper_contact" placeholder="Phone or Email">
-                </div>
+                <label>Business Name <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                <input type="text" id="new_keeper_business" placeholder="e.g. Gold Vault Keepers Ltd">
+            </div>
+
+            <div class="form-group">
+                <label>Entity Type</label>
+                <select id="new_keeper_entity" required>
+                    <option value="individual">Individual</option>
+                    <option value="group">Group / Company</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Phone Number <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="new_keeper_phone" required placeholder="e.g. 0244123456">
+            </div>
+
+            <div class="form-group">
+                <label>Email Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                <input type="email" id="new_keeper_email" placeholder="e.g. contact@domain.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Physical Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                <textarea id="new_keeper_address" rows="2" placeholder="e.g. 15 Kumasi Rd"></textarea>
             </div>
             
             <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
@@ -372,7 +389,7 @@ window.openCreateKeeperModal = () => {
             </button>
         </form>
     `;
-    
+
     document.getElementById('global-modal').classList.add('active');
 };
 
@@ -384,8 +401,12 @@ window.submitCreateKeeper = async (event) => {
 
     const payload = {
         name: document.getElementById('new_keeper_name').value,
+        business_name: document.getElementById('new_keeper_business').value,
         type: 'keeper',
-        contact_info: document.getElementById('new_keeper_contact').value
+        entity_type: document.getElementById('new_keeper_entity').value,
+        phone: document.getElementById('new_keeper_phone').value,
+        email: document.getElementById('new_keeper_email').value,
+        address: document.getElementById('new_keeper_address').value
     };
 
     try {

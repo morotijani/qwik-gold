@@ -25,7 +25,7 @@ if ($customerId <= 0) {
 
 try {
     // 1) SELECT customer details
-    $custStmt = $pdo->prepare("SELECT id, name, type, contact_info, created_at FROM customers WHERE id = ?");
+    $custStmt = $pdo->prepare("SELECT id, name, business_name, type, entity_type, phone, email, address, created_at FROM customers WHERE id = ?");
     $custStmt->execute([$customerId]);
     $customer = $custStmt->fetch(PDO::FETCH_ASSOC);
 

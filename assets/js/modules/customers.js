@@ -64,7 +64,7 @@ window.addEventListener('route-changed', async (e) => {
                     <td>#${c.id}</td>
                     <td style="font-weight: 600;">${c.name}</td>
                     <td><span class="badge badge-outline">${c.type}</span></td>
-                    <td>${c.contact_info || 'N/A'}</td>
+                    <td>${c.phone || 'N/A'}</td>
                     <td>
                         <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="viewCustomer(${c.id})">
                             View Profile
@@ -91,10 +91,15 @@ window.addEventListener('route-changed', async (e) => {
                 
                 <form id="create-customer-form">
                     <div class="form-group">
-                        <label>Full Name or Business Name</label>
+                        <label>Full Name <span style="color: var(--danger);">*</span></label>
                         <input type="text" id="cust-name" required placeholder="e.g. Kwame Mensah">
                     </div>
                     
+                    <div class="form-group">
+                        <label>Business Name <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                        <input type="text" id="cust-business-name" placeholder="e.g. Gold Traders Ltd">
+                    </div>
+
                     <div class="form-group">
                         <label>Entity Type</label>
                         <select id="cust-type" required>
@@ -104,8 +109,18 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
                     
                     <div class="form-group">
-                        <label>Contact Information</label>
-                        <textarea id="cust-contact" rows="3" placeholder="Phone number, address, etc."></textarea>
+                        <label>Phone Number <span style="color: var(--danger);">*</span></label>
+                        <input type="text" id="cust-phone" required placeholder="e.g. 0244123456">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                        <input type="email" id="cust-email" placeholder="e.g. name@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Physical Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
+                        <textarea id="cust-address" rows="2" placeholder="e.g. 15 Kumasi Rd, Adum"></textarea>
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-block">
@@ -129,8 +144,11 @@ window.addEventListener('route-changed', async (e) => {
             try {
                 const payload = {
                     name: document.getElementById('cust-name').value,
+                    business_name: document.getElementById('cust-business-name').value,
                     type: document.getElementById('cust-type').value,
-                    contact_info: document.getElementById('cust-contact').value
+                    phone: document.getElementById('cust-phone').value,
+                    email: document.getElementById('cust-email').value,
+                    address: document.getElementById('cust-address').value
                 };
 
                 await window.api.post('/customers/create.php', payload);
@@ -214,7 +232,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="display: flex; align-items: flex-start; gap: 12px;">
                                     <span class="material-symbols-outlined" style="color: var(--text-muted);">contact_phone</span>
                                     <div style="line-height: 1.5; color: var(--text-main);">
-                                        ${data.profile.contact_info ? data.profile.contact_info.replace(/\n/g, '<br>') : '<span style="color: var(--text-muted);">No contact provided</span>'}
+                                        ${data.profile.phone ? data.profile.phone : '<span style="color: var(--text-muted);">No contact provided</span>'}
                                     </div>
                                 </div>
                             </div>

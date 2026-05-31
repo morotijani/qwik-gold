@@ -18,7 +18,7 @@ try {
 
     // 2. Insert Dummy Customers
     $pdo->exec("
-        INSERT INTO customers (name, type, contact_info) VALUES 
+        INSERT INTO customers (name, type, phone) VALUES 
         ('Kwame Mensah', 'individual', '054-123-4567'),
         ('Ama Serwaa', 'individual', '024-987-6543'),
         ('Obuasi Miners Syndicate', 'group', 'Kumasi Road, Block C'),

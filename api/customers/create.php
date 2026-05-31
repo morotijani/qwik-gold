@@ -29,11 +29,19 @@ if (!isset($data['name']) || !isset($data['type'])) {
 
 $name = trim($data['name']);
 $type = strtolower(trim($data['type']));
-// contact_info is optional
-$contactInfo = isset($data['contact_info']) ? trim($data['contact_info']) : null;
+
+// New optional fields
+$businessName = isset($data['business_name']) ? trim($data['business_name']) : null;
+$phone = isset($data['phone']) ? trim($data['phone']) : null;
+$email = isset($data['email']) ? trim($data['email']) : null;
+$address = isset($data['address']) ? trim($data['address']) : null;
+$entityType = isset($data['entity_type']) ? trim($data['entity_type']) : 'individual';
 
 if (empty($name)) {
     sendResponse('error', 'Customer name cannot be empty', [], 400);
+}
+if (empty($phone)) {
+    sendResponse('error', 'Phone number is required', [], 400);
 }
 
 if ($type !== 'individual' && $type !== 'group' && $type !== 'keeper') {
@@ -42,18 +50,22 @@ if ($type !== 'individual' && $type !== 'group' && $type !== 'keeper') {
 
 try {
     // Insert new customer
-    $stmt = $pdo->prepare("INSERT INTO customers (name, type, contact_info) VALUES (?, ?, ?)");
-    $stmt->execute([$name, $type, $contactInfo]);
+    $stmt = $pdo->prepare("INSERT INTO customers (name, business_name, type, entity_type, phone, email, address) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$name, $businessName, $type, $entityType, $phone, $email, $address]);
     
     $customerId = $pdo->lastInsertId();
 
     
-    log_activity($pdo, $current_user_id ?? null, 'CREATE_CUSTOMER', 'customers', $customerId, null, ['name' => $name, 'type' => $type]);
+    log_activity($pdo, $current_user_id ?? null, 'CREATE_CUSTOMER', 'customers', $customerId, null, ['name' => $name, 'type' => $type, 'entity' => $entityType]);
     sendResponse('success', 'Customer registered successfully', [
         'customer_id' => (int)$customerId,
         'name' => $name,
+        'business_name' => $businessName,
         'type' => $type,
-        'contact_info' => $contactInfo
+        'entity_type' => $entityType,
+        'phone' => $phone,
+        'email' => $email,
+        'address' => $address
     ], 201);
 
 } catch (\PDOException $e) {
