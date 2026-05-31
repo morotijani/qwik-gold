@@ -120,8 +120,8 @@ try {
 
     // 5. IN BOTH CASES: Insert gold into vault & gold_purchases
     // Insert into gold_vault as company owned (customer_id is NULL for company owned gold per schema)
-    $insertVaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id) VALUES (?, 'company_owned', ?, 'office_vault', NULL)");
-    $insertVaultStmt->execute([$goldType, $weightGrams]);
+    $insertVaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id) VALUES (?, 'company_owned', ?, ?, 'office_vault', NULL)");
+    $insertVaultStmt->execute([$goldType, $weightGrams, $volume]);
 
     // Insert purchase record with origin 'loan_offset'
     $insertPurchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'loan_offset')");

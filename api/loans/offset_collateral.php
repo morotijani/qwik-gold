@@ -98,8 +98,8 @@ try {
             $updateStmt->execute([$newKeeperGrams, $recordId]);
 
             // Insert new company_owned record for the converted amount
-            $insertStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id) VALUES (?, 'company_owned', ?, 'office_vault', NULL)");
-            $insertStmt->execute([$goldType, $remainingToUse]);
+            $insertStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id) VALUES (?, 'company_owned', ?, ?, 'office_vault', NULL)");
+            $insertStmt->execute([$goldType, $remainingToUse, $volume]);
 
             $remainingToUse = 0;
             break; // Done
