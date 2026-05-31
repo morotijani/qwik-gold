@@ -89,127 +89,160 @@ window.viewKeeper = async (keeperId) => {
         const ballsGrams = parseFloat(balanceData.balls_grams || 0).toFixed(2);
         const refinedGrams = parseFloat(balanceData.refined_grams || 0).toFixed(2);
 
-        // Build the full-page UI
+        // Build the full-page UI in Edge Settings style
         let html = `
-                <div class="profile-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                    <div style="display: flex; align-items: center; gap: 20px;">
-                        <div class="profile-avatar-large" style="width: 80px; height: 80px; border-radius: 50%; background: var(--gold-gradient); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #000; font-weight: 700;">
-                            ${initial}
-                        </div>
-                        <div>
-                            <h2 style="font-size: 2rem; margin-bottom: 4px;">${profile.name}</h2>
-                            <span class="status-badge status-active" style="padding: 6px 12px; font-size: 0.9rem;">Keeper</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-secondary" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));">
-                        <span class="material-symbols-outlined">arrow_back</span> Return
+            <div style="max-width: 900px; margin: 0 auto; padding-bottom: 40px; animation: slideIn 0.3s ease;">
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: initial; font-weight: 600; margin: 0;">Keeper Profile</h2>
+                    <button class="btn btn-secondary" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));" style="background: transparent; border: none; padding: 8px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span> Return
                     </button>
                 </div>
 
-                <div class="profile-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
-                    <!-- Left Column: Info & Actions -->
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div class="glass-panel" style="padding: 24px;">
-                            <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Contact Information</h3>
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-muted);">Phone/Email</span>
-                                    <span style="font-weight: 500;">${profile.phone || 'N/A'}</span>
+                <!-- Main Profile Card -->
+                <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
+                    <!-- Top Section -->
+                    <div style="padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                        <!-- Left: Avatar & Info -->
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--gold-gradient, linear-gradient(135deg, #FFD700, #FDB931)); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #000; font-weight: 700;">
+                                ${initial}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 0;">${profile.name}</h3>
+                                    ${profile.business_name ? `<span style="background: rgba(255,215,0,0.1); color: var(--gold-primary, #FFD700); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid rgba(255,215,0,0.2);">${profile.business_name}</span>` : ''}
                                 </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-muted);">Customer ID</span>
-                                    <span style="font-weight: 500;">#${profile.id}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-muted);">Joined</span>
-                                    <span style="font-weight: 500;">${new Date(profile.created_at).toLocaleDateString()}</span>
+                                <span style="color: var(--text-muted, #aaa); font-size: 0.9rem;">
+                                    ${profile.phone || 'No phone'} 
+                                    ${profile.email ? ` &nbsp;|&nbsp; ${profile.email}` : ''}
+                                </span>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px; font-size: 0.85rem; font-weight: 500;">
+                                    <span style="color: #4cd137; display: flex; align-items: center; gap: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active Keeper
+                                    </span>
+                                    <span style="color: var(--text-muted, #aaa); border-left: 1px solid var(--border, #333); padding-left: 12px; text-transform: capitalize; display: flex; align-items: center; gap: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">${profile.entity_type === 'group' ? 'groups' : 'person'}</span> ${profile.entity_type || 'Individual'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="glass-panel" style="padding: 24px; text-align: center;">
-                            <h3 style="font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Vault Actions</h3>
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <button class="btn btn-primary" onclick="window.openKeeperDepositModal(${profile.id}, '${profile.name}')" style="width: 100%; justify-content: center; padding: 12px;">
-                                    <span class="material-symbols-outlined">download</span> Deposit Gold
-                                </button>
-                                <button class="btn" style="background: rgba(255,107,107,0.1); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.2); width: 100%; justify-content: center; padding: 12px;" onclick="window.openKeeperLiquidateModal(${profile.id}, '${profile.name}')">
-                                    <span class="material-symbols-outlined">sell</span> Liquidate (Sell)
-                                </button>
-                            </div>
+                        <!-- Right: Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button class="btn btn-primary" onclick="window.openKeeperDepositModal(${profile.id}, '${profile.name}')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 18px; border-radius: 8px; font-weight: 500;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">download</span> Deposit
+                            </button>
+                            <button class="btn" onclick="window.openKeeperLiquidateModal(${profile.id}, '${profile.name}')" style="background: var(--bg-card, #222); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3); padding: 10px 18px; border-radius: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.1)'" onmouseout="this.style.background='var(--bg-card, #222)'">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">sell</span> Liquidate
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Right Column: Balance Overview -->
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div class="glass-panel" style="padding: 24px;">
-                            <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">Keeper Vault Balance</h3>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                                <!-- Gold Balls -->
-                                <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center;">
-                                    <div style="width: 48px; height: 48px; background: rgba(255,215,0,0.1); color: var(--gold-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                                        <span class="material-symbols-outlined" style="font-size: 28px;">trip_origin</span>
-                                    </div>
-                                    <h4 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Gold Balls</h4>
-                                    <div style="font-size: 2.5rem; font-weight: 700; color: #fff;">
-                                        ${ballsGrams} <span style="font-size: 1rem; color: var(--gold-primary);">g</span>
-                                    </div>
-                                </div>
+                    <div style="height: 1px; background: var(--border, #333); width: 100%;"></div>
 
-                                <!-- Refined Gold -->
-                                <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; text-align: center;">
-                                    <div style="width: 48px; height: 48px; background: rgba(255,215,0,0.1); color: var(--gold-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                                        <span class="material-symbols-outlined" style="font-size: 28px;">diamond</span>
-                                    </div>
-                                    <h4 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Refined Gold</h4>
-                                    <div style="font-size: 2.5rem; font-weight: 700; color: #fff;">
-                                        ${refinedGrams} <span style="font-size: 1rem; color: var(--gold-primary);">g</span>
-                                    </div>
+                    <!-- Bottom Section (Manage link style) -->
+                    <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; color: var(--text-muted, #aaa); font-size: 0.9rem;">
+                        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">badge</span> ID: #${profile.id}
+                            </div>
+                            ${profile.address ? `
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">location_on</span> ${profile.address}
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div>Joined: ${new Date(profile.created_at).toLocaleDateString()}</div>
+                    </div>
+                </div>
+
+                <!-- Balances Card -->
+                <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
+                    <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: 1.1rem;">
+                        Vault Balances
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <!-- Gold Balls Row -->
+                        <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #333);">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(255,215,0,0.1); color: var(--gold-primary, #FFD700); display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined">trip_origin</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500; font-size: 1rem;">Gold Balls</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted, #aaa);">Unrefined gold deposits</span>
                                 </div>
                             </div>
+                            <div style="font-size: 1.5rem; font-weight: 600;">
+                                ${ballsGrams} <span style="font-size: 1rem; color: var(--gold-primary, #FFD700);">g</span>
+                            </div>
                         </div>
-                        
-                        <div class="glass-panel" style="padding: 24px; grid-column: 1 / -1; margin-top: 10px;">
-                            <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Vault Activity History</h3>
-                            <div class="table-container" style="max-height: 400px; overflow-y: auto;">
-                                <table class="data-table" style="width: 100%;">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Action</th>
-                                            <th>Type</th>
-                                            <th>Weight</th>
-                                            <th>Payout</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${historyData.length > 0 ? historyData.map(h => {
-            const isDeposit = h.action === 'deposit';
-            const badgeClass = isDeposit ? 'badge-outline' : 'badge-gold';
-            const actionLabel = isDeposit ? 'Deposit' : 'Liquidated (Sold)';
 
-            // Format numbers gracefully
+                        <!-- Refined Gold Row -->
+                        <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(255,215,0,0.1); color: var(--gold-primary, #FFD700); display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined">diamond</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 500; font-size: 1rem;">Refined Gold</span>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted, #aaa);">Processed and refined</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: 600;">
+                                ${refinedGrams} <span style="font-size: 1rem; color: var(--gold-primary, #FFD700);">g</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Card -->
+                <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden;">
+                    <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Vault Activity History</span>
+                        <span class="material-symbols-outlined" style="color: var(--text-muted, #aaa); font-size: 20px;">history</span>
+                    </div>
+                    
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead style="position: sticky; top: 0; background: transparent; z-index: 1;">
+                                <tr>
+                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Date</th>
+                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Action</th>
+                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Type</th>
+                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Weight</th>
+                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Payout</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${historyData && historyData.length > 0 ? historyData.map(h => {
+            const isDeposit = h.action === 'deposit';
+            const badgeStyle = isDeposit
+                ? 'background: rgba(76, 209, 55, 0.1); color: #4cd137; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;'
+                : 'background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;';
+            const actionLabel = isDeposit ? 'Deposit' : 'Liquidated';
+
             const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
             const p = h.payout_ghs ? '₵' + parseFloat(h.payout_ghs).toLocaleString() : '-';
 
             return `
-                                                <tr>
-                                                    <td>${new Date(h.created_at).toLocaleString()}</td>
-                                                    <td><span class="badge ${badgeClass}">${actionLabel}</span></td>
-                                                    <td style="text-transform: capitalize;">${h.gold_type}</td>
-                                                    <td style="font-weight: 600; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">${isDeposit ? '+' : '-'}${w}</td>
-                                                    <td>${p}</td>
-                                                </tr>
-                                            `;
-        }).join('') : '<tr><td colspan="5" style="text-align: center;">No activity recorded yet.</td></tr>'}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                        <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 16px 24px;">${new Date(h.created_at).toLocaleString()}</td>
+                                            <td style="padding: 16px 24px;"><span style="${badgeStyle}">${actionLabel}</span></td>
+                                            <td style="padding: 16px 24px; text-transform: capitalize;">${h.gold_type}</td>
+                                            <td style="padding: 16px 24px; font-weight: 500; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">${isDeposit ? '+' : '-'}${w}</td>
+                                            <td style="padding: 16px 24px;">${p}</td>
+                                        </tr>
+                                    `;
+        }).join('') : '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted, #aaa);">No activity recorded yet.</td></tr>'}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
         container.innerHTML = html;
     } catch (error) {
         console.error('Error fetching keeper details:', error);
