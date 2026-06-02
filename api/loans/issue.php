@@ -55,12 +55,17 @@ try {
     // 0. Begin the database transaction
     $pdo->beginTransaction();
 
-    // 1. INSERT a new record into the loans table
+    // 1. INSERT a new record into the loans table (without loan_uid first)
     $loanType = $hasCollateral ? 'collateral' : 'standard';
-    $loanUid = 'LN-' . mt_rand(100000, 999999);
-    $stmt = $pdo->prepare("INSERT INTO loans (loan_uid, customer_id, principal_amount, type, status) VALUES (?, ?, ?, ?, 'active')");
-    $stmt->execute([$loanUid, $customerId, $principalAmount, $loanType]);
+    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, type, status) VALUES (?, ?, ?, 'active')");
+    $stmt->execute([$customerId, $principalAmount, $loanType]);
     $loanId = $pdo->lastInsertId();
+
+    // 1a. Generate a guaranteed unique loan_uid using the database's auto-increment ID
+    // This will pad it to at least 6 digits (e.g., LN-000025) and will seamlessly expand to 7+ digits if it gets full.
+    $loanUid = 'LN-' . str_pad($loanId, 6, '0', STR_PAD_LEFT);
+    $updateUidStmt = $pdo->prepare("UPDATE loans SET loan_uid = ? WHERE id = ?");
+    $updateUidStmt->execute([$loanUid, $loanId]);
 
     // 1b. If collateral is provided, add it to gold_vault
     if ($hasCollateral) {
