@@ -94,6 +94,9 @@
                 <a href="#ledger" class="nav-link" data-route="ledger">
                     <span class="material-symbols-outlined">menu_book</span> Capital Ledger
                 </a>
+                <a href="#profile" class="nav-link" data-route="profile">
+                    <span class="material-symbols-outlined">account_circle</span> My Profile
+                </a>
                 <!-- Admin Only Links will be injected via JS if role === 'admin' -->
                 <div id="admin-nav" class="hidden">
                     <div class="nav-section-title">Administration</div>
@@ -122,7 +125,7 @@
                 <div class="topbar-right">
                     <span id="clock" class="clock hidden"></span>
                     <button class="btn-icon notification-btn"><span class="material-symbols-outlined">notifications</span></button>
-                    <div class="user-profile-top">
+                    <div class="user-profile-top" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="window.location.hash='profile'" title="My Profile">
                         <div class="user-avatar-small">
                             <span class="material-symbols-outlined">account_circle</span>
                         </div>
@@ -158,5 +161,6 @@
     <script src="assets/js/modules/ledger.js"></script>
     <script src="assets/js/modules/expenses.js"></script>
     <script src="assets/js/modules/audit.js"></script>
+    <script src="assets/js/modules/profile.js"></script>
 </body>
 </html>
