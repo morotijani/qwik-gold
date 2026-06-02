@@ -33,9 +33,9 @@ try {
 
     // 4. Issue some active loans
     $pdo->exec("
-        INSERT INTO loans (customer_id, principal_amount, status) VALUES
-        (1, 5000.00, 'active'),
-        (3, 15000.00, 'active')
+        INSERT INTO loans (loan_uid, customer_id, principal_amount, status) VALUES
+        ('LN-100001', 1, 5000.00, 'active'),
+        ('LN-100002', 3, 15000.00, 'active')
     ");
 
     $pdo->exec("

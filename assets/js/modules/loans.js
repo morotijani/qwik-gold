@@ -21,6 +21,7 @@
                         <thead>
                             <tr>
                                 <th>No.</th>
+                                <th>Loan ID</th>
                                 <th>Customer Name</th>
                                 <th>Principal Amount</th>
                                 <th>Type</th>
@@ -45,7 +46,7 @@
             const tbody = document.getElementById('loans-table-body');
 
             if (!res || res.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 32px;">No loans found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">No loans found.</td></tr>';
                 return;
             }
 
@@ -63,6 +64,7 @@
                 html += `
                     <tr>
                         <td style="color: var(--text-muted);">${index + 1}</td>
+                        <td style="color: var(--text-main); font-weight: 500;">${loan.loan_uid || 'LN-'+loan.id}</td>
                         <td style="font-weight: 600;"><a href="#" onclick="window.previewCustomerLoans(${loan.customer_id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.customer_name}</a></td>
                         <td>GHS ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td>${typeBadge}</td>
@@ -73,7 +75,7 @@
             });
             tbody.innerHTML = html;
         } catch (error) {
-            document.getElementById('loans-table-body').innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--danger); padding: 32px;">Failed to load data: ${error.message}</td></tr>`;
+            document.getElementById('loans-table-body').innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--danger); padding: 32px;">Failed to load data: ${error.message}</td></tr>`;
         }
     }
 

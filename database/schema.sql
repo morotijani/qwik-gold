@@ -42,6 +42,7 @@ CREATE TABLE gold_vault (
 -- loans
 CREATE TABLE loans (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    loan_uid VARCHAR(50) UNIQUE DEFAULT NULL,
     customer_id INT NOT NULL,
     principal_amount DECIMAL(15, 2) NOT NULL,
     type ENUM('standard', 'collateral') NOT NULL DEFAULT 'standard',

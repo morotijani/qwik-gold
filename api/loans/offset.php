@@ -62,6 +62,7 @@ try {
     $principalAmount = (float)$loan['principal_amount'];
     $changeDue = 0.0;
     $newStatus = 'active';
+    $newPrincipal = $principalAmount;
 
     // Determine comment
     $userComment = isset($data['comment']) && !empty(trim($data['comment'])) ? trim($data['comment']) : null;
@@ -69,6 +70,7 @@ try {
     // 2 & 3. Compare gold value and handle full settlement
     if ($goldValueGhs >= $principalAmount) {
         $newStatus = 'settled';
+        $newPrincipal = 0.0;
         
         // Update loan status to 'settled' (zeroing out the principal is optional but good practice)
         $updateStmt = $pdo->prepare("UPDATE loans SET status = 'settled', principal_amount = 0, settlement_note = 'Settled via gold offset' WHERE id = ?");
@@ -118,7 +120,7 @@ try {
     $insertPurchaseStmt->execute([$customerId, $goldType, $weightGrams, $goldValueGhs]);
 
     
-    log_activity($pdo, $current_user_id ?? null, 'OFFSET_LOAN_GOLD', 'loans', $loanId, ['old_principal' => $currentPrincipal], ['new_principal' => $newPrincipal]);
+    log_activity($pdo, $current_user_id ?? null, 'OFFSET_LOAN_GOLD', 'loans', $loanId, ['old_principal' => $principalAmount], ['new_principal' => $newPrincipal]);
     // Commit Transaction
     $pdo->commit();
 

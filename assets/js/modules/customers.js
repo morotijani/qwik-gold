@@ -324,7 +324,7 @@ window.addEventListener('route-changed', async (e) => {
 
                     <!-- Loan History Card -->
                     <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden;">
-                        <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: initial; display: flex; justify-content: space-between; align-items: center;">
                             <span>Complete Loan History</span>
                             <span class="material-symbols-outlined" style="color: var(--text-muted, #aaa); font-size: initial;">account_balance_wallet</span>
                         </div>
@@ -332,6 +332,8 @@ window.addEventListener('route-changed', async (e) => {
                             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                                 <thead style="position: sticky; top: 0; background: transparent; z-index: 1;">
                                     <tr>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">No.</th>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Loan ID</th>
                                         <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Date</th>
                                         <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Amount</th>
                                         <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Type</th>
@@ -340,14 +342,25 @@ window.addEventListener('route-changed', async (e) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.all_loans && data.all_loans.length > 0 ? data.all_loans.map(l => {
+                                    ${data.all_loans && data.all_loans.length > 0 ? data.all_loans.map((l, index) => {
                 const statusColor = l.status === 'active' ? '#ff6b6b' : '#4cd137';
                 const statusBg = l.status === 'active' ? 'rgba(255, 107, 107, 0.1)' : 'rgba(76, 209, 55, 0.1)';
+                let goldTypeStr = '';
+                if (l.type === 'collateral' && data.current_kept_gold) {
+                    const types = [];
+                    if (data.current_kept_gold.refined_grams > 0) types.push('Refined');
+                    if (data.current_kept_gold.balls_grams > 0) types.push('Balls');
+                    if (types.length > 0) {
+                        goldTypeStr = ` (${types.join(' & ')})`;
+                    }
+                }
                 return `
                                         <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
+                                            <td style="padding: 16px 24px; font-weight: 500; color: var(--text-main);">${l.loan_uid || 'LN-'+l.id}</td>
                                             <td style="padding: 16px 24px;">${new Date(l.created_at).toLocaleDateString()}</td>
                                             <td style="padding: 16px 24px; font-weight: 600;">GHS ${parseFloat(l.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                            <td style="padding: 16px 24px; text-transform: capitalize;">${l.type}</td>
+                                            <td style="padding: 16px 24px; text-transform: capitalize;">${l.type}${goldTypeStr}</td>
                                             <td style="padding: 16px 24px;">
                                                 <span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">
                                                     ${l.status.toUpperCase()}
@@ -357,7 +370,7 @@ window.addEventListener('route-changed', async (e) => {
                                                 ${l.status === 'active' ? `<button class="btn btn-sm btn-outline" onclick="window.openCustomerSettleModal(${l.id}, ${data.profile.id}, '${l.type}', ${l.principal_amount})" style="font-size: 0.8rem; padding: 4px 12px; border-color: var(--success); color: var(--success);">Settle</button>` : '-'}
                                             </td>
                                         </tr>
-                                        `}).join('') : `<tr><td colspan="4" style="padding: 32px; text-align: center; color: var(--text-muted);">No loan history found.</td></tr>`}
+                                        `}).join('') : `<tr><td colspan="7" style="padding: 32px; text-align: center; color: var(--text-muted);">No loan history found.</td></tr>`}
                                 </tbody>
                             </table>
                         </div>
@@ -454,7 +467,7 @@ window.addEventListener('route-changed', async (e) => {
             btn.innerHTML = '<span class="material-symbols-outlined">save</span> Save Changes';
         }
     };
-    
+
     window.addEventListener('transaction-completed', () => {
         if (currentViewState === 'view' && viewingCustomerId) {
             const currentHash = window.location.hash.substring(1) || 'customers';
@@ -478,7 +491,7 @@ window.addEventListener('route-changed', async (e) => {
         customerId: null,
         loanType: null,
         principalAmount: 0,
-        settleType: '', 
+        settleType: '',
         cashAmount: '',
         goldType: 'refined',
         weightGrams: '',
@@ -495,17 +508,30 @@ window.addEventListener('route-changed', async (e) => {
     window.openCustomerSettleModal = async (loanId, customerId, loanType, principalAmount) => {
         window._settleWizardState = {
             step: 1,
+            profile: null,
             loanId: loanId,
             customerId: customerId,
             loanType: loanType,
-            principalAmount: parseFloat(principalAmount),
-            settleType: '',
-            cashAmount: '',
+            principalAmount: parseFloat(principalAmount) || 0,
+
+            settleType: '', // 'cash', 'walkin', 'collateral'
+
+            // Cash State
+            cashAmount: parseFloat(principalAmount) || 0,
+
+            // Walk-in State
             goldType: 'refined',
             weightGrams: '',
+            volume: '',
             pricePerPound: '',
             pricePerBall: '',
+            calculatedPounds: 0,
+            calculatedDensity: 0,
+            calculatedKarat: 0,
+            calculatedBlades: 0,
             calcTotalGhs: 0,
+
+            // Collateral State
             collateralGoldType: '',
             collateralGramsToUse: '',
             collateralAgreedValue: '',
@@ -534,38 +560,87 @@ window.addEventListener('route-changed', async (e) => {
                 console.warn('Could not fetch collateral', e);
             }
         }
-        
+
         window.renderSettleWizardStep();
     };
 
     window.updateSettleState = (key, value) => {
         window._settleWizardState[key] = value;
-        if (key === 'settleType') window.renderSettleWizardStep();
+        if (key === 'settleType') {
+            window.renderSettleWizardStep();
+        } else {
+            if (window.validateSettleWizardStep) window.validateSettleWizardStep();
+        }
+    };
+
+    window.validateSettleWizardStep = () => {
+        const s = window._settleWizardState;
+        const btn = document.getElementById('btn-preview-summary');
+        if (!btn) return;
+
+        let canProceed = false;
+        if (s.settleType === 'cash' && parseFloat(s.cashAmount) > 0) canProceed = true;
+        if (s.settleType === 'walkin' && parseFloat(s.weightGrams) > 0 && s.calcTotalGhs > 0) canProceed = true;
+        if (s.settleType === 'collateral' && s.collateralGoldType && parseFloat(s.collateralGramsToUse) > 0 && parseFloat(s.collateralAgreedValue) > 0) canProceed = true;
+
+        btn.disabled = !canProceed;
+    };
+
+    window.handleSettleGoldTypeChange = (type) => {
+        window.updateSettleState('goldType', type);
+        window.updateSettleState('weightGrams', '');
+        window.updateSettleState('volume', '');
+        window.updateSettleState('pricePerPound', '');
+        window.updateSettleState('pricePerBall', '');
+        window.calcSettleMath();
+        window.renderSettleWizardStep();
     };
 
     window.calcSettleMath = () => {
         const s = window._settleWizardState;
         const weight = parseFloat(s.weightGrams) || 0;
+        const truncate2 = (num) => Math.floor(num * 100) / 100;
         let total = 0;
+
         if (s.goldType === 'refined') {
+            const volume = parseFloat(s.volume) || 0;
             const price = parseFloat(s.pricePerPound) || 0;
-            total = weight * price;
+
+            s.calculatedPounds = truncate2(weight / 7.75);
+            s.calculatedDensity = volume > 0 ? truncate2(weight / volume) : 0;
+
+            if (s.calculatedDensity > 0) {
+                s.calculatedKarat = truncate2(((s.calculatedDensity - 10.51) * 52.838) / s.calculatedDensity);
+            } else {
+                s.calculatedKarat = 0;
+            }
+            total = (s.calculatedKarat * price / 23) * s.calculatedPounds;
+
+            if (document.getElementById('settle_calc_density')) document.getElementById('settle_calc_density').textContent = s.calculatedDensity.toFixed(2);
+            if (document.getElementById('settle_calc_pounds')) document.getElementById('settle_calc_pounds').textContent = s.calculatedPounds.toFixed(2);
+            if (document.getElementById('settle_calc_karat')) document.getElementById('settle_calc_karat').textContent = typeof s.calculatedKarat === 'number' ? s.calculatedKarat.toFixed(2) : '0.00';
         } else {
             const price = parseFloat(s.pricePerBall) || 0;
-            total = weight * price;
+            s.calculatedBlades = weight / 0.8;
+            total = s.calculatedBlades * price;
+
+            if (document.getElementById('settle_calc_blades')) document.getElementById('settle_calc_blades').textContent = s.calculatedBlades.toFixed(4);
         }
+
         s.calcTotalGhs = total;
-        
+
         const displayEl = document.getElementById('settle_calc_total');
         if (displayEl) {
-            displayEl.textContent = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            displayEl.textContent = total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
+
+        if (window.validateSettleWizardStep) window.validateSettleWizardStep();
     };
 
     window.autoFillCollateral = () => {
         const s = window._settleWizardState;
         if (!s.collateralGoldType) return;
-        
+
         const match = s.availableCollateral.find(v => v.gold_type === s.collateralGoldType);
         if (match) {
             s.collateralGramsToUse = match.weight_grams;
@@ -575,20 +650,20 @@ window.addEventListener('route-changed', async (e) => {
             }
         }
     };
-    
+
     window.renderSettleWizardStep = () => {
         const s = window._settleWizardState;
         const body = document.getElementById('modal-body');
         let html = '';
-        
+
         if (s.step === 1) {
             html += `
                 <div style="margin-bottom: 24px; text-align: center;">
                     <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Outstanding Principal Amount</p>
-                    <h2 style="margin: 5px 0 0 0; color: var(--text-color); font-size: 2rem;">GH₵ ${s.principalAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</h2>
+                    <h2 style="margin: 5px 0 0 0; color: var(--text-color); font-size: 2rem;">GH₵ ${s.principalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h2>
                 </div>
                 
-                <h3 style="margin: 0 0 16px 0; font-size: 1.1rem;">Select Settlement Method</h3>
+                <h3 style="margin: 0 0 16px 0; font-size: initial;">Select Settlement Method</h3>
                 <div style="display: flex; gap: 12px; margin-bottom: 24px;">
                     <button class="btn btn-outline" style="flex: 1; padding: 16px; ${s.settleType === 'cash' ? 'background: rgba(33, 150, 243, 0.1); border-color: var(--info);' : ''}" onclick="window.updateSettleState('settleType', 'cash')">
                         <span class="material-symbols-outlined" style="display: block; font-size: 24px; margin-bottom: 8px; color: var(--info);">payments</span>
@@ -616,12 +691,15 @@ window.addEventListener('route-changed', async (e) => {
                     <h3 style="margin: 0;">Enter Settlement Details</h3>
                 </div>
             `;
-            
+
             if (s.settleType === 'cash') {
                 html += `
                     <div class="form-group">
-                        <label>Amount Paid (GHS) <span style="color: var(--danger);">*</span></label>
-                        <input type="number" step="0.01" max="${s.principalAmount}" value="${s.cashAmount}" oninput="if(this.value > ${s.principalAmount}) this.value = ${s.principalAmount}; window.updateSettleState('cashAmount', this.value)" placeholder="Max GH₵ ${s.principalAmount}">
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Amount Paid (GHS) <span style="color: var(--danger);">*</span></span>
+                            <button class="btn btn-sm btn-text" style="padding: 0; color: var(--info);" onclick="window.updateSettleState('cashAmount', ${s.principalAmount}); window.renderSettleWizardStep()">Pay All</button>
+                        </label>
+                        <input type="number" step="0.01" min="0" max="${s.principalAmount}" value="${s.cashAmount}" oninput="if(this.value < 0) this.value = 0; if(this.value > ${s.principalAmount}) this.value = ${s.principalAmount}; window.updateSettleState('cashAmount', this.value)" placeholder="Max GH₵ ${s.principalAmount}">
                     </div>
                 `;
             } else if (s.settleType === 'walkin') {
@@ -630,35 +708,62 @@ window.addEventListener('route-changed', async (e) => {
                         <label style="margin-bottom: 8px;">Gold Type</label>
                         <div class="segmented-control">
                             <label class="segment-label">
-                                <input type="radio" name="sw_gold_type" value="refined" ${s.goldType === 'refined' ? 'checked' : ''} onchange="window.updateSettleState('goldType', 'refined'); window.calcSettleMath(); window.renderSettleWizardStep()"> 
+                                <input type="radio" name="sw_gold_type" value="refined" ${s.goldType === 'refined' ? 'checked' : ''} onchange="window.handleSettleGoldTypeChange('refined')"> 
                                 <span>Refined Gold</span>
                             </label>
                             <label class="segment-label">
-                                <input type="radio" name="sw_gold_type" value="balls" ${s.goldType === 'balls' ? 'checked' : ''} onchange="window.updateSettleState('goldType', 'balls'); window.calcSettleMath(); window.renderSettleWizardStep()"> 
+                                <input type="radio" name="sw_gold_type" value="balls" ${s.goldType === 'balls' ? 'checked' : ''} onchange="window.handleSettleGoldTypeChange('balls')"> 
                                 <span>Gold Balls</span>
                             </label>
                         </div>
                     </div>
                     
+                    <div class="form-group">
+                        <label>Weight (Grams)</label>
+                        <input type="number" step="0.01" min="0" value="${s.weightGrams}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('weightGrams', this.value); window.calcSettleMath()">
+                    </div>
+                    
                     ${s.goldType === 'refined' ? `
                         <div class="form-group">
-                            <label>Local Price (GHS per Pound)</label>
-                            <input type="number" step="0.01" value="${s.pricePerPound}" oninput="window.updateSettleState('pricePerPound', this.value); window.calcSettleMath()">
+                            <label>Volume</label>
+                            <input type="number" step="0.01" min="0" value="${s.volume}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('volume', this.value); window.calcSettleMath()">
+                        </div>
+                        <div class="form-group">
+                            <label>Current Local Price (GHS)</label>
+                            <input type="number" step="0.01" min="0" value="${s.pricePerPound}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('pricePerPound', this.value); window.calcSettleMath()">
                         </div>
                     ` : `
                         <div class="form-group">
-                            <label>Price per Ball (GHS)</label>
-                            <input type="number" step="0.01" value="${s.pricePerBall}" oninput="window.updateSettleState('pricePerBall', this.value); window.calcSettleMath()">
+                            <label>Price per Blade (GHS)</label>
+                            <input type="number" step="0.01" min="0" value="${s.pricePerBall}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('pricePerBall', this.value); window.calcSettleMath()">
                         </div>
                     `}
-                    <div class="form-group">
-                        <label>Weight (Grams)</label>
-                        <input type="number" step="0.01" value="${s.weightGrams}" oninput="window.updateSettleState('weightGrams', this.value); window.calcSettleMath()">
+                    
+                    ${s.goldType === 'refined' ? `
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <div style="flex: 1; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Pounds</div>
+                            <div id="settle_calc_pounds" style="font-weight: 600;">${(Number(s.calculatedPounds) || 0).toFixed(2)}</div>
+                        </div>
+                        <div style="flex: 1; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Density</div>
+                            <div id="settle_calc_density" style="font-weight: 600;">${(Number(s.calculatedDensity) || 0).toFixed(2)}</div>
+                        </div>
+                        <div style="flex: 1; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Karat</div>
+                            <div id="settle_calc_karat" style="font-weight: 600;">${(Number(s.calculatedKarat) || 0).toFixed(2)}</div>
+                        </div>
                     </div>
+                    ` : `
+                    <div style="background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Total Blades</div>
+                        <div id="settle_calc_blades" style="font-weight: 600;">${(Number(s.calculatedBlades) || 0).toFixed(4)}</div>
+                    </div>
+                    `}
                     
                     <div style="background: rgba(255, 193, 7, 0.1); border: 1px dashed var(--gold-primary); padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: center;">
                         <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px;">Calculated Total Value</div>
-                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--gold-primary);">GH₵ <span id="settle_calc_total">${s.calcTotalGhs.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--gold-primary);">GH₵ <span id="settle_calc_total">${s.calcTotalGhs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
                     </div>
                 `;
             } else if (s.settleType === 'collateral') {
@@ -683,14 +788,14 @@ window.addEventListener('route-changed', async (e) => {
                                 Grams to Use 
                                 ${s.collateralGoldType ? `<button class="btn btn-sm btn-text" style="padding: 0; color: var(--gold-primary);" onclick="window.autoFillCollateral()">Use All Available</button>` : ''}
                             </label>
-                            <input type="number" step="0.01" id="sc_grams" value="${s.collateralGramsToUse}" oninput="window.updateSettleState('collateralGramsToUse', this.value)">
+                            <input type="number" step="0.01" min="0" id="sc_grams" value="${s.collateralGramsToUse}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('collateralGramsToUse', this.value)">
                         </div>
                         <div class="form-group">
                             <label>Agreed Value (GHS)</label>
-                            <input type="number" step="0.01" value="${s.collateralAgreedValue}" oninput="window.updateSettleState('collateralAgreedValue', this.value)">
+                            <input type="number" step="0.01" min="0" value="${s.collateralAgreedValue}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('collateralAgreedValue', this.value)">
                         </div>
                     `;
-                    
+
                     if (!s.collateralGoldType && s.availableCollateral.length === 1) {
                         setTimeout(() => {
                             window.updateSettleState('collateralGoldType', s.availableCollateral[0].gold_type);
@@ -699,26 +804,26 @@ window.addEventListener('route-changed', async (e) => {
                     }
                 }
             }
-            
+
             html += `
                 <div class="form-group">
                     <label>Settlement Note / Comment <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
                     <textarea rows="2" placeholder="Add a comment for this settlement" oninput="window.updateSettleState('comment', this.value)">${s.comment}</textarea>
                 </div>
             `;
-            
+
             let canProceed = false;
             if (s.settleType === 'cash' && parseFloat(s.cashAmount) > 0) canProceed = true;
             if (s.settleType === 'walkin' && parseFloat(s.weightGrams) > 0 && s.calcTotalGhs > 0) canProceed = true;
             if (s.settleType === 'collateral' && s.collateralGoldType && parseFloat(s.collateralGramsToUse) > 0 && parseFloat(s.collateralAgreedValue) > 0) canProceed = true;
 
-            html += `<button class="btn btn-primary btn-block" ${!canProceed ? 'disabled' : ''} onclick="window._settleWizardState.step = 3; window.renderSettleWizardStep()">Preview Summary <span class="material-symbols-outlined">arrow_forward</span></button>`;
+            html += `<button id="btn-preview-summary" class="btn btn-primary btn-block" ${!canProceed ? 'disabled' : ''} onclick="window._settleWizardState.step = 3; window.renderSettleWizardStep()">Preview Summary <span class="material-symbols-outlined">arrow_forward</span></button>`;
         }
         else if (s.step === 3) {
             let typeLabel = '';
             let amountGhs = 0;
             let themeColor = '';
-            
+
             if (s.settleType === 'cash') {
                 typeLabel = 'Cash Repayment';
                 amountGhs = parseFloat(s.cashAmount);
@@ -732,9 +837,38 @@ window.addEventListener('route-changed', async (e) => {
                 amountGhs = parseFloat(s.collateralAgreedValue);
                 themeColor = 'var(--gold-primary)';
             }
-            
+
             const newBal = Math.max(0, s.principalAmount - amountGhs);
             const statusBadge = newBal === 0 ? '<span style="background: rgba(76,175,80,0.2); color: #4caf50; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">FULLY SETTLED</span>' : '<span style="background: rgba(33,150,243,0.2); color: #2196f3; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">PARTIAL PAYMENT</span>';
+
+            let detailsStr = '';
+            if (s.settleType === 'walkin') {
+                if (s.goldType === 'refined') {
+                    detailsStr = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Weight & Volume</span>
+                        <span>${s.weightGrams}g / ${s.volume}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Density & Karat</span>
+                        <span>${s.calculatedDensity.toFixed(2)} / ${typeof s.calculatedKarat === 'number' ? s.calculatedKarat.toFixed(2) : '0.00'}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
+                        <span style="color: var(--text-muted);">Pounds & Price</span>
+                        <span>${s.calculatedPounds.toFixed(2)} @ ₵${s.pricePerPound}</span>
+                    </div>`;
+                } else {
+                    detailsStr = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                        <span style="color: var(--text-muted);">Weight</span>
+                        <span>${s.weightGrams}g</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
+                        <span style="color: var(--text-muted);">Blades & Price</span>
+                        <span>${s.calculatedBlades.toFixed(4)} @ ₵${s.pricePerBall}</span>
+                    </div>`;
+                }
+            }
 
             html += `
                 <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -747,18 +881,19 @@ window.addEventListener('route-changed', async (e) => {
                         <span style="color: var(--text-muted);">Action</span>
                         <span style="font-weight: 600;">${typeLabel}</span>
                     </div>
+                    ${detailsStr}
                     <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                         <span style="color: var(--text-muted);">Previous Owed</span>
-                        <span>GH₵ ${s.principalAmount.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                        <span>GH₵ ${s.principalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
                         <span style="color: var(--text-muted);">Payment/Value</span>
-                        <span style="color: ${s.settleType === 'cash' ? 'var(--info)' : 'var(--success)'}; font-weight: 600;">- GH₵ ${amountGhs.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+                        <span style="color: ${s.settleType === 'cash' ? 'var(--info)' : 'var(--success)'}; font-weight: 600;">- GH₵ ${amountGhs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: var(--text-muted);">New Balance</span>
                         <div style="text-align: right;">
-                            <div style="font-weight: 700; font-size: 1.2rem;">GH₵ ${newBal.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+                            <div style="font-weight: 700; font-size: 1.2rem;">GH₵ ${newBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                             ${statusBadge}
                         </div>
                     </div>
@@ -772,17 +907,17 @@ window.addEventListener('route-changed', async (e) => {
         }
         body.innerHTML = html;
     };
-    
+
     window.submitSettleWizard = async () => {
         const s = window._settleWizardState;
         const btn = document.getElementById('btn-submit-settle');
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-        
+
         try {
             let endpoint = '';
             let payload = {};
-            
+
             if (s.settleType === 'cash') {
                 endpoint = '/loans/repay_cash.php';
                 payload = {
@@ -811,12 +946,12 @@ window.addEventListener('route-changed', async (e) => {
                     comment: s.comment
                 };
             }
-            
+
             await window.api.post(endpoint, payload);
             window.showToast('Loan settled successfully!', 'success');
             window.closeModal();
             window.dispatchEvent(new Event('transaction-completed'));
-            
+
         } catch (e) {
             window.showToast(e.message || 'Error settling loan', 'error');
             btn.disabled = false;

@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 try {
     $stmt = $pdo->prepare("
         SELECT 
-            l.id, l.customer_id, l.principal_amount, l.type, l.status, l.created_at,
+            l.id, l.loan_uid, l.customer_id, l.principal_amount, l.type, l.status, l.created_at,
             c.name as customer_name, c.phone as contact_info
         FROM loans l
         JOIN customers c ON l.customer_id = c.id
