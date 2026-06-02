@@ -213,7 +213,7 @@ window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-contai
                         <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Collateral Details</h4>
                         <div class="form-group">
                             <label>Gold Type Deposited</label>
-                            <select id="w_gold">
+                            <select id="w_gold" onchange="window.wizHandleGoldTypeChange(this.value)">
                                 <option value="balls">Gold Balls</option>
                                 <option value="refined">Refined Gold</option>
                             </select>
@@ -222,7 +222,21 @@ window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-contai
                             <label>Weight (Grams)</label>
                             <div class="input-with-icon">
                                 <span class="material-symbols-outlined">scale</span>
-                                <input type="number" step="0.01" id="w_weight" placeholder="0.00">
+                                <input type="number" step="0.01" id="w_weight" placeholder="0.00" oninput="window.wizCalcBlades()">
+                            </div>
+                        </div>
+                        <div class="form-group" id="w_volume_group" style="display: none;">
+                            <label>Volume (Refined Only)</label>
+                            <div class="input-with-icon">
+                                <span class="material-symbols-outlined">water_drop</span>
+                                <input type="number" step="0.01" id="w_volume" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-group" id="w_blades_group">
+                            <label>Total Blades (Calculated)</label>
+                            <div class="input-with-icon">
+                                <span class="material-symbols-outlined">calculate</span>
+                                <input type="number" step="0.0001" id="w_blades" readonly placeholder="0.0000" style="background: var(--bg-hover);">
                             </div>
                         </div>
                         <div style="display: flex; gap: 8px; margin-top: 32px; justify-content: flex-end;">
@@ -250,6 +264,24 @@ window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-contai
             window.wizSelectType = (type) => {
                 wizardState.type = type;
                 window.wizGoToStep(2);
+            };
+
+            window.wizHandleGoldTypeChange = (type) => {
+                wizardState.goldType = type;
+                if (type === 'refined') {
+                    document.getElementById('w_volume_group').style.display = 'block';
+                    document.getElementById('w_blades_group').style.display = 'none';
+                } else {
+                    document.getElementById('w_volume_group').style.display = 'none';
+                    document.getElementById('w_blades_group').style.display = 'block';
+                }
+            };
+
+            window.wizCalcBlades = () => {
+                if (document.getElementById('w_gold').value === 'balls') {
+                    const wt = parseFloat(document.getElementById('w_weight').value) || 0;
+                    document.getElementById('w_blades').value = (wt / 0.8).toFixed(4);
+                }
             };
 
             window.wizGoToStep = (step) => {
@@ -295,6 +327,8 @@ window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-contai
                 }
                 wizardState.goldType = document.getElementById('w_gold').value;
                 wizardState.weight = wt;
+                wizardState.volume = document.getElementById('w_volume').value;
+                wizardState.totalBlades = document.getElementById('w_blades').value;
                 window.wizRenderSummary();
                 window.wizGoToStep(4);
             };
@@ -309,6 +343,11 @@ window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-contai
                     html += `
                         <p style="margin-top:16px; padding-top:16px; border-top: 1px solid var(--border);"><strong>Collateral Deposited:</strong> ${wizardState.weight}g of ${wizardState.goldType} gold</p>
                     `;
+                    if (wizardState.goldType === 'refined') {
+                        html += `<p style="margin-bottom:8px;"><strong>Volume:</strong> ${wizardState.volume || '-'}</p>`;
+                    } else if (wizardState.goldType === 'balls') {
+                        html += `<p style="margin-bottom:8px;"><strong>Total Blades:</strong> ${wizardState.totalBlades || '-'}</p>`;
+                    }
                 }
                 document.getElementById('wiz-summary-box').innerHTML = html;
             };
@@ -327,6 +366,11 @@ window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-contai
                 if (payload.has_collateral) {
                     payload.gold_type = wizardState.goldType;
                     payload.weight_grams = parseFloat(wizardState.weight);
+                    if (wizardState.goldType === 'refined') {
+                        payload.volume = parseFloat(wizardState.volume) || null;
+                    } else if (wizardState.goldType === 'balls') {
+                        payload.total_blades = parseFloat(wizardState.totalBlades) || null;
+                    }
                 }
                 
                 try {

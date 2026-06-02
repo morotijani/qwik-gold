@@ -69,8 +69,11 @@ try {
 
     // 1b. If collateral is provided, add it to gold_vault
     if ($hasCollateral) {
-        $insertVaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id) VALUES (?, 'keeper_held', ?, 'office_vault', ?)");
-        $insertVaultStmt->execute([$goldType, $weightGrams, $customerId]);
+        $volume = isset($data['volume']) ? (float)$data['volume'] : null;
+        $totalBlades = isset($data['total_blades']) ? (float)$data['total_blades'] : null;
+
+        $insertVaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, total_blades, current_location, customer_id) VALUES (?, 'keeper_held', ?, ?, ?, 'office_vault', ?)");
+        $insertVaultStmt->execute([$goldType, $weightGrams, $volume, $totalBlades, $customerId]);
     }
 
     // 2. INSERT a record into the capital_ledger table

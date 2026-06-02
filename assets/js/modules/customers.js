@@ -357,7 +357,7 @@ window.addEventListener('route-changed', async (e) => {
                 return `
                                         <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                             <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
-                                            <td style="padding: 16px 24px; font-weight: 500;"><a href="#" onclick="window.openLoanDetailsModal(${l.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${l.loan_uid || 'LN-'+l.id}</a></td>
+                                            <td style="padding: 16px 24px; font-weight: 500;"><a href="#" onclick="window.openLoanDetailsModal(${l.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${l.loan_uid || 'LN-' + l.id}</a></td>
                                             <td style="padding: 16px 24px;">${new Date(l.created_at).toLocaleDateString()}</td>
                                             <td style="padding: 16px 24px; font-weight: 600;">GHS ${parseFloat(l.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                             <td style="padding: 16px 24px; text-transform: capitalize;">${l.type}${goldTypeStr}</td>
