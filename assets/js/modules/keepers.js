@@ -11,54 +11,60 @@ async function renderKeepers(container) {
         const keepers = keepersData.filter(c => c.type === 'keeper');
 
         let html = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Keepers Vault</h2>
-                    <button class="btn btn-text" onclick="window.openCreateKeeperModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
-                        <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">person_add</span> Register Keeper
-                    </button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <div>
+                    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; color: var(--text-main); font-weight: 700;">Keepers Vault</h2>
+                    <p style="margin: 0; color: var(--text-muted);">Manage your gold keepers and their vault balances.</p>
                 </div>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Keeper Name</th>
-                                <th>Contact Info</th>
-                                <th style="text-align: right;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
+                <button class="btn btn-primary" onclick="window.openCreateKeeperModal()" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">person_add</span> Register Keeper
+                </button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+        `;
 
         if (keepers.length > 0) {
-            keepers.forEach((k, index) => {
+            keepers.forEach((k) => {
+                const initial = k.name.charAt(0).toUpperCase();
                 html += `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td style="font-weight: 500;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div class="user-avatar-small"><span class="material-symbols-outlined">person</span></div>
-                                    ${k.name}
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 24px;" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--gold-primary)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='none'; this.style.borderColor='var(--border)'; this.style.boxShadow='none';" onclick="window.viewKeeper(${k.id})">
+                        
+                        <div style="display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(255, 215, 0, 0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; flex-shrink: 0;">
+                                ${initial}
+                            </div>
+                            <div style="flex-grow: 1; overflow: hidden;">
+                                <h3 style="margin: 0 0 6px 0; font-size: 1.15rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${k.name}</h3>
+                                ${k.business_name ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">storefront</span> ${k.business_name}</div>` : ''}
+                                <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">call</span> ${k.phone || 'No phone'}
                                 </div>
-                            </td>
-                            <td>${k.phone || '-'}</td>
-                            <td style="text-align: right;">
-                                <button class="btn btn-primary" onclick="window.viewKeeper(${k.id})">
-                                    Manage Vault
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 16px;">
+                            <span style="font-size: 0.85rem; color: #4cd137; background: rgba(76, 209, 55, 0.1); padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; font-weight: 500;">
+                                <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Active Keeper
+                            </span>
+                            <span style="color: var(--gold-primary); font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 4px; opacity: 0.9;">
+                                Manage Vault <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
             });
         } else {
-            html += `<tr><td colspan="4" style="text-align: center;">No keepers found.</td></tr>`;
+            html += `<div style="grid-column: 1 / -1; text-align: center; padding: 60px 40px; background: var(--bg-surface); border: 1px dashed var(--border); border-radius: 16px; color: var(--text-muted);">
+                <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px; display: block;">group_off</span>
+                <h3 style="margin: 0 0 8px 0; color: var(--text-main); font-weight: 600;">No Keepers Found</h3>
+                <p style="margin: 0;">You haven't registered any gold keepers yet.</p>
+            </div>`;
         }
 
         html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
+            </div>
+        `;
         container.innerHTML = html;
     } catch (error) {
         console.error('Error fetching keepers:', error);
@@ -91,142 +97,111 @@ window.viewKeeper = async (keeperId) => {
 
         // Build the full-page UI in Edge Settings style
         let html = `
-            <div style="max-width: 900px; margin: 0 auto; padding-bottom: 40px; animation: slideIn 0.3s ease;">
-                <!-- Header -->
+            <div style="width: 100%; padding-bottom: 40px; animation: slideIn 0.3s ease;">
+                <!-- Top Navigation/Header -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 style="font-size: initial; font-weight: 600; margin: 0;">Keeper Profile</h2>
-                    <div style="display: flex; gap: 12px;">
-                        <button class="btn btn-text" onclick='window.openEditKeeperModal(${JSON.stringify(profile).replace(/'/g, "&#39;")})' style="background: transparent; border: 1px solid var(--border, #333); color: var(--text-main); padding: 8px 16px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn-icon" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));" style="background: var(--bg-surface); border: 1px solid var(--border);">
+                            <span class="material-symbols-outlined">arrow_back</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="window.location.hash='#keepers'; window.dispatchEvent(new Event('hashchange'));" style="background: transparent; border: none; padding: 8px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <span class="material-symbols-outlined" style="font-size: 20px;">arrow_back</span> Return
-                        </button>
+                        <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0; color: var(--text-main);">Keeper Profile</h2>
                     </div>
+                    <button class="btn btn-text" onclick='window.openEditKeeperModal(${JSON.stringify(profile).replace(/'/g, "&#39;")})' style="display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit Details
+                    </button>
                 </div>
 
-                <!-- Main Profile Card -->
-                <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
-                    <!-- Top Section -->
-                    <div style="padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                        <!-- Left: Avatar & Info -->
-                        <div style="display: flex; align-items: center; gap: 20px;">
-                            <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--gold-gradient, linear-gradient(135deg, #FFD700, #FDB931)); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #000; font-weight: 700;">
-                                ${initial}
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <h3 style="font-size: 1.25rem; font-weight: 600; margin: 0;">${profile.name}</h3>
-                                    ${profile.business_name ? `<span style="background: rgba(255,215,0,0.1); color: var(--gold-primary, #FFD700); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid rgba(255,215,0,0.2);">${profile.business_name}</span>` : ''}
-                                </div>
-                                <span style="color: var(--text-muted, #aaa); font-size: 0.9rem;">
-                                    ${profile.phone || 'No phone'} 
-                                    ${profile.email ? ` &nbsp;|&nbsp; ${profile.email}` : ''}
+                <!-- Main Profile Banner Card -->
+                <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; position: relative; overflow: hidden;">
+                    <!-- Decorative background glow -->
+                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--gold-primary); filter: blur(80px); opacity: 0.1; border-radius: 50%;"></div>
+                    
+                    <div style="display: flex; align-items: center; gap: 24px; z-index: 1;">
+                        <div style="width: 80px; height: 80px; border-radius: 20px; background: rgba(255, 215, 0, 0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700;">
+                            ${initial}
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <h3 style="font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main);">${profile.name}</h3>
+                                <span style="font-size: 0.8rem; color: #4cd137; background: rgba(76, 209, 55, 0.1); padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Active
                                 </span>
-                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px; font-size: 0.85rem; font-weight: 500;">
-                                    <span style="color: #4cd137; display: flex; align-items: center; gap: 4px;">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Active Keeper
-                                    </span>
-                                    <span style="color: var(--text-muted, #aaa); border-left: 1px solid var(--border, #333); padding-left: 12px; text-transform: capitalize; display: flex; align-items: center; gap: 4px;">
-                                        <span class="material-symbols-outlined" style="font-size: 16px;">${profile.entity_type === 'group' ? 'groups' : 'person'}</span> ${profile.entity_type || 'Individual'}
-                                    </span>
-                                </div>
                             </div>
-                        </div>
-
-                        <!-- Right: Action Buttons -->
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <button class="btn btn-primary" onclick="window.openKeeperDepositModal(${profile.id}, '${profile.name}')" style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 18px; border-radius: 8px; font-weight: 500;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">download</span> Deposit
-                            </button>
-                            <button class="btn" onclick="window.openKeeperLiquidateModal(${profile.id}, '${profile.name}')" style="background: var(--bg-card, #222); color: #ff6b6b; border: 1px solid rgba(255,107,107,0.3); padding: 10px 18px; border-radius: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.1)'" onmouseout="this.style.background='var(--bg-card, #222)'">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">sell</span> Liquidate
-                            </button>
+                            <div style="color: var(--text-muted); font-size: 0.95rem; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                ${profile.business_name ? `<span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">storefront</span> ${profile.business_name}</span>` : ''}
+                                <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">call</span> ${profile.phone || 'No phone'}</span>
+                                ${profile.email ? `<span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">mail</span> ${profile.email}</span>` : ''}
+                            </div>
                         </div>
                     </div>
 
-                    <div style="height: 1px; background: var(--border, #333); width: 100%;"></div>
-
-                    <!-- Bottom Section (Manage link style) -->
-                    <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; color: var(--text-muted, #aaa); font-size: 0.9rem;">
-                        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">badge</span> ID: ${profile.customer_uid || '#' + profile.id}
-                            </div>
-                            ${profile.address ? `
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">location_on</span> ${profile.address}
-                            </div>
-                            ` : ''}
-                        </div>
-                        <div>Joined: ${new Date(profile.created_at).toLocaleDateString()}</div>
+                    <div style="display: flex; align-items: center; gap: 12px; z-index: 1;">
+                        <button class="btn btn-primary" onclick="window.openKeeperDepositModal(${profile.id}, '${profile.name}')" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-weight: 600;">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">download</span> Receive Deposit
+                        </button>
+                        <button class="btn" onclick="window.openKeeperLiquidateModal(${profile.id}, '${profile.name}')" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; border: 1px solid rgba(255, 107, 107, 0.2); padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 107, 107, 0.2)';" onmouseout="this.style.background='rgba(255, 107, 107, 0.1)';">
+                            <span class="material-symbols-outlined" style="font-size: 20px;">sell</span> Liquidate
+                        </button>
                     </div>
                 </div>
 
-                <!-- Balances Card -->
-                <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
-                    <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: 1.1rem;">
-                        Vault Balances
-                    </div>
-                    <div style="display: flex; flex-direction: column;">
-                        <!-- Gold Balls Row -->
-                        <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border, #333);">
-                            <div style="display: flex; align-items: center; gap: 16px;">
-                                <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(255,215,0,0.1); color: var(--gold-primary, #FFD700); display: flex; align-items: center; justify-content: center;">
-                                    <span class="material-symbols-outlined">trip_origin</span>
-                                </div>
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 500; font-size: 1rem;">Gold Balls</span>
-                                    <span style="font-size: 0.85rem; color: var(--text-muted, #aaa);">Unrefined gold deposits</span>
-                                </div>
-                            </div>
-                            <div style="font-size: 1.5rem; font-weight: 600;">
-                                ${ballsGrams} <span style="font-size: 1rem; color: var(--gold-primary, #FFD700);">g</span>
+                <!-- Balances Grid -->
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin: 0 0 16px 0;">Vault Balances</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    
+                    <!-- Gold Balls Balance -->
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 20px;">
+                        <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(255, 215, 0, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="font-size: 28px; color: var(--gold-primary);">trip_origin</span>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; margin-bottom: 4px;">Gold Balls</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1;">
+                                ${ballsGrams} <span style="font-size: 1rem; color: var(--gold-primary); font-weight: 600;">g</span>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Refined Gold Row -->
-                        <div style="padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 16px;">
-                                <div style="width: 40px; height: 40px; border-radius: 8px; background: rgba(255,215,0,0.1); color: var(--gold-primary, #FFD700); display: flex; align-items: center; justify-content: center;">
-                                    <span class="material-symbols-outlined">diamond</span>
-                                </div>
-                                <div style="display: flex; flex-direction: column;">
-                                    <span style="font-weight: 500; font-size: 1rem;">Refined Gold</span>
-                                    <span style="font-size: 0.85rem; color: var(--text-muted, #aaa);">Processed and refined</span>
-                                </div>
-                            </div>
-                            <div style="font-size: 1.5rem; font-weight: 600;">
-                                ${refinedGrams} <span style="font-size: 1rem; color: var(--gold-primary, #FFD700);">g</span>
+                    <!-- Refined Gold Balance -->
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 20px;">
+                        <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(255, 215, 0, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined" style="font-size: 28px; color: var(--gold-primary);">diamond</span>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; margin-bottom: 4px;">Refined Gold</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1;">
+                                ${refinedGrams} <span style="font-size: 1rem; color: var(--gold-primary); font-weight: 600;">g</span>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
-                <!-- History Card -->
-                <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden;">
-                    <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span>Vault Activity History</span>
-                        <span class="material-symbols-outlined" style="color: var(--text-muted, #aaa); font-size: 20px;">history</span>
+                <!-- History Section -->
+                <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+                    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin: 0;">Vault Activity History</h3>
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">history</span>
                     </div>
                     
                     <div style="max-height: 400px; overflow-y: auto;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                            <thead style="position: sticky; top: 0; background: transparent; z-index: 1;">
+                        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                            <thead style="position: sticky; top: 0; background: var(--bg-main); z-index: 1;">
                                 <tr>
-                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Date</th>
-                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Action</th>
-                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Type</th>
-                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Weight</th>
-                                    <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Payout</th>
+                                    <th style="padding: 16px 24px;">Date</th>
+                                    <th style="padding: 16px 24px;">Action</th>
+                                    <th style="padding: 16px 24px;">Type</th>
+                                    <th style="padding: 16px 24px;">Weight</th>
+                                    <th style="padding: 16px 24px;">Payout</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${historyData && historyData.length > 0 ? historyData.map(h => {
             const isDeposit = h.action === 'deposit';
             const badgeStyle = isDeposit
-                ? 'background: rgba(76, 209, 55, 0.1); color: #4cd137; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;'
-                : 'background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;';
+                ? 'background: rgba(76, 209, 55, 0.1); color: #4cd137; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;'
+                : 'background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;';
+            const actionIcon = isDeposit ? 'arrow_downward' : 'arrow_upward';
             const actionLabel = isDeposit ? 'Deposit' : 'Liquidated';
 
             const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
@@ -235,25 +210,34 @@ window.viewKeeper = async (keeperId) => {
             let extraInfo = '';
             if (isDeposit) {
                 if (h.gold_type === 'refined' && h.volume) {
-                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Vol: ${parseFloat(h.volume).toFixed(4)}</div>`;
+                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Vol: ${parseFloat(h.volume).toFixed(4)}</div>`;
                 } else if (h.gold_type === 'balls' && h.total_blades) {
-                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Blades: ${parseFloat(h.total_blades).toFixed(2)}</div>`;
+                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Blades: ${parseFloat(h.total_blades).toFixed(2)}</div>`;
                 }
             }
 
             return `
-                                        <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-                                            <td style="padding: 16px 24px;">${new Date(h.created_at).toLocaleString()}</td>
-                                            <td style="padding: 16px 24px;"><span style="${badgeStyle}">${actionLabel}</span></td>
-                                            <td style="padding: 16px 24px; text-transform: capitalize;">${h.gold_type}</td>
-                                            <td style="padding: 16px 24px; font-weight: 500; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">
+                                        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 16px 24px; color: var(--text-muted);">${new Date(h.created_at).toLocaleString()}</td>
+                                            <td style="padding: 16px 24px;">
+                                                <span style="${badgeStyle}">
+                                                    <span class="material-symbols-outlined" style="font-size: 14px;">${actionIcon}</span> ${actionLabel}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 16px 24px; text-transform: capitalize; font-weight: 500;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <span class="material-symbols-outlined" style="font-size: 16px; color: var(--gold-primary);">${h.gold_type === 'refined' ? 'diamond' : 'trip_origin'}</span>
+                                                    ${h.gold_type}
+                                                </div>
+                                            </td>
+                                            <td style="padding: 16px 24px; font-weight: 600; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">
                                                 ${isDeposit ? '+' : '-'}${w}
                                                 ${extraInfo}
                                             </td>
-                                            <td style="padding: 16px 24px;">${p}</td>
+                                            <td style="padding: 16px 24px; font-weight: 500;">${p}</td>
                                         </tr>
                                     `;
-        }).join('') : '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted, #aaa);">No activity recorded yet.</td></tr>'}
+        }).join('') : '<tr><td colspan="5" style="text-align: center; padding: 48px; color: var(--text-muted);">No activity recorded yet.</td></tr>'}
                             </tbody>
                         </table>
                     </div>
@@ -272,52 +256,213 @@ window.openKeeperDepositModal = (customerId, customerName) => {
     const modalBody = document.getElementById('modal-body');
 
     modalBody.innerHTML = `
-        <form id="keeper-deposit-form" onsubmit="window.submitKeeperDeposit(event, ${customerId})">
-            <div class="form-group">
-                <label>Gold Type</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">category</span>
-                    <select id="deposit_gold_type" required onchange="window.toggleKeeperDepositFields()">
-                        <option value="balls">Gold Balls</option>
-                        <option value="refined">Refined Gold</option>
-                    </select>
+        <form id="keeper-deposit-form" onsubmit="window.reviewKeeperDeposit(event, ${customerId}, '${customerName.replace(/'/g, "\\'")}')">
+            
+            <div id="deposit-step-1">
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 12px; display: block; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Gold Type</label>
+                    <div style="display: flex; gap: 12px;">
+                        <!-- Hidden input to store selected value -->
+                        <input type="hidden" id="deposit_gold_type" value="balls">
+                        
+                        <!-- Gold Balls Card -->
+                        <div id="card_deposit_balls" style="flex: 1; border: 2px solid var(--warning); background: var(--warning-bg); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
+                             onclick="window.selectKeeperDepositGoldType('balls')">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <div id="icon_bg_deposit_balls" style="background: var(--warning); color: white; height: 40px; width: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined">scatter_plot</span>
+                                </div>
+                                <div id="radio_border_deposit_balls" style="height: 20px; width: 20px; border-radius: 50%; border: 2px solid var(--warning); background: var(--warning); display: flex; align-items: center; justify-content: center;">
+                                    <div id="radio_dot_deposit_balls" style="height: 8px; width: 8px; background: white; border-radius: 50%; display: block;"></div>
+                                </div>
+                            </div>
+                            <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">Gold Balls</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Unrefined / Sponge</div>
+                        </div>
+                        
+                        <!-- Refined Gold Card -->
+                        <div id="card_deposit_refined" style="flex: 1; border: 2px solid var(--border); background: white; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
+                             onclick="window.selectKeeperDepositGoldType('refined')">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <div id="icon_bg_deposit_refined" style="background: var(--bg-hover); color: var(--text-muted); height: 40px; width: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined">diamond</span>
+                                </div>
+                                <div id="radio_border_deposit_refined" style="height: 20px; width: 20px; border-radius: 50%; border: 2px solid #ccc; background: transparent; display: flex; align-items: center; justify-content: center;">
+                                    <div id="radio_dot_deposit_refined" style="height: 8px; width: 8px; background: white; border-radius: 50%; display: none;"></div>
+                                </div>
+                            </div>
+                            <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">Refined Gold</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Processed Bars</div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Highlighted Weight Input -->
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block; text-align: center;">Deposit Weight</label>
+                    <div style="position: relative;">
+                        <input type="number" id="deposit_weight_grams" step="0.01" min="0.01" required placeholder="0.00" oninput="window.calculateKeeperBlades()" style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='var(--gold-primary)'" onblur="this.style.borderColor='var(--border)'">
+                        <span style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--gold-primary); font-size: 1.2rem; pointer-events: none;">grams</span>
+                    </div>
+                </div>
+
+                <!-- Dynamic field for Refined Gold -->
+                <div class="form-group" id="deposit_volume_group" style="display: none; margin-bottom: 20px;">
+                    <label style="font-weight: 500; color: var(--text-main);">Water Volume</label>
+                    <div class="input-with-icon" style="background: var(--bg-main); border-radius: 12px; border: 1px solid var(--border);">
+                        <span class="material-symbols-outlined" style="color: #3498db;">water_drop</span>
+                        <input type="number" id="deposit_volume" step="0.0001" min="0.0001" placeholder="0.0000" style="padding: 14px 14px 14px 44px; font-size: 1.05rem; background: transparent; border: none; width: 100%; color: var(--text-main); outline: none;">
+                    </div>
+                </div>
+
+                <!-- Dynamic field for Gold Balls -->
+                <div class="form-group" id="deposit_blades_group" style="margin-bottom: 20px;">
+                    <label style="font-weight: 500; color: var(--text-main);">Total Blades <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal;">(Auto-calculated)</span></label>
+                    <div class="input-with-icon" style="background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed var(--border);">
+                        <span class="material-symbols-outlined" style="opacity: 0.5;">calculate</span>
+                        <input type="number" id="deposit_total_blades" step="0.01" readonly placeholder="0.00" style="background: transparent; border: none; width: 100%; pointer-events: none; opacity: 0.9; padding: 14px 14px 14px 44px; font-size: 1.05rem; font-weight: 600; color: var(--gold-primary); outline: none;">
+                    </div>
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">Each blade weighs 0.8 grams. Calculated automatically (Weight in Grams / 0.8).</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 32px; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span class="material-symbols-outlined">visibility</span> Review Details
+                </button>
             </div>
             
-            <div class="form-group">
-                <label>Weight (Grams)</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">scale</span>
-                    <input type="number" id="deposit_weight_grams" step="0.01" min="0.01" required placeholder="0.00" oninput="window.calculateKeeperBlades()">
+            <div id="deposit-step-2" style="display: none;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="display: inline-flex; background: rgba(46, 204, 113, 0.1); color: #2ecc71; padding: 12px; border-radius: 50%; margin-bottom: 12px;">
+                        <span class="material-symbols-outlined" style="font-size: 32px;">verified</span>
+                    </div>
+                    <h3 style="margin: 0; color: var(--text-main); font-size: 1.2rem;">Confirm Deposit</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Please review the deposit details before confirming.</p>
                 </div>
-            </div>
 
-            <!-- Dynamic field for Refined Gold -->
-            <div class="form-group" id="deposit_volume_group" style="display: none;">
-                <label>Volume</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">water_drop</span>
-                    <input type="number" id="deposit_volume" step="0.0001" min="0.0001" placeholder="0.0000">
-                </div>
-            </div>
+                <div id="deposit-review-details"></div>
 
-            <!-- Dynamic field for Gold Balls -->
-            <div class="form-group" id="deposit_blades_group">
-                <label>Total Blades</label>
-                <div class="input-with-icon" style="background: rgba(255,255,255,0.05); cursor: not-allowed;">
-                    <span class="material-symbols-outlined" style="opacity: 0.5;">calculate</span>
-                    <input type="number" id="deposit_total_blades" step="0.01" readonly placeholder="0.00" style="background: transparent; pointer-events: none; opacity: 0.7;">
+                <div style="display: flex; gap: 12px; margin-top: 32px;">
+                    <button type="button" class="btn btn-secondary" onclick="window.backToKeeperDeposit()" style="flex: 1; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span class="material-symbols-outlined">arrow_back</span> Back
+                    </button>
+                    <button type="button" id="btn-confirm-deposit" class="btn btn-primary" onclick="window.confirmKeeperDeposit(${customerId})" style="flex: 2; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span class="material-symbols-outlined">check_circle</span> Confirm Deposit
+                    </button>
                 </div>
-                <small style="color: var(--text-muted); display: block; margin-top: 4px;">Calculated automatically (Grams / 0.8)</small>
             </div>
-            
-            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
-                <span class="material-symbols-outlined">check_circle</span> Process Deposit
-            </button>
         </form>
     `;
 
     document.getElementById('global-modal').classList.add('active');
+};
+
+window.reviewKeeperDeposit = (event, customerId, customerName) => {
+    event.preventDefault();
+    
+    const goldType = document.getElementById('deposit_gold_type').value;
+    const weight = document.getElementById('deposit_weight_grams').value;
+    
+    let detailsHtml = `
+        <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Action</span>
+                <span style="font-weight: 600; color: var(--gold-primary);">Deposit Gold</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Keeper</span>
+                <span style="font-weight: 600; color: var(--text-main);">${customerName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Gold Type</span>
+                <span style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${goldType === 'balls' ? 'Gold Balls' : 'Refined Gold'}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Deposit Weight</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(weight).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+            </div>
+    `;
+
+    if (goldType === 'refined') {
+        const volume = document.getElementById('deposit_volume').value;
+        detailsHtml += `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--text-muted);">Water Volume</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(volume).toFixed(4)}</span>
+            </div>
+        `;
+    } else {
+        const blades = document.getElementById('deposit_total_blades').value;
+        detailsHtml += `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--text-muted);">Total Blades</span>
+                <span style="font-weight: 600; color: var(--text-main);">${blades}</span>
+            </div>
+        `;
+    }
+
+    detailsHtml += `</div>`;
+
+    document.getElementById('deposit-review-details').innerHTML = detailsHtml;
+    
+    document.getElementById('deposit-step-1').style.display = 'none';
+    document.getElementById('deposit-step-2').style.display = 'block';
+};
+
+window.backToKeeperDeposit = () => {
+    document.getElementById('deposit-step-2').style.display = 'none';
+    document.getElementById('deposit-step-1').style.display = 'block';
+};
+
+window.selectKeeperDepositGoldType = (type) => {
+    document.getElementById('deposit_gold_type').value = type;
+    
+    // Elements for balls
+    const cardBalls = document.getElementById('card_deposit_balls');
+    const iconBgBalls = document.getElementById('icon_bg_deposit_balls');
+    const radioBorderBalls = document.getElementById('radio_border_deposit_balls');
+    const radioDotBalls = document.getElementById('radio_dot_deposit_balls');
+
+    // Elements for refined
+    const cardRefined = document.getElementById('card_deposit_refined');
+    const iconBgRefined = document.getElementById('icon_bg_deposit_refined');
+    const radioBorderRefined = document.getElementById('radio_border_deposit_refined');
+    const radioDotRefined = document.getElementById('radio_dot_deposit_refined');
+
+    if (type === 'balls') {
+        cardBalls.style.border = '2px solid var(--warning)';
+        cardBalls.style.background = 'var(--warning-bg)';
+        iconBgBalls.style.background = 'var(--warning)';
+        iconBgBalls.style.color = 'white';
+        radioBorderBalls.style.border = '2px solid var(--warning)';
+        radioBorderBalls.style.background = 'var(--warning)';
+        radioDotBalls.style.display = 'block';
+
+        cardRefined.style.border = '2px solid var(--border)';
+        cardRefined.style.background = 'white';
+        iconBgRefined.style.background = 'var(--bg-hover)';
+        iconBgRefined.style.color = 'var(--text-muted)';
+        radioBorderRefined.style.border = '2px solid #ccc';
+        radioBorderRefined.style.background = 'transparent';
+        radioDotRefined.style.display = 'none';
+    } else {
+        cardRefined.style.border = '2px solid var(--warning)';
+        cardRefined.style.background = 'var(--warning-bg)';
+        iconBgRefined.style.background = 'var(--warning)';
+        iconBgRefined.style.color = 'white';
+        radioBorderRefined.style.border = '2px solid var(--warning)';
+        radioBorderRefined.style.background = 'var(--warning)';
+        radioDotRefined.style.display = 'block';
+
+        cardBalls.style.border = '2px solid var(--border)';
+        cardBalls.style.background = 'white';
+        iconBgBalls.style.background = 'var(--bg-hover)';
+        iconBgBalls.style.color = 'var(--text-muted)';
+        radioBorderBalls.style.border = '2px solid #ccc';
+        radioBorderBalls.style.background = 'transparent';
+        radioDotBalls.style.display = 'none';
+    }
+
+    window.toggleKeeperDepositFields();
 };
 
 window.toggleKeeperDepositFields = () => {
@@ -353,9 +498,8 @@ window.calculateKeeperBlades = () => {
     }
 };
 
-window.submitKeeperDeposit = async (event, customerId) => {
-    event.preventDefault();
-    const btn = event.target.querySelector('button[type="submit"]');
+window.confirmKeeperDeposit = async (customerId) => {
+    const btn = document.getElementById('btn-confirm-deposit');
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
@@ -381,7 +525,7 @@ window.submitKeeperDeposit = async (event, customerId) => {
         console.error('Error in deposit:', error);
         window.showToast('Network error', 'error');
         btn.disabled = false;
-        btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Process Deposit';
+        btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Confirm Deposit';
     }
 };
 
@@ -390,47 +534,190 @@ window.openKeeperLiquidateModal = (customerId, customerName) => {
     const modalBody = document.getElementById('modal-body');
 
     modalBody.innerHTML = `
-        <form id="keeper-liquidate-form" onsubmit="window.submitKeeperLiquidate(event, ${customerId})">
-            <div class="form-group">
-                <label>Gold Type to Liquidate</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">category</span>
-                    <select id="liq_gold_type" required>
-                        <option value="balls">Gold Balls</option>
-                        <option value="refined">Refined Gold</option>
-                    </select>
-                </div>
-            </div>
+        <form id="keeper-liquidate-form" onsubmit="window.reviewKeeperLiquidate(event, ${customerId}, '${customerName.replace(/'/g, "\\'")}')">
             
-            <div class="form-group">
-                <label>Grams to Sell</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">scale</span>
-                    <input type="number" id="liq_grams_sold" step="0.01" min="0.01" required placeholder="0.00">
+            <div id="liq-step-1">
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 12px; display: block; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Gold Type to Liquidate</label>
+                    <div style="display: flex; gap: 12px;">
+                        <!-- Hidden input to store selected value -->
+                        <input type="hidden" id="liq_gold_type" value="balls">
+                        
+                        <!-- Gold Balls Card -->
+                        <div id="card_liq_balls" style="flex: 1; border: 2px solid var(--warning); background: var(--warning-bg); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
+                             onclick="window.selectKeeperLiqGoldType('balls')">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <div id="icon_bg_liq_balls" style="background: var(--warning); color: white; height: 40px; width: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined">scatter_plot</span>
+                                </div>
+                                <div id="radio_border_liq_balls" style="height: 20px; width: 20px; border-radius: 50%; border: 2px solid var(--warning); background: var(--warning); display: flex; align-items: center; justify-content: center;">
+                                    <div id="radio_dot_liq_balls" style="height: 8px; width: 8px; background: white; border-radius: 50%; display: block;"></div>
+                                </div>
+                            </div>
+                            <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">Gold Balls</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Unrefined / Sponge</div>
+                        </div>
+                        
+                        <!-- Refined Gold Card -->
+                        <div id="card_liq_refined" style="flex: 1; border: 2px solid var(--border); background: white; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
+                             onclick="window.selectKeeperLiqGoldType('refined')">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <div id="icon_bg_liq_refined" style="background: var(--bg-hover); color: var(--text-muted); height: 40px; width: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined">diamond</span>
+                                </div>
+                                <div id="radio_border_liq_refined" style="height: 20px; width: 20px; border-radius: 50%; border: 2px solid #ccc; background: transparent; display: flex; align-items: center; justify-content: center;">
+                                    <div id="radio_dot_liq_refined" style="height: 8px; width: 8px; background: white; border-radius: 50%; display: none;"></div>
+                                </div>
+                            </div>
+                            <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">Refined Gold</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Processed Bars</div>
+                        </div>
+                    </div>
                 </div>
-                <small style="color: var(--text-muted); display: block; margin-top: 4px;">Must not exceed keeper's current balance.</small>
+
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block; text-align: center;">Grams to Sell</label>
+                    <div style="position: relative;">
+                        <input type="number" id="liq_grams_sold" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='#ff6b6b'" onblur="this.style.borderColor='var(--border)'">
+                        <span style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 1.2rem; pointer-events: none;">g</span>
+                    </div>
+                    <small style="color: var(--text-muted); display: block; margin-top: 8px; text-align: center;">Must not exceed keeper's current balance.</small>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block; text-align: center;">Total Payout (GHS)</label>
+                    <div style="position: relative;">
+                        <input type="number" id="liq_payout_ghs" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='#ff6b6b'" onblur="this.style.borderColor='var(--border)'">
+                        <span style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 1.2rem; pointer-events: none;">₵</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn" style="background: #ff6b6b; color: #111; margin-top: 32px; width: 100%; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
+                    <span class="material-symbols-outlined">visibility</span> Review Details
+                </button>
             </div>
 
-            <div class="form-group">
-                <label>Total Payout (GHS)</label>
-                <div class="input-with-icon">
-                    <span class="material-symbols-outlined">payments</span>
-                    <input type="number" id="liq_payout_ghs" step="0.01" min="0.01" required placeholder="0.00">
+            <div id="liq-step-2" style="display: none;">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="display: inline-flex; background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 12px; border-radius: 50%; margin-bottom: 12px;">
+                        <span class="material-symbols-outlined" style="font-size: 32px;">point_of_sale</span>
+                    </div>
+                    <h3 style="margin: 0; color: var(--text-main); font-size: 1.2rem;">Confirm Liquidation</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Please review the liquidation details before confirming.</p>
+                </div>
+
+                <div id="liq-review-details"></div>
+
+                <div style="display: flex; gap: 12px; margin-top: 32px;">
+                    <button type="button" class="btn btn-secondary" onclick="window.backToKeeperLiquidate()" style="flex: 1; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span class="material-symbols-outlined">arrow_back</span> Back
+                    </button>
+                    <button type="button" id="btn-confirm-liquidate" class="btn" onclick="window.confirmKeeperLiquidate(${customerId})" style="background: #ff6b6b; color: #111; flex: 2; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
+                        <span class="material-symbols-outlined">point_of_sale</span> Confirm Liquidation
+                    </button>
                 </div>
             </div>
-            
-            <button type="submit" class="btn" style="background: #ff6b6b; color: #111; margin-top: 20px; width: 100%;">
-                <span class="material-symbols-outlined">point_of_sale</span> Confirm Liquidation
-            </button>
         </form>
     `;
 
     document.getElementById('global-modal').classList.add('active');
 };
 
-window.submitKeeperLiquidate = async (event, customerId) => {
+window.reviewKeeperLiquidate = (event, customerId, customerName) => {
     event.preventDefault();
-    const btn = event.target.querySelector('button[type="submit"]');
+    
+    const goldType = document.getElementById('liq_gold_type').value;
+    const gramsSold = document.getElementById('liq_grams_sold').value;
+    const payout = document.getElementById('liq_payout_ghs').value;
+    
+    let detailsHtml = `
+        <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Action</span>
+                <span style="font-weight: 600; color: #ff6b6b;">Liquidate Gold</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Keeper</span>
+                <span style="font-weight: 600; color: var(--text-main);">${customerName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Gold Type</span>
+                <span style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${goldType === 'balls' ? 'Gold Balls' : 'Refined Gold'}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Grams to Sell</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(gramsSold).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span style="color: var(--text-muted);">Total Payout</span>
+                <span style="font-weight: 700; color: #ff6b6b; font-size: 1.1rem;">₵ ${parseFloat(payout).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('liq-review-details').innerHTML = detailsHtml;
+    
+    document.getElementById('liq-step-1').style.display = 'none';
+    document.getElementById('liq-step-2').style.display = 'block';
+};
+
+window.backToKeeperLiquidate = () => {
+    document.getElementById('liq-step-2').style.display = 'none';
+    document.getElementById('liq-step-1').style.display = 'block';
+};
+
+window.selectKeeperLiqGoldType = (type) => {
+    document.getElementById('liq_gold_type').value = type;
+    
+    // Elements for balls
+    const cardBalls = document.getElementById('card_liq_balls');
+    const iconBgBalls = document.getElementById('icon_bg_liq_balls');
+    const radioBorderBalls = document.getElementById('radio_border_liq_balls');
+    const radioDotBalls = document.getElementById('radio_dot_liq_balls');
+
+    // Elements for refined
+    const cardRefined = document.getElementById('card_liq_refined');
+    const iconBgRefined = document.getElementById('icon_bg_liq_refined');
+    const radioBorderRefined = document.getElementById('radio_border_liq_refined');
+    const radioDotRefined = document.getElementById('radio_dot_liq_refined');
+
+    if (type === 'balls') {
+        cardBalls.style.border = '2px solid var(--warning)';
+        cardBalls.style.background = 'var(--warning-bg)';
+        iconBgBalls.style.background = 'var(--warning)';
+        iconBgBalls.style.color = 'white';
+        radioBorderBalls.style.border = '2px solid var(--warning)';
+        radioBorderBalls.style.background = 'var(--warning)';
+        radioDotBalls.style.display = 'block';
+
+        cardRefined.style.border = '2px solid var(--border)';
+        cardRefined.style.background = 'white';
+        iconBgRefined.style.background = 'var(--bg-hover)';
+        iconBgRefined.style.color = 'var(--text-muted)';
+        radioBorderRefined.style.border = '2px solid #ccc';
+        radioBorderRefined.style.background = 'transparent';
+        radioDotRefined.style.display = 'none';
+    } else {
+        cardRefined.style.border = '2px solid var(--warning)';
+        cardRefined.style.background = 'var(--warning-bg)';
+        iconBgRefined.style.background = 'var(--warning)';
+        iconBgRefined.style.color = 'white';
+        radioBorderRefined.style.border = '2px solid var(--warning)';
+        radioBorderRefined.style.background = 'var(--warning)';
+        radioDotRefined.style.display = 'block';
+
+        cardBalls.style.border = '2px solid var(--border)';
+        cardBalls.style.background = 'white';
+        iconBgBalls.style.background = 'var(--bg-hover)';
+        iconBgBalls.style.color = 'var(--text-muted)';
+        radioBorderBalls.style.border = '2px solid #ccc';
+        radioBorderBalls.style.background = 'transparent';
+        radioDotBalls.style.display = 'none';
+    }
+};
+
+window.confirmKeeperLiquidate = async (customerId) => {
+    const btn = document.getElementById('btn-confirm-liquidate');
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
