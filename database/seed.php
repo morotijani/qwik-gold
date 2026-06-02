@@ -8,6 +8,7 @@ try {
     $pdo->exec("TRUNCATE TABLE audit_logs;");
     $pdo->exec("TRUNCATE TABLE expenses;");
     $pdo->exec("TRUNCATE TABLE gold_purchases;");
+    $pdo->exec("TRUNCATE TABLE loan_settlements;");
     $pdo->exec("TRUNCATE TABLE loans;");
     $pdo->exec("TRUNCATE TABLE gold_vault;");
     $pdo->exec("TRUNCATE TABLE capital_ledger;");
@@ -33,9 +34,9 @@ try {
 
     // 4. Issue some active loans
     $pdo->exec("
-        INSERT INTO loans (loan_uid, customer_id, principal_amount, status) VALUES
-        ('LN-100001', 1, 5000.00, 'active'),
-        ('LN-100002', 3, 15000.00, 'active')
+        INSERT INTO loans (loan_uid, customer_id, principal_amount, original_principal, status, issued_by) VALUES
+        ('LN-100001', 1, 5000.00, 5000.00, 'active', 1),
+        ('LN-100002', 3, 15000.00, 15000.00, 'active', 1)
     ");
 
     $pdo->exec("

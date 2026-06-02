@@ -154,6 +154,16 @@ try {
     $insertPurchaseStmt->execute([$customerId, $goldType, $weightGrams, $goldValueGhs]);
     $purchaseId = $pdo->lastInsertId();
 
+    // 4b. Insert into loan_settlements
+    $settlementStmt = $pdo->prepare("
+        INSERT INTO loan_settlements 
+        (loan_id, settlement_type, amount_paid, principal_before, principal_after, gold_type, gold_grams_used, processed_by, notes)
+        VALUES (?, 'collateral', ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $settlementStmt->execute([
+        $loanId, $goldValueGhs, $currentPrincipal, $newPrincipal, $goldType, $weightGrams, $current_user_id, $userComment
+    ]);
+
     
     log_activity($pdo, $current_user_id ?? null, 'OFFSET_COLLATERAL', 'loans', $loanId, ['old_principal' => $currentPrincipal], ['new_principal' => $newPrincipal, 'grams_used' => $weightGrams]);
     // Commit Transaction

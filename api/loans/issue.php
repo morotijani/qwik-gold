@@ -57,8 +57,8 @@ try {
 
     // 1. INSERT a new record into the loans table (without loan_uid first)
     $loanType = $hasCollateral ? 'collateral' : 'standard';
-    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, type, status) VALUES (?, ?, ?, 'active')");
-    $stmt->execute([$customerId, $principalAmount, $loanType]);
+    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, original_principal, type, status, issued_by) VALUES (?, ?, ?, ?, 'active', ?)");
+    $stmt->execute([$customerId, $principalAmount, $principalAmount, $loanType, $current_user_id]);
     $loanId = $pdo->lastInsertId();
 
     // 1a. Generate a guaranteed unique loan_uid using the database's auto-increment ID

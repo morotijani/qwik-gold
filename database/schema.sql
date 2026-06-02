@@ -45,11 +45,38 @@ CREATE TABLE loans (
     loan_uid VARCHAR(50) UNIQUE DEFAULT NULL,
     customer_id INT NOT NULL,
     principal_amount DECIMAL(15, 2) NOT NULL,
+    original_principal DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     type ENUM('standard', 'collateral') NOT NULL DEFAULT 'standard',
     status ENUM('active', 'settled') NOT NULL DEFAULT 'active',
+    issued_by INT DEFAULT NULL,
     settlement_note TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (issued_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- loan_settlements
+CREATE TABLE loan_settlements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    loan_id INT NOT NULL,
+    settlement_type ENUM('cash', 'walk_in_gold', 'collateral') NOT NULL,
+    amount_paid DECIMAL(15, 2) NOT NULL,
+    principal_before DECIMAL(15, 2) NOT NULL,
+    principal_after DECIMAL(15, 2) NOT NULL,
+    gold_type ENUM('refined', 'balls') DEFAULT NULL,
+    gold_grams_used DECIMAL(10, 4) DEFAULT NULL,
+    price_per_blade DECIMAL(15, 2) DEFAULT NULL,
+    total_blades DECIMAL(10, 4) DEFAULT NULL,
+    volume DECIMAL(10, 4) DEFAULT NULL,
+    current_local_price DECIMAL(15, 2) DEFAULT NULL,
+    pounds DECIMAL(10, 4) DEFAULT NULL,
+    density DECIMAL(10, 2) DEFAULT NULL,
+    karat DECIMAL(10, 2) DEFAULT NULL,
+    processed_by INT DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (loan_id) REFERENCES loans(id) ON DELETE CASCADE,
+    FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- gold_purchases (The Sales Desk)

@@ -53,6 +53,85 @@ document.addEventListener('DOMContentLoaded', () => {
         if(globalModal) globalModal.classList.remove('active');
     };
 
+    // === LOAN DETAILS MODAL ===
+    window.openLoanDetailsModal = async (loanId) => {
+        try {
+            const data = await window.api.get(`/loans/details.php?loan_id=${loanId}`);
+            const { loan, settlements } = data;
+            
+            let settlementRows = settlements.length === 0 
+                ? '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No settlement records found.</td></tr>' 
+                : settlements.map(s => {
+                    let details = '';
+                    if (s.settlement_type === 'walk_in_gold' || s.settlement_type === 'collateral') {
+                        details = `<br><small style="color: var(--gold-primary);">`;
+                        if (s.gold_type === 'refined') {
+                            details += `${parseFloat(s.gold_grams_used).toFixed(2)}g (Vol: ${s.volume || '-'} | Krt: ${s.karat || '-'} | Den: ${s.density || '-'} | Lbs: ${s.pounds || '-'})`;
+                        } else if (s.gold_type === 'balls') {
+                            details += `${parseFloat(s.gold_grams_used).toFixed(2)}g (${s.total_blades || '-'} blades @ ₵${s.price_per_blade || '-'})`;
+                        } else {
+                            details += `${parseFloat(s.gold_grams_used).toFixed(2)}g of ${s.gold_type}`;
+                        }
+                        details += `</small>`;
+                    }
+
+                    return `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 12px; color: var(--text-muted);">${new Date(s.created_at).toLocaleDateString()}</td>
+                        <td style="padding: 12px; text-transform: capitalize;">${s.settlement_type.replace(/_/g, ' ')}${details}</td>
+                        <td style="padding: 12px; color: var(--success); font-weight: 600;">GH₵ ${parseFloat(s.amount_paid).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td style="padding: 12px; color: var(--text-muted);">GH₵ ${parseFloat(s.principal_after).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td style="padding: 12px;">${s.processor_name || 'N/A'}</td>
+                    </tr>
+                    `;
+                }).join('');
+
+            const html = `
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Original Principal</div>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-main);">GH₵ ${parseFloat(loan.original_principal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Current Outstanding</div>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: ${loan.principal_amount > 0 ? 'var(--warning)' : 'var(--success)'};">GH₵ ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Issued Date</div>
+                            <div style="font-size: 1rem; color: var(--text-main);">${new Date(loan.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase;">Issued By</div>
+                            <div style="font-size: 1rem; color: var(--text-main);">${loan.issuer_name || 'System'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 style="margin-bottom: 12px;">Settlement Timeline</h4>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table" style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--bg-card);">
+                            <tr style="border-bottom: 2px solid var(--border);">
+                                <th style="padding: 12px; text-align: left; color: var(--text-muted);">Date</th>
+                                <th style="padding: 12px; text-align: left; color: var(--text-muted);">Method</th>
+                                <th style="padding: 12px; text-align: left; color: var(--text-muted);">Amount Paid</th>
+                                <th style="padding: 12px; text-align: left; color: var(--text-muted);">Balance After</th>
+                                <th style="padding: 12px; text-align: left; color: var(--text-muted);">Processed By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${settlementRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            window.openModal(`Loan Details: ${loan.loan_uid || 'LN-'+loan.id}`, html);
+        } catch (e) {
+            window.showToast('Failed to load loan details', 'error');
+        }
+    };
+
     // === AUTHENTICATION FLOW ===
     
     // Check initial state

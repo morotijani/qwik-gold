@@ -34,6 +34,14 @@ $goldType = strtolower($data['gold_type']);
 $weightGrams = (float)$data['weight_grams'];
 $goldValueGhs = (float)$data['gold_value_ghs'];
 
+$volume = isset($data['volume']) ? (float)$data['volume'] : null;
+$currentLocalPrice = isset($data['current_local_price']) ? (float)$data['current_local_price'] : null;
+$pounds = isset($data['pounds']) ? (float)$data['pounds'] : null;
+$density = isset($data['density']) ? (float)$data['density'] : null;
+$karat = isset($data['karat']) ? (float)$data['karat'] : null;
+$pricePerBlade = isset($data['price_per_blade']) ? (float)$data['price_per_blade'] : null;
+$totalBlades = isset($data['total_blades']) ? (float)$data['total_blades'] : null;
+
 if ($loanId <= 0 || $customerId <= 0 || $weightGrams <= 0 || $goldValueGhs <= 0) {
     sendResponse('error', 'Invalid numeric values provided', [], 400);
 }
@@ -116,8 +124,18 @@ try {
     $insertVaultStmt->execute([$goldType, $weightGrams]);
 
     // Insert purchase record with origin 'loan_offset'
-    $insertPurchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (customer_id, gold_type, weight_grams, total_paid_ghs, origin) VALUES (?, ?, ?, ?, 'loan_offset')");
-    $insertPurchaseStmt->execute([$customerId, $goldType, $weightGrams, $goldValueGhs]);
+    $insertPurchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'loan_offset')");
+    $insertPurchaseStmt->execute([$customerId, $goldType, $weightGrams, $goldValueGhs, $currentLocalPrice, $density, $karat, $pounds, $totalBlades]);
+
+    // Insert into loan_settlements
+    $settlementStmt = $pdo->prepare("
+        INSERT INTO loan_settlements 
+        (loan_id, settlement_type, amount_paid, principal_before, principal_after, gold_type, gold_grams_used, price_per_blade, total_blades, volume, current_local_price, pounds, density, karat, processed_by, notes)
+        VALUES (?, 'walk_in_gold', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $settlementStmt->execute([
+        $loanId, $goldValueGhs, $principalAmount, $newPrincipal, $goldType, $weightGrams, $pricePerBlade, $totalBlades, $volume, $currentLocalPrice, $pounds, $density, $karat, $current_user_id, $userComment
+    ]);
 
     
     log_activity($pdo, $current_user_id ?? null, 'OFFSET_LOAN_GOLD', 'loans', $loanId, ['old_principal' => $principalAmount], ['new_principal' => $newPrincipal]);

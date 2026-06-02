@@ -64,7 +64,7 @@
                 html += `
                     <tr>
                         <td style="color: var(--text-muted);">${index + 1}</td>
-                        <td style="color: var(--text-main); font-weight: 500;">${loan.loan_uid || 'LN-'+loan.id}</td>
+                        <td style="font-weight: 500;"><a href="#" onclick="window.openLoanDetailsModal(${loan.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.loan_uid || 'LN-'+loan.id}</a></td>
                         <td style="font-weight: 600;"><a href="#" onclick="window.previewCustomerLoans(${loan.customer_id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.customer_name}</a></td>
                         <td>GHS ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td>${typeBadge}</td>

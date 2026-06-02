@@ -80,6 +80,16 @@ try {
         }
     }
 
+    // 1b. Insert into loan_settlements
+    $settlementStmt = $pdo->prepare("
+        INSERT INTO loan_settlements 
+        (loan_id, settlement_type, amount_paid, principal_before, principal_after, processed_by, notes)
+        VALUES (?, 'cash', ?, ?, ?, ?, ?)
+    ");
+    $settlementStmt->execute([
+        $loanId, $actualPayment, $currentPrincipal, $newPrincipal, $current_user_id, $userComment
+    ]);
+
     // 2. INSERT into capital_ledger
     // Securely fetch the latest running balance
     $balanceStmt = $pdo->query("SELECT running_balance FROM capital_ledger ORDER BY id DESC LIMIT 1 FOR UPDATE");
