@@ -63,6 +63,9 @@ try {
     $changeDue = 0.0;
     $newStatus = 'active';
 
+    // Determine comment
+    $userComment = isset($data['comment']) && !empty(trim($data['comment'])) ? trim($data['comment']) : null;
+
     // 2 & 3. Compare gold value and handle full settlement
     if ($goldValueGhs >= $principalAmount) {
         $newStatus = 'settled';
@@ -94,9 +97,13 @@ try {
         // 4. Handle partial offset
         $newPrincipal = $principalAmount - $goldValueGhs;
         
-        // Subtract gold value from principal_amount
-        $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ? WHERE id = ?");
-        $updateStmt->execute([$newPrincipal, $loanId]);
+        if ($userComment) {
+            $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ?, settlement_note = ? WHERE id = ?");
+            $updateStmt->execute([$newPrincipal, $userComment, $loanId]);
+        } else {
+            $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ? WHERE id = ?");
+            $updateStmt->execute([$newPrincipal, $loanId]);
+        }
         
         $message = "Loan partially offset with gold";
     }

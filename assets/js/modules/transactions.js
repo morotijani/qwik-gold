@@ -40,8 +40,8 @@ window.addEventListener('route-changed', (e) => {
     `;
 });
 
-window.loadTxForm = (type) => {
-    const formContainer = document.getElementById('tx-form-container');
+window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-container') => {
+    const formContainer = document.getElementById(targetContainerId);
         
         if (type === 'purchase') {
             formContainer.innerHTML = `
@@ -139,7 +139,7 @@ window.loadTxForm = (type) => {
         else if (type === 'issue_loan') {
             window.wizardState = {
                 type: null,
-                customerId: '',
+                customerId: prefillData.customerId || '',
                 amount: '',
                 goldType: 'balls',
                 weight: ''
@@ -192,7 +192,7 @@ window.loadTxForm = (type) => {
                             <label>Customer ID</label>
                             <div class="input-with-icon">
                                 <span class="material-symbols-outlined">person</span>
-                                <input type="number" id="w_cust" required placeholder="Enter ID">
+                                <input type="number" id="w_cust" required placeholder="Enter ID" value="${prefillData.customerId || ''}" ${prefillData.customerId ? 'readonly' : ''}>
                             </div>
                         </div>
                         <div class="form-group">
@@ -333,10 +333,11 @@ window.loadTxForm = (type) => {
                     await window.api.post('/loans/issue.php', payload);
                     window.showToast('Loan successfully issued', 'success');
                     document.getElementById('issue-loan-modal').remove();
+                    window.dispatchEvent(new Event('transaction-completed'));
                 } catch (e) {
                     window.showToast(e.message, 'error');
                     btn.disabled = false;
-                    btn.innerHTML = 'Confirm & Execute';
+                    btn.innerHTML = 'Confirm & Issue';
                 }
             };
         }
@@ -347,7 +348,7 @@ window.loadTxForm = (type) => {
                     <form id="form-offset" style="margin-top: 16px;">
                         <div class="form-group">
                             <label>Loan ID</label>
-                            <input type="number" id="o_loan" required>
+                            <input type="number" id="o_loan" required value="${prefillData.loanId || ''}" ${prefillData.loanId ? 'readonly' : ''}>
                         </div>
                         <div class="form-group">
                             <label>Gold Type</label>
@@ -383,7 +384,8 @@ window.loadTxForm = (type) => {
                         gold_value_ghs: parseFloat(document.getElementById('o_value').value)
                     });
                     window.showToast('Loan offset successfully', 'success');
-                    formContainer.innerHTML = '';
+                    if (formContainer) formContainer.innerHTML = '';
+                    window.dispatchEvent(new Event('transaction-completed'));
                 } catch (e) {
                     window.showToast(e.message, 'error');
                     btn.disabled = false;
@@ -398,11 +400,11 @@ window.loadTxForm = (type) => {
                     <form id="form-offset-col" style="margin-top: 16px;">
                         <div class="form-group">
                             <label>Loan ID</label>
-                            <input type="number" id="oc_loan" required>
+                            <input type="number" id="oc_loan" required value="${prefillData.loanId || ''}" ${prefillData.loanId ? 'readonly' : ''}>
                         </div>
                         <div class="form-group">
                             <label>Customer ID</label>
-                            <input type="number" id="oc_cust" required>
+                            <input type="number" id="oc_cust" required value="${prefillData.customerId || ''}" ${prefillData.customerId ? 'readonly' : ''}>
                         </div>
                         <div class="form-group">
                             <label>Gold Type in Vault</label>
@@ -439,11 +441,51 @@ window.loadTxForm = (type) => {
                         agreed_value_ghs: parseFloat(document.getElementById('oc_value').value)
                     });
                     window.showToast('Loan offset with collateral successfully', 'success');
-                    formContainer.innerHTML = '';
+                    if (formContainer) formContainer.innerHTML = '';
+                    window.dispatchEvent(new Event('transaction-completed'));
                 } catch (e) {
                     window.showToast(e.message, 'error');
                     btn.disabled = false;
                     btn.innerHTML = 'Process Collateral Offset';
+                }
+            });
+        }
+        else if (type === 'repay_loan') {
+            formContainer.innerHTML = `
+                <div class="glass-panel" style="padding: 24px;">
+                    <h3>Repay Loan with Cash</h3>
+                    <form id="form-repay" style="margin-top: 16px;">
+                        <div class="form-group">
+                            <label>Loan ID</label>
+                            <input type="number" id="r_loan" required value="${prefillData.loanId || ''}" ${prefillData.loanId ? 'readonly' : ''}>
+                        </div>
+                        <div class="form-group">
+                            <label>Amount Paid (GHS)</label>
+                            <input type="number" step="0.01" id="r_amount" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--info); border-color: var(--info);">Process Cash Repayment</button>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('form-repay').addEventListener('submit', async (ev) => {
+                ev.preventDefault();
+                const btn = ev.target.querySelector('button');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
+                
+                try {
+                    await window.api.post('/loans/repay_cash.php', {
+                        loan_id: parseInt(document.getElementById('r_loan').value),
+                        amount_paid_ghs: parseFloat(document.getElementById('r_amount').value)
+                    });
+                    window.showToast('Loan repaid successfully', 'success');
+                    if (formContainer) formContainer.innerHTML = '';
+                    window.dispatchEvent(new Event('transaction-completed'));
+                } catch (e) {
+                    window.showToast(e.message, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Process Cash Repayment';
                 }
             });
         }

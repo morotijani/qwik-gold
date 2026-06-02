@@ -51,22 +51,33 @@ try {
 
     $currentPrincipal = (float)$loan['principal_amount'];
     
-    // Mathematically cap the payment to the current principal.
-    // If a customer hands over 500 GHS for a 400 GHS debt, the office hands them back 100 GHS physical change,
-    // so the ledger should only record an injection of exactly 400 GHS to close the loan.
-    $actualPayment = min($amountPaidGhs, $currentPrincipal);
+    // Server-side validation
+    if ($amountPaidGhs > $currentPrincipal) {
+        throw new Exception("Amount paid cannot exceed the outstanding principal balance ({$currentPrincipal} GHS).");
+    }
+    
+    $actualPayment = $amountPaidGhs;
     $newPrincipal = $currentPrincipal - $actualPayment;
     $newStatus = 'active';
+    
+    // Determine comment
+    $userComment = isset($data['comment']) && !empty(trim($data['comment'])) ? trim($data['comment']) : null;
     
     // UPDATE loans table
     if ($newPrincipal <= 0.0001) { // Floating point safety for zero
         $newStatus = 'settled';
         $newPrincipal = 0.0;
+        // Default note for full settlement
         $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = 0, status = 'settled', settlement_note = 'Settled via cash repayment' WHERE id = ?");
         $updateStmt->execute([$loanId]);
     } else {
-        $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ? WHERE id = ?");
-        $updateStmt->execute([$newPrincipal, $loanId]);
+        if ($userComment) {
+            $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ?, settlement_note = ? WHERE id = ?");
+            $updateStmt->execute([$newPrincipal, $userComment, $loanId]);
+        } else {
+            $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ? WHERE id = ?");
+            $updateStmt->execute([$newPrincipal, $loanId]);
+        }
     }
 
     // 2. INSERT into capital_ledger

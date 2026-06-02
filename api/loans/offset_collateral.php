@@ -105,6 +105,9 @@ try {
     $newStatus = 'active';
     $newPrincipal = $currentPrincipal;
 
+    // Determine comment
+    $userComment = isset($data['comment']) && !empty(trim($data['comment'])) ? trim($data['comment']) : null;
+
     if ($goldValueGhs >= $currentPrincipal) {
         $newStatus = 'settled';
         $newPrincipal = 0.0;
@@ -135,9 +138,13 @@ try {
         // Handle partial offset
         $newPrincipal = $currentPrincipal - $goldValueGhs;
         
-        // Subtract gold value from principal_amount
-        $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ? WHERE id = ?");
-        $updateStmt->execute([$newPrincipal, $loanId]);
+        if ($userComment) {
+            $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ?, settlement_note = ? WHERE id = ?");
+            $updateStmt->execute([$newPrincipal, $userComment, $loanId]);
+        } else {
+            $updateStmt = $pdo->prepare("UPDATE loans SET principal_amount = ? WHERE id = ?");
+            $updateStmt->execute([$newPrincipal, $loanId]);
+        }
         
         $message = "Loan partially offset using collateral";
     }
