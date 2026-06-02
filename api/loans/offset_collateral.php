@@ -33,6 +33,17 @@ $customerId = (int)$data['customer_id'];
 $goldType = strtolower($data['gold_type']);
 $weightGrams = (float)$data['grams_to_use'];
 $goldValueGhs = (float)$data['agreed_value_ghs'];
+$userComment = isset($data['comment']) ? trim($data['comment']) : null;
+
+// Granular gold metrics
+$currentLocalPrice = isset($data['current_local_price']) ? (float)$data['current_local_price'] : null;
+$volume = isset($data['volume']) ? (float)$data['volume'] : null;
+$pounds = isset($data['pounds']) ? (float)$data['pounds'] : null;
+$density = isset($data['density']) ? (float)$data['density'] : null;
+$karat = isset($data['karat']) ? (float)$data['karat'] : null;
+
+$pricePerBlade = isset($data['price_per_blade']) ? (float)$data['price_per_blade'] : null;
+$totalBlades = isset($data['total_blades']) ? (float)$data['total_blades'] : null;
 
 if ($loanId <= 0 || $customerId <= 0 || $weightGrams <= 0 || $goldValueGhs <= 0) {
     sendResponse('error', 'Invalid numeric values provided', [], 400);
@@ -157,11 +168,13 @@ try {
     // 4b. Insert into loan_settlements
     $settlementStmt = $pdo->prepare("
         INSERT INTO loan_settlements 
-        (loan_id, settlement_type, amount_paid, principal_before, principal_after, gold_type, gold_grams_used, processed_by, notes)
-        VALUES (?, 'collateral', ?, ?, ?, ?, ?, ?, ?)
+        (loan_id, settlement_type, amount_paid, principal_before, principal_after, gold_type, gold_grams_used, processed_by, notes,
+         volume, total_blades, price_per_blade, current_local_price, pounds, density, karat)
+        VALUES (?, 'collateral', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     $settlementStmt->execute([
-        $loanId, $goldValueGhs, $currentPrincipal, $newPrincipal, $goldType, $weightGrams, $current_user_id, $userComment
+        $loanId, $goldValueGhs, $currentPrincipal, $newPrincipal, $goldType, $weightGrams, $current_user_id, $userComment,
+        $volume, $totalBlades, $pricePerBlade, $currentLocalPrice, $pounds, $density, $karat
     ]);
 
     

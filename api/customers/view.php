@@ -53,7 +53,7 @@ try {
 
     // 3) SELECT the sum of their keeper gold
     $goldStmt = $pdo->prepare("
-        SELECT gold_type, SUM(weight_grams) as total_grams 
+        SELECT gold_type, SUM(weight_grams) as total_grams, SUM(volume) as total_volume, SUM(total_blades) as sum_blades 
         FROM gold_vault 
         WHERE customer_id = ? AND ownership_status = 'keeper_held'
         GROUP BY gold_type
@@ -63,14 +63,18 @@ try {
     
     $vaultTotals = [
         'balls_grams' => 0.0,
-        'refined_grams' => 0.0
+        'balls_blades' => 0.0,
+        'refined_grams' => 0.0,
+        'refined_volume' => 0.0
     ];
     
     foreach ($goldResults as $row) {
         if ($row['gold_type'] === 'balls') {
             $vaultTotals['balls_grams'] = (float)$row['total_grams'];
+            $vaultTotals['balls_blades'] = (float)$row['sum_blades'];
         } elseif ($row['gold_type'] === 'refined') {
             $vaultTotals['refined_grams'] = (float)$row['total_grams'];
+            $vaultTotals['refined_volume'] = (float)$row['total_volume'];
         }
     }
 

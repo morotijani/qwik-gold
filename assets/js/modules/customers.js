@@ -546,13 +546,13 @@ window.addEventListener('route-changed', async (e) => {
         if (loanType === 'collateral') {
             try {
                 const res = await window.api.get(`/customers/view.php?customer_id=${customerId}`);
-                if (res.status === 'success' && res.data.current_kept_gold) {
+                if (res.current_kept_gold) {
                     const available = [];
-                    if (res.data.current_kept_gold.balls_grams > 0) {
-                        available.push({ gold_type: 'balls', weight_grams: res.data.current_kept_gold.balls_grams });
+                    if (res.current_kept_gold.balls_grams > 0) {
+                        available.push({ gold_type: 'balls', weight_grams: res.current_kept_gold.balls_grams });
                     }
-                    if (res.data.current_kept_gold.refined_grams > 0) {
-                        available.push({ gold_type: 'refined', weight_grams: res.data.current_kept_gold.refined_grams });
+                    if (res.current_kept_gold.refined_grams > 0) {
+                        available.push({ gold_type: 'refined', weight_grams: res.current_kept_gold.refined_grams });
                     }
                     window._settleWizardState.availableCollateral = available;
                 }
@@ -596,6 +596,29 @@ window.addEventListener('route-changed', async (e) => {
         window.renderSettleWizardStep();
     };
 
+    window.handleCollateralTypeChange = (type) => {
+        const s = window._settleWizardState;
+        s.collateralGoldType = type;
+        const col = s.availableCollateral.find(c => c.gold_type === type);
+        
+        // Map to standard calculation state variables
+        s.goldType = type;
+        s.weightGrams = col.weight_grams;
+        s.collateralGramsToUse = col.weight_grams;
+
+        if (type === 'refined') {
+            s.volume = col.volume;
+        } else {
+            s.calculatedBlades = col.total_blades;
+        }
+
+        s.pricePerPound = '';
+        s.pricePerBall = '';
+        
+        window.calcSettleMath();
+        window.renderSettleWizardStep();
+    };
+
     window.calcSettleMath = () => {
         const s = window._settleWizardState;
         const weight = parseFloat(s.weightGrams) || 0;
@@ -621,13 +644,19 @@ window.addEventListener('route-changed', async (e) => {
             if (document.getElementById('settle_calc_karat')) document.getElementById('settle_calc_karat').textContent = typeof s.calculatedKarat === 'number' ? s.calculatedKarat.toFixed(2) : '0.00';
         } else {
             const price = parseFloat(s.pricePerBall) || 0;
-            s.calculatedBlades = weight / 0.8;
+            if (s.settleType === 'collateral') {
+                const col = s.availableCollateral.find(c => c.gold_type === 'balls');
+                if (col) s.calculatedBlades = col.total_blades;
+            } else {
+                s.calculatedBlades = weight / 0.8;
+            }
             total = s.calculatedBlades * price;
 
-            if (document.getElementById('settle_calc_blades')) document.getElementById('settle_calc_blades').textContent = s.calculatedBlades.toFixed(4);
+            if (document.getElementById('settle_calc_blades')) document.getElementById('settle_calc_blades').textContent = (s.calculatedBlades || 0).toFixed(4);
         }
 
         s.calcTotalGhs = total;
+        if (s.settleType === 'collateral') s.collateralAgreedValue = total;
 
         const displayEl = document.getElementById('settle_calc_total');
         if (displayEl) {
@@ -776,30 +805,79 @@ window.addEventListener('route-changed', async (e) => {
                             <div class="segmented-control">
                                 ${s.availableCollateral.map(c => `
                                     <label class="segment-label">
-                                        <input type="radio" name="sc_col_type" value="${c.gold_type}" ${s.collateralGoldType === c.gold_type ? 'checked' : ''} onchange="window.updateSettleState('collateralGoldType', '${c.gold_type}')">
+                                        <input type="radio" name="sc_col_type" value="${c.gold_type}" ${s.collateralGoldType === c.gold_type ? 'checked' : ''} onchange="window.handleCollateralTypeChange('${c.gold_type}')">
                                         <span style="text-transform: capitalize;">${c.gold_type} (${c.weight_grams}g)</span>
                                     </label>
                                 `).join('')}
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label style="display: flex; justify-content: space-between; align-items: center;">
-                                Grams to Use 
-                                ${s.collateralGoldType ? `<button class="btn btn-sm btn-text" style="padding: 0; color: var(--gold-primary);" onclick="window.autoFillCollateral()">Use All Available</button>` : ''}
-                            </label>
-                            <input type="number" step="0.01" min="0" id="sc_grams" value="${s.collateralGramsToUse}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('collateralGramsToUse', this.value)">
-                        </div>
-                        <div class="form-group">
-                            <label>Agreed Value (GHS)</label>
-                            <input type="number" step="0.01" min="0" value="${s.collateralAgreedValue}" oninput="if(this.value < 0) this.value = 0; window.updateSettleState('collateralAgreedValue', this.value)">
-                        </div>
                     `;
+
+                    if (s.collateralGoldType) {
+                        const selectedCol = s.availableCollateral.find(c => c.gold_type === s.collateralGoldType);
+                        
+                        html += `
+                            <div class="form-group">
+                                <label>Grams to Use (All Available)</label>
+                                <input type="number" readonly style="background: var(--bg-hover);" id="sc_grams" value="${selectedCol.weight_grams}">
+                            </div>
+                        `;
+
+                        if (s.collateralGoldType === 'refined') {
+                            html += `
+                            <div class="form-group">
+                                <label>Volume (From Vault)</label>
+                                <input type="number" readonly style="background: var(--bg-hover);" value="${selectedCol.volume}">
+                            </div>
+                            <div class="form-group">
+                                <label>Current Local Price (GHS) <span style="color: var(--danger);">*</span></label>
+                                <div class="input-with-icon">
+                                    <span class="material-symbols-outlined">payments</span>
+                                    <input type="number" step="0.01" placeholder="e.g. 1500" value="${s.pricePerPound}" oninput="window.updateSettleState('pricePerPound', this.value); window.calcSettleMath();">
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                                <div style="flex: 1; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Pounds</div>
+                                    <div id="settle_calc_pounds" style="font-weight: 600;">${(Number(s.calculatedPounds) || 0).toFixed(2)}</div>
+                                </div>
+                                <div style="flex: 1; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Density</div>
+                                    <div id="settle_calc_density" style="font-weight: 600;">${(Number(s.calculatedDensity) || 0).toFixed(2)}</div>
+                                </div>
+                                <div style="flex: 1; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">Karat</div>
+                                    <div id="settle_calc_karat" style="font-weight: 600;">${(Number(s.calculatedKarat) || 0).toFixed(2)}</div>
+                                </div>
+                            </div>
+                            `;
+                        } else {
+                            html += `
+                            <div class="form-group">
+                                <label>Total Blades (From Vault)</label>
+                                <input type="number" readonly style="background: var(--bg-hover);" value="${(Number(selectedCol.total_blades) || 0).toFixed(4)}">
+                            </div>
+                            <div class="form-group">
+                                <label>Price per Blade (GHS) <span style="color: var(--danger);">*</span></label>
+                                <div class="input-with-icon">
+                                    <span class="material-symbols-outlined">payments</span>
+                                    <input type="number" step="0.01" placeholder="e.g. 150" value="${s.pricePerBall}" oninput="window.updateSettleState('pricePerBall', this.value); window.calcSettleMath();">
+                                </div>
+                            </div>
+                            `;
+                        }
+
+                        html += `
+                        <div style="background: rgba(255, 193, 7, 0.1); border: 1px dashed var(--gold-primary); padding: 16px; border-radius: 8px; margin-bottom: 24px; text-align: center;">
+                            <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px;">Calculated Total Value</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--gold-primary);">GH₵ <span id="settle_calc_total">${s.calcTotalGhs.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+                        </div>
+                        `;
+                    }
 
                     if (!s.collateralGoldType && s.availableCollateral.length === 1) {
                         setTimeout(() => {
-                            window.updateSettleState('collateralGoldType', s.availableCollateral[0].gold_type);
-                            window.renderSettleWizardStep();
+                            window.handleCollateralTypeChange(s.availableCollateral[0].gold_type);
                         }, 50);
                     }
                 }
@@ -842,12 +920,12 @@ window.addEventListener('route-changed', async (e) => {
             const statusBadge = newBal === 0 ? '<span style="background: rgba(76,175,80,0.2); color: #4caf50; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">FULLY SETTLED</span>' : '<span style="background: rgba(33,150,243,0.2); color: #2196f3; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">PARTIAL PAYMENT</span>';
 
             let detailsStr = '';
-            if (s.settleType === 'walkin') {
+            if (s.settleType === 'walkin' || s.settleType === 'collateral') {
                 if (s.goldType === 'refined') {
                     detailsStr = `
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
                         <span style="color: var(--text-muted);">Weight & Volume</span>
-                        <span>${s.weightGrams}g / ${s.volume}</span>
+                        <span>${s.weightGrams || s.collateralGramsToUse}g / ${s.volume}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
                         <span style="color: var(--text-muted);">Density & Karat</span>
@@ -860,12 +938,12 @@ window.addEventListener('route-changed', async (e) => {
                 } else {
                     detailsStr = `
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
-                        <span style="color: var(--text-muted);">Weight</span>
-                        <span>${s.weightGrams}g</span>
+                        <span style="color: var(--text-muted);">Weight & Blades</span>
+                        <span>${s.weightGrams || s.collateralGramsToUse}g / ${s.calculatedBlades.toFixed(4)} blades</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
-                        <span style="color: var(--text-muted);">Blades & Price</span>
-                        <span>${s.calculatedBlades.toFixed(4)} @ ₵${s.pricePerBall}</span>
+                        <span style="color: var(--text-muted);">Price per Blade</span>
+                        <span>₵${s.pricePerBall}</span>
                     </div>`;
                 }
             }
@@ -952,9 +1030,19 @@ window.addEventListener('route-changed', async (e) => {
                     customer_id: s.customerId,
                     gold_type: s.collateralGoldType,
                     grams_to_use: parseFloat(s.collateralGramsToUse),
-                    agreed_value_ghs: parseFloat(s.collateralAgreedValue),
+                    agreed_value_ghs: parseFloat(s.calcTotalGhs),
                     comment: s.comment
                 };
+                if (s.collateralGoldType === 'refined') {
+                    payload.current_local_price = parseFloat(s.pricePerPound) || 0;
+                    payload.volume = parseFloat(s.volume) || 0;
+                    payload.pounds = s.calculatedPounds || 0;
+                    payload.density = s.calculatedDensity || 0;
+                    payload.karat = s.calculatedKarat || 0;
+                } else if (s.collateralGoldType === 'balls') {
+                    payload.price_per_blade = parseFloat(s.pricePerBall) || 0;
+                    payload.total_blades = s.calculatedBlades || 0;
+                }
             }
 
             await window.api.post(endpoint, payload);
