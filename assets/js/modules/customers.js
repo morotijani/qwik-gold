@@ -549,10 +549,18 @@ window.addEventListener('route-changed', async (e) => {
                 if (res.current_kept_gold) {
                     const available = [];
                     if (res.current_kept_gold.balls_grams > 0) {
-                        available.push({ gold_type: 'balls', weight_grams: res.current_kept_gold.balls_grams });
+                        available.push({ 
+                            gold_type: 'balls', 
+                            weight_grams: res.current_kept_gold.balls_grams,
+                            total_blades: res.current_kept_gold.balls_blades 
+                        });
                     }
                     if (res.current_kept_gold.refined_grams > 0) {
-                        available.push({ gold_type: 'refined', weight_grams: res.current_kept_gold.refined_grams });
+                        available.push({ 
+                            gold_type: 'refined', 
+                            weight_grams: res.current_kept_gold.refined_grams,
+                            volume: res.current_kept_gold.refined_volume 
+                        });
                     }
                     window._settleWizardState.availableCollateral = available;
                 }
