@@ -1,43 +1,70 @@
 // assets/js/modules/transactions.js
 
-window.addEventListener('route-changed', (e) => {
+window.addEventListener('route-changed', async (e) => {
     if (e.detail.route !== 'transactions') return;
     const container = e.detail.container;
 
     container.innerHTML = `
-        <div style="max-width: 800px; margin: 0 auto;">
-            <h2 class="page-title">New Transaction</h2>
-            
-            <div class="metric-grid" style="grid-template-columns: repeat(2, 1fr);">
-                <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('purchase')">
-                    <h3><span class="material-symbols-outlined" style="vertical-align: middle;">shopping_cart</span> Walk-In Purchase</h3>
-                    <p style="margin-top: 8px; font-size: 0.9rem;">Buy gold over the counter.</p>
-                </button>
-                
-                <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('issue_loan')">
-                    <h3><span class="material-symbols-outlined" style="vertical-align: middle; color: var(--info);">payments</span> Issue Loan</h3>
-                    <p style="margin-top: 8px; font-size: 0.9rem;">Give cash to a customer.</p>
-                </button>
-                
-                <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('offset_loan')">
-                    <h3><span class="material-symbols-outlined" style="vertical-align: middle; color: var(--success);">balance</span> Walk-in Offset</h3>
-                    <p style="margin-top: 8px; font-size: 0.9rem;">Accept new gold to pay down a debt.</p>
-                </button>
-                
-                <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('offset_collateral')">
-                    <h3><span class="material-symbols-outlined" style="vertical-align: middle;">key</span> Collateral Offset</h3>
-                    <p style="margin-top: 8px; font-size: 0.9rem;">Use deposited gold to pay down a debt.</p>
-                </button>
-                
-                <button class="glass-panel" style="padding: 24px; text-align: left; cursor: pointer; border: 1px solid var(--border); transition: var(--transition);" onclick="loadTxForm('market_sale')">
-                    <h3><span class="material-symbols-outlined" style="vertical-align: middle; color: var(--danger);">account_balance</span> Market Execution</h3>
-                    <p style="margin-top: 8px; font-size: 0.9rem;">Liquidate inventory at the main market.</p>
-                </button>
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Global Transactions</h2>
+        </div>
+        
+        <div style="border: 1px solid var(--border, #333); border-radius: 16px; padding: 24px; border-top: 4px solid var(--gold-primary); background: transparent; margin-bottom: 24px;">
+            <div style="color: var(--text-muted, #aaa); font-size: 0.9rem; margin-bottom: 8px;">Current Office Capital Balance</div>
+            <div style="font-size: 2rem; font-weight: bold; color: var(--gold-primary);" id="ledger-balance">GHS ...</div>
+        </div>
 
-            <div id="tx-form-container" style="margin-top: 32px;"></div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">No.</th>
+                        <th>Transaction ID</th>
+                        <th>Date & Time</th>
+                        <th>Type</th>
+                        <th style="text-align: right;">Amount (GHS)</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-tbody">
+                    <tr><td colspan="5" style="text-align: center;">Loading history...</td></tr>
+                </tbody>
+            </table>
         </div>
     `;
+
+    try {
+        const response = await window.api.get('/ledger/history.php?limit=100');
+        
+        document.getElementById('ledger-balance').textContent = 'GHS ' + Number(response.current_running_balance_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        
+        const tbody = document.getElementById('transactions-tbody');
+        if (!response.transactions || response.transactions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No transactions found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = response.transactions.map((tx, index) => {
+            const isPositive = tx.amount_ghs > 0;
+            const amountColor = isPositive ? '#4cd137' : '#ff6b6b';
+            const amountSign = isPositive ? '+' : '';
+            
+            // Format type
+            const displayType = tx.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                    <td style="color: var(--text-muted);">${index + 1}</td>
+                    <td><span style="font-family: monospace; background: rgba(255,255,255,0.05); color: var(--text-main); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">TX-${String(tx.id).padStart(6, '0')}</span></td>
+                    <td>${new Date(tx.date).toLocaleString()}</td>
+                    <td>${displayType} ${tx.reference_id ? `<span style="color: var(--text-muted); font-size: 0.8rem;">(Ref: ${tx.reference_id})</span>` : ''}</td>
+                    <td style="text-align: right; font-weight: 600; color: ${amountColor};">${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error('Failed to load transactions', error);
+        document.getElementById('transactions-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--danger);">Failed to load transactions.</td></tr>';
+    }
 });
 
 window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-container') => {
