@@ -430,10 +430,11 @@ window.openEditCustomerModal = (customer) => {
 
 window._loanWizardState = { step: 1 };
 
-window.openCustomerIssueLoanModal = (customerId) => {
+window.openCustomerIssueLoanModal = async (customerId = null) => {
     window._loanWizardState = {
         step: 1,
         customerId: customerId,
+        customersList: [],
         principal: '',
         hasCollateral: false,
         goldType: 'balls',
@@ -445,6 +446,15 @@ window.openCustomerIssueLoanModal = (customerId) => {
         karat: 0,
         notes: ''
     };
+    
+    if (!customerId) {
+        try {
+            const res = await window.api.get('/customers/list.php');
+            window._loanWizardState.customersList = Array.isArray(res) ? res : (res.customers || []);
+        } catch (e) {
+            console.error('Failed to load customers for loan modal', e);
+        }
+    }
     
     window.renderLoanWizard();
 };
@@ -497,6 +507,19 @@ window.renderLoanWizard = () => {
                         <p style="margin: 0; color: #b45309; font-size: 0.85rem; opacity: 0.9;">This principal amount will be directly deducted from the company's Capital Ledger upon issuance.</p>
                     </div>
                 </div>
+                
+                ${s.customersList && s.customersList.length > 0 ? `
+                <div>
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Select Customer <span style="color: var(--danger);">*</span></label>
+                    <select id="loan-customer-id" required
+                            onchange="window._loanWizardState.customerId = this.value"
+                            style="width: 100%; padding: 16px; font-size: 1rem; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); transition: border-color 0.2s;"
+                            onfocus="this.style.borderColor='var(--warning)'" onblur="this.style.borderColor='var(--border)'">
+                        <option value="" disabled ${!s.customerId ? 'selected' : ''}>-- Choose Customer --</option>
+                        ${s.customersList.map(c => `<option value="${c.id}" ${s.customerId == c.id ? 'selected' : ''}>${c.name} (${c.phone})</option>`).join('')}
+                    </select>
+                </div>
+                ` : ''}
                 
                 <div>
                     <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Principal Amount <span style="color: var(--danger);">*</span></label>
@@ -732,7 +755,16 @@ window.submitLoanWizard = async () => {
         await window.api.post('/loans/issue.php', payload);
         window.showToast('Loan issued successfully!', 'success');
         window.closeModal();
-        window.viewCustomer(s.customerId); // Refresh profile
+        
+        if (window.location.hash === '#loans') {
+            if (typeof window.loadLoansData === 'function') {
+                window.loadLoansData();
+            }
+        } else {
+            if (typeof window.viewCustomer === 'function') {
+                window.viewCustomer(s.customerId); // Refresh profile
+            }
+        }
     } catch (error) {
         window.showToast(error.message, 'error');
         if(btn) {

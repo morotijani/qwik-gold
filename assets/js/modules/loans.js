@@ -8,39 +8,43 @@
 
         // Initial Skeleton
         container.innerHTML = `
-            <div style="max-width: 1100px; margin: 0 auto;">
+            <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 class="page-title" style="font-size: initial; font-weight: 600; margin: 0;">Loan Portfolio</h2>
-                    <button class="btn-text" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;" onclick="window.openIssueLoanModal()">
-                        <span class="material-symbols-outlined" style="font-size: 18px; font-weight: 300;">add</span> Issue New Loan
+                    <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 700; color: var(--text-main);">Loan Portfolio</h2>
+                    <button class="btn btn-primary" onclick="window.openIssueLoanModal()">
+                        <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">add</span> Issue New Loan
                     </button>
                 </div>
                 
-                <div class="table-container">
-                    <table>
+                <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid var(--border);">
+                    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">account_balance_wallet</span>
+                        <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">All Issued Loans</h3>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
                         <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Loan ID</th>
-                                <th>Customer Name</th>
-                                <th>Principal Amount</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Date Issued</th>
+                            <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">No.</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Loan ID</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Customer Name</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Principal Amount</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Status</th>
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">Date Issued</th>
                             </tr>
                         </thead>
                         <tbody id="loans-table-body">
-                            <tr><td colspan="6" style="text-align:center; padding: 32px;"><span class="material-symbols-outlined spin">sync</span> Loading...</td></tr>
+                            <tr><td colspan="7" style="text-align:center; padding: 48px;"><span class="material-symbols-outlined spin" style="font-size: 2rem; color: var(--gold-primary);">sync</span></td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         `;
 
-        await loadLoansData();
+        await window.loadLoansData();
     });
 
-    async function loadLoansData() {
+    window.loadLoansData = async () => {
         try {
             const res = await window.api.get('/loans/list.php');
             const tbody = document.getElementById('loans-table-body');
@@ -62,14 +66,14 @@
                     : '<span class="status-settled">Settled</span>';
 
                 html += `
-                    <tr>
-                        <td style="color: var(--text-muted);">${index + 1}</td>
-                        <td style="font-weight: 500;"><a href="#" onclick="window.openLoanDetailsModal(${loan.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.loan_uid || 'LN-'+loan.id}</a></td>
-                        <td style="font-weight: 600;"><a href="#" onclick="window.previewCustomerLoans(${loan.customer_id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.customer_name}</a></td>
-                        <td>GHS ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                        <td>${typeBadge}</td>
-                        <td>${statusBadge}</td>
-                        <td>${date}</td>
+                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
+                        <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
+                        <td style="padding: 16px; font-weight: 600;"><a href="#" onclick="window.openLoanDetailsModal(${loan.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.loan_uid || 'LN-'+loan.id}</a></td>
+                        <td style="padding: 16px; font-weight: 600;"><a href="#" onclick="window.previewCustomerLoans(${loan.customer_id}); return false;" style="color: var(--text-main); text-decoration: none;">${loan.customer_name}</a></td>
+                        <td style="padding: 16px; font-weight: 700; color: var(--text-main);">GHS ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td style="padding: 16px;">${typeBadge}</td>
+                        <td style="padding: 16px;">${statusBadge}</td>
+                        <td style="padding: 16px 24px; color: var(--text-muted); font-size: 0.9rem;">${date}</td>
                     </tr>
                 `;
             });
@@ -101,49 +105,10 @@
 
     // Attach to window so the button can call it, and modal can use it to refresh
     window.openIssueLoanModal = () => {
-        // We reuse the loadTxForm from transactions.js to generate the modal
-        if (typeof window.loadTxForm === 'function') {
-            window.loadTxForm('issue_loan');
-
-            // We need to override wizSubmit temporarily or hook into it so we can refresh the table
-            const originalWizSubmit = window.wizSubmit;
-            window.wizSubmit = async () => {
-                const btn = document.getElementById('wiz-btn-confirm');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-
-                const payload = {
-                    customer_id: parseInt(window.wizardState.customerId),
-                    principal_amount: parseFloat(window.wizardState.amount),
-                    has_collateral: window.wizardState.type === 'collateral'
-                };
-
-                if (payload.has_collateral) {
-                    payload.gold_type = window.wizardState.goldType;
-                    payload.weight_grams = parseFloat(window.wizardState.weight);
-                    if (payload.gold_type === 'refined') {
-                        payload.volume = parseFloat(window.wizardState.volume) || null;
-                    } else if (payload.gold_type === 'balls') {
-                        payload.total_blades = parseFloat(window.wizardState.totalBlades) || null;
-                    }
-                }
-
-                try {
-                    await window.api.post('/loans/issue.php', payload);
-                    window.showToast('Loan successfully issued', 'success');
-                    document.getElementById('issue-loan-modal').remove();
-                    // Refresh the table!
-                    if (document.getElementById('loans-table-body')) {
-                        loadLoansData();
-                    }
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Confirm & Issue Loan';
-                }
-            };
+        if (typeof window.openCustomerIssueLoanModal === 'function') {
+            window.openCustomerIssueLoanModal(null);
         } else {
-            window.showToast('Transactions module not loaded', 'error');
+            window.showToast('Customers module not fully loaded. Please refresh.', 'error');
         }
     };
 })();
