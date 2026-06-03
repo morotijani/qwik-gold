@@ -55,10 +55,15 @@ try {
     
     $customerId = $pdo->lastInsertId();
 
+    $customerUid = 'CUST-' . str_pad($customerId, 6, '0', STR_PAD_LEFT);
+    $updateUidStmt = $pdo->prepare("UPDATE customers SET customer_uid = ? WHERE id = ?");
+    $updateUidStmt->execute([$customerUid, $customerId]);
+
     
-    log_activity($pdo, $current_user_id ?? null, 'CREATE_CUSTOMER', 'customers', $customerId, null, ['name' => $name, 'type' => $type, 'entity' => $entityType]);
+    log_activity($pdo, $current_user_id ?? null, 'CREATE_CUSTOMER', 'customers', $customerId, null, ['name' => $name, 'type' => $type, 'entity' => $entityType, 'customer_uid' => $customerUid]);
     sendResponse('success', 'Customer registered successfully', [
         'customer_id' => (int)$customerId,
+        'customer_uid' => $customerUid,
         'name' => $name,
         'business_name' => $businessName,
         'type' => $type,

@@ -151,7 +151,7 @@ window.viewKeeper = async (keeperId) => {
                     <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; color: var(--text-muted, #aaa); font-size: 0.9rem;">
                         <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                             <div style="display: flex; align-items: center; gap: 6px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">badge</span> ID: #${profile.id}
+                                <span class="material-symbols-outlined" style="font-size: 18px;">badge</span> ID: ${profile.customer_uid || '#' + profile.id}
                             </div>
                             ${profile.address ? `
                             <div style="display: flex; align-items: center; gap: 6px;">

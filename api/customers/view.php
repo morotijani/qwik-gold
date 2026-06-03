@@ -25,7 +25,7 @@ if ($customerId <= 0) {
 
 try {
     // 1) SELECT customer details
-    $custStmt = $pdo->prepare("SELECT id, name, business_name, type, entity_type, phone, email, address, created_at FROM customers WHERE id = ?");
+    $custStmt = $pdo->prepare("SELECT id, customer_uid, name, business_name, type, entity_type, phone, email, address, created_at FROM customers WHERE id = ?");
     $custStmt->execute([$customerId]);
     $customer = $custStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -77,6 +77,10 @@ try {
             $vaultTotals['refined_volume'] = (float)$row['total_volume'];
         }
     }
+    // 4) SELECT all gold purchases (walk-in sales from this customer)
+    $purchasesStmt = $pdo->prepare("SELECT id, transaction_ref, gold_type, weight_grams, total_paid_ghs, created_at FROM gold_purchases WHERE customer_id = ? ORDER BY created_at DESC");
+    $purchasesStmt->execute([$customerId]);
+    $allPurchases = $purchasesStmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Return the perfectly combined JSON response
     sendResponse('success', 'Customer profile retrieved', [
@@ -86,6 +90,7 @@ try {
             'loans' => $activeLoans
         ],
         'all_loans' => $allLoans,
+        'all_purchases' => $allPurchases,
         'total_settled_ghs' => $totalSettled,
         'current_kept_gold' => $vaultTotals
     ], 200);

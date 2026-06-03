@@ -4,6 +4,7 @@ USE gold_ledger;
 -- customers (Individuals & Groups)
 CREATE TABLE customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_uid VARCHAR(50) UNIQUE DEFAULT NULL,
     name VARCHAR(255) NOT NULL,
     business_name VARCHAR(255) DEFAULT NULL,
     type ENUM('individual', 'group', 'keeper') NOT NULL DEFAULT 'individual',

@@ -19,30 +19,29 @@ window.addEventListener('route-changed', async (e) => {
 
     const renderList = async () => {
         container.innerHTML = `
-            <div class="glass-panel" style="padding: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2>Customer Directory</h2>
-                    <button class="btn btn-primary" id="btn-new-customer">
-                        <span class="material-symbols-outlined">add</span> Register Customer
-                    </button>
-                </div>
-                
-                <div class="table-container">
-                    <table id="customers-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Contact</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-tbody">
-                            <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Customer Directory</h2>
+                <button class="btn btn-text" id="btn-new-customer" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
+                    <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">person_add</span> Register Customer
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <table class="data-table" id="customers-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">No.</th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Contact</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-tbody">
+                        <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
         `;
 
@@ -56,17 +55,18 @@ window.addEventListener('route-changed', async (e) => {
             const tbody = document.getElementById('customers-tbody');
 
             if (customers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No customers found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No customers found.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = customers.map(c => `
+            tbody.innerHTML = customers.map((c, index) => `
                 <tr>
-                    <td>#${c.id}</td>
+                    <td style="color: var(--text-muted);">${index + 1}</td>
+                    <td><span style="font-family: monospace; background: rgba(255,215,0,0.1); color: var(--gold-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">${c.customer_uid || '#' + c.id}</span></td>
                     <td style="font-weight: 600;">${c.name}</td>
                     <td><span class="badge badge-outline">${c.type}</span></td>
                     <td>${c.phone || 'N/A'}</td>
-                    <td>
+                    <td style="text-align: right;">
                         <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;" onclick="viewCustomer(${c.id})">
                             View Profile
                         </button>
@@ -254,7 +254,7 @@ window.addEventListener('route-changed', async (e) => {
                         <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; color: var(--text-muted, #aaa); font-size: 0.9rem;">
                             <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 6px;">
-                                    <span class="material-symbols-outlined" style="font-size: 18px;">badge</span> ID: #${data.profile.id}
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">badge</span> ID: ${data.profile.customer_uid}
                                 </div>
                                 ${data.profile.address ? `
                                 <div style="display: flex; align-items: center; gap: 6px;">
@@ -308,6 +308,7 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
                     ` : ''}
 
+                    ${(data.all_loans && data.all_loans.length > 0) ? `
                     <!-- Financial Summary -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                         <div style="border: 1px solid var(--border, #333); border-radius: 16px; padding: 24px; border-top: 4px solid #ff6b6b; background: transparent;">
@@ -323,7 +324,7 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
 
                     <!-- Loan History Card -->
-                    <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden;">
+                    <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
                         <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: initial; display: flex; justify-content: space-between; align-items: center;">
                             <span>Complete Loan History</span>
                             <span class="material-symbols-outlined" style="color: var(--text-muted, #aaa); font-size: initial;">account_balance_wallet</span>
@@ -342,10 +343,10 @@ window.addEventListener('route-changed', async (e) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${data.all_loans && data.all_loans.length > 0 ? data.all_loans.map((l, index) => {
+                                    ${data.all_loans.map((l, index) => {
                 const statusColor = l.status === 'active' ? '#ff6b6b' : '#4cd137';
                 const statusBg = l.status === 'active' ? 'rgba(255, 107, 107, 0.1)' : 'rgba(76, 209, 55, 0.1)';
-                
+
                 return `
                                         <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                             <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
@@ -362,11 +363,56 @@ window.addEventListener('route-changed', async (e) => {
                                                 ${l.status === 'active' ? `<button class="btn btn-sm btn-outline" onclick="window.openCustomerSettleModal(${l.id}, ${data.profile.id}, '${l.type}', ${l.principal_amount})" style="font-size: 0.8rem; padding: 4px 12px; border-color: var(--success); color: var(--success);">Settle</button>` : '-'}
                                             </td>
                                         </tr>
-                                        `}).join('') : `<tr><td colspan="7" style="padding: 32px; text-align: center; color: var(--text-muted);">No loan history found.</td></tr>`}
+                                        `}).join('')}
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                    ` : ''}
+
+                    ${(data.all_purchases && data.all_purchases.length > 0) ? `
+                    <!-- Gold Sales History Card -->
+                    <div style="border: 1px solid var(--border, #333); border-radius: 16px; overflow: hidden; margin-bottom: 24px;">
+                        <div style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border, #333); font-size: initial; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Gold Sales History</span>
+                            <span class="material-symbols-outlined" style="color: var(--text-muted, #aaa); font-size: initial;">storefront</span>
+                        </div>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                                <thead style="position: sticky; top: 0; background: transparent; z-index: 1;">
+                                    <tr>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">No.</th>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Transaction Ref</th>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Date</th>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Gold Type</th>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Weight</th>
+                                        <th style="padding: 16px 24px; font-weight: 500; color: var(--text-muted, #aaa); border-bottom: 1px solid var(--border, #333);">Total Paid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.all_purchases.map((p, index) => {
+                return `
+                                        <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
+                                            <td style="padding: 16px 24px; font-weight: 500; color: var(--gold-primary);">${p.transaction_ref || '-'}</td>
+                                            <td style="padding: 16px 24px;">${new Date(p.created_at).toLocaleDateString()}</td>
+                                            <td style="padding: 16px 24px; text-transform: capitalize;">${p.gold_type}</td>
+                                            <td style="padding: 16px 24px; font-weight: 600;">${parseFloat(p.weight_grams).toFixed(2)} g</td>
+                                            <td style="padding: 16px 24px; font-weight: 600; color: #4cd137;">GHS ${parseFloat(p.total_paid_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                        </tr>
+                                        `}).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${!(data.all_loans && data.all_loans.length > 0) && !(data.all_purchases && data.all_purchases.length > 0) ? `
+                    <div style="padding: 40px; text-align: center; color: var(--text-muted, #aaa); border: 1px dashed var(--border, #333); border-radius: 16px;">
+                        <span class="material-symbols-outlined" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;">inbox</span>
+                        <p>No financial history or sales records found for this customer.</p>
+                    </div>
+                    ` : ''}
                 </div>
             `;
 
@@ -541,17 +587,17 @@ window.addEventListener('route-changed', async (e) => {
                 if (res.current_kept_gold) {
                     const available = [];
                     if (res.current_kept_gold.balls_grams > 0) {
-                        available.push({ 
-                            gold_type: 'balls', 
+                        available.push({
+                            gold_type: 'balls',
                             weight_grams: res.current_kept_gold.balls_grams,
-                            total_blades: res.current_kept_gold.balls_blades 
+                            total_blades: res.current_kept_gold.balls_blades
                         });
                     }
                     if (res.current_kept_gold.refined_grams > 0) {
-                        available.push({ 
-                            gold_type: 'refined', 
+                        available.push({
+                            gold_type: 'refined',
                             weight_grams: res.current_kept_gold.refined_grams,
-                            volume: res.current_kept_gold.refined_volume 
+                            volume: res.current_kept_gold.refined_volume
                         });
                     }
                     window._settleWizardState.availableCollateral = available;
@@ -600,7 +646,7 @@ window.addEventListener('route-changed', async (e) => {
         const s = window._settleWizardState;
         s.collateralGoldType = type;
         const col = s.availableCollateral.find(c => c.gold_type === type);
-        
+
         // Map to standard calculation state variables
         s.goldType = type;
         s.weightGrams = col.weight_grams;
@@ -614,7 +660,7 @@ window.addEventListener('route-changed', async (e) => {
 
         s.pricePerPound = '';
         s.pricePerBall = '';
-        
+
         window.calcSettleMath();
         window.renderSettleWizardStep();
     };
@@ -815,7 +861,7 @@ window.addEventListener('route-changed', async (e) => {
 
                     if (s.collateralGoldType) {
                         const selectedCol = s.availableCollateral.find(c => c.gold_type === s.collateralGoldType);
-                        
+
                         html += `
                             <div class="form-group">
                                 <label>Grams to Use (All Available)</label>
