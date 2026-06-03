@@ -32,11 +32,13 @@ window.addEventListener('route-changed', async (e) => {
                     <div style="display: flex; gap: 12px; align-items: center;">
                         <select id="tx-type-filter" onchange="window.changeTxType(this.value)" style="padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.95rem; background: white; cursor: pointer; outline: none; transition: border-color 0.2s;">
                             <option value="all" ${window._txState.type === 'all' ? 'selected' : ''}>All Transactions</option>
-                            <option value="capital_injected" ${window._txState.type === 'capital_injected' ? 'selected' : ''}>Capital Injected</option>
-                            <option value="expense_recorded" ${window._txState.type === 'expense_recorded' ? 'selected' : ''}>Expense Recorded</option>
+                            <option value="external_capital_in" ${window._txState.type === 'external_capital_in' ? 'selected' : ''}>Capital Injected</option>
+                            <option value="expense" ${window._txState.type === 'expense' ? 'selected' : ''}>Expense Recorded</option>
                             <option value="expense_refunded" ${window._txState.type === 'expense_refunded' ? 'selected' : ''}>Expense Refunded</option>
                             <option value="loan_issued" ${window._txState.type === 'loan_issued' ? 'selected' : ''}>Loan Issued</option>
-                            <option value="loan_settlement" ${window._txState.type === 'loan_settlement' ? 'selected' : ''}>Loan Settlement</option>
+                            <option value="loan_repaid" ${window._txState.type === 'loan_repaid' ? 'selected' : ''}>Loan Repaid / Settled</option>
+                            <option value="gold_purchase" ${window._txState.type === 'gold_purchase' ? 'selected' : ''}>Gold Purchase / Offset</option>
+                            <option value="out_sale_revenue" ${window._txState.type === 'out_sale_revenue' ? 'selected' : ''}>Market Sale Revenue</option>
                         </select>
                     </div>
                 </div>
