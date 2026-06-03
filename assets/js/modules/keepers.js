@@ -128,9 +128,12 @@ window.viewKeeper = async (keeperId) => {
                                 </span>
                             </div>
                             <div style="color: var(--text-muted); font-size: 0.95rem; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                <span style="display: flex; align-items: center; gap: 4px; font-weight: 500; color: var(--gold-primary);"><span class="material-symbols-outlined" style="font-size: 16px;">tag</span> ID: ${profile.customer_uid}</span>
+                                <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">category</span> ${profile.entity_type ? profile.entity_type.charAt(0).toUpperCase() + profile.entity_type.slice(1) : 'Individual'}</span>
                                 ${profile.business_name ? `<span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">storefront</span> ${profile.business_name}</span>` : ''}
                                 <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">call</span> ${profile.phone || 'No phone'}</span>
                                 ${profile.email ? `<span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">mail</span> ${profile.email}</span>` : ''}
+                                <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">calendar_today</span> Joined ${profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}</span>
                             </div>
                         </div>
                     </div>
@@ -540,10 +543,8 @@ window.openKeeperLiquidateModal = (customerId, customerName) => {
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label style="font-weight: 600; color: var(--text-main); margin-bottom: 12px; display: block; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px;">Gold Type to Liquidate</label>
                     <div style="display: flex; gap: 12px;">
-                        <!-- Hidden input to store selected value -->
                         <input type="hidden" id="liq_gold_type" value="balls">
                         
-                        <!-- Gold Balls Card -->
                         <div id="card_liq_balls" style="flex: 1; border: 2px solid var(--warning); background: var(--warning-bg); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
                              onclick="window.selectKeeperLiqGoldType('balls')">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -558,7 +559,6 @@ window.openKeeperLiquidateModal = (customerId, customerName) => {
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Unrefined / Sponge</div>
                         </div>
                         
-                        <!-- Refined Gold Card -->
                         <div id="card_liq_refined" style="flex: 1; border: 2px solid var(--border); background: white; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;" 
                              onclick="window.selectKeeperLiqGoldType('refined')">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
@@ -575,21 +575,8 @@ window.openKeeperLiquidateModal = (customerId, customerName) => {
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block; text-align: center;">Grams to Sell</label>
-                    <div style="position: relative;">
-                        <input type="number" id="liq_grams_sold" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='#ff6b6b'" onblur="this.style.borderColor='var(--border)'">
-                        <span style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 1.2rem; pointer-events: none;">g</span>
-                    </div>
-                    <small style="color: var(--text-muted); display: block; margin-top: 8px; text-align: center;">Must not exceed keeper's current balance.</small>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block; text-align: center;">Total Payout (GHS)</label>
-                    <div style="position: relative;">
-                        <input type="number" id="liq_payout_ghs" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='#ff6b6b'" onblur="this.style.borderColor='var(--border)'">
-                        <span style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 1.2rem; pointer-events: none;">₵</span>
-                    </div>
+                <div id="liq_dynamic_container">
+                    <!-- Fields populated by JS -->
                 </div>
                 
                 <button type="submit" class="btn" style="background: #ff6b6b; color: #111; margin-top: 32px; width: 100%; padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
@@ -621,14 +608,131 @@ window.openKeeperLiquidateModal = (customerId, customerName) => {
     `;
 
     document.getElementById('global-modal').classList.add('active');
+
+    // Fetch keeper's current balance
+    window.api.get('/keepers/balance.php?customer_id=' + customerId)
+        .then(data => {
+            const balances = data.vault_totals;
+            const form = document.getElementById('keeper-liquidate-form');
+            form.dataset.ballsGrams = balances.balls_grams || 0;
+            form.dataset.ballsBlades = balances.balls_blades || 0;
+            form.dataset.refinedGrams = balances.refined_grams || 0;
+            form.dataset.refinedVolume = balances.refined_volume || 0;
+
+            window.toggleKeeperLiqFields();
+        })
+        .catch(err => {
+            console.error('Failed to load keeper balance:', err);
+        });
+};
+
+window.toggleKeeperLiqFields = () => {
+    const goldType = document.getElementById('liq_gold_type').value;
+    const form = document.getElementById('keeper-liquidate-form');
+    const container = document.getElementById('liq_dynamic_container');
+    
+    if (goldType === 'balls') {
+        const grams = parseFloat(form.dataset.ballsGrams) || 0;
+        const blades = parseFloat(form.dataset.ballsBlades) || 0;
+        
+        container.innerHTML = `
+            <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                <div class="form-group" style="flex: 1;">
+                    <label style="color: var(--text-muted); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; display: block;">Total Grams</label>
+                    <input type="number" id="liq_balls_grams" value="${grams}" readonly style="width: 100%; padding: 12px; font-weight: 600; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); pointer-events: none;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label style="color: var(--text-muted); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; display: block;">Total Balls (Blades)</label>
+                    <input type="number" id="liq_balls_blades" value="${blades}" readonly style="width: 100%; padding: 12px; font-weight: 600; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); pointer-events: none;">
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block;">Current Local Price per Blade (GHS)</label>
+                <div style="position: relative;">
+                    <input type="number" id="liq_price_per_blade" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 16px 16px 16px 44px; font-size: 1.2rem; font-weight: 600; background: var(--bg-main); border: 2px solid var(--border); border-radius: 12px; color: var(--text-main); transition: border-color 0.2s; outline: none;" onfocus="this.style.borderColor='#ff6b6b'" onblur="this.style.borderColor='var(--border)'" oninput="window.calculateKeeperLiqPayout()">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 1.2rem;">₵</span>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: #ff6b6b; margin-bottom: 8px; display: block; text-align: center;">Total Payout (GHS)</label>
+                <input type="number" id="liq_total_payout" readonly required style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; color: #ff6b6b; background: rgba(255,107,107,0.05); border: 2px solid #ff6b6b; border-radius: 16px; pointer-events: none;">
+            </div>
+        `;
+    } else {
+        const grams = parseFloat(form.dataset.refinedGrams) || 0;
+        const volume = parseFloat(form.dataset.refinedVolume) || 0;
+        
+        const truncate2 = (num) => Math.floor(num * 100) / 100;
+        const pounds = truncate2(grams / 7.75);
+        const density = volume > 0 ? truncate2(grams / volume) : 0;
+        const karat = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
+        
+        container.innerHTML = `
+            <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                <div class="form-group" style="flex: 1;">
+                    <label style="color: var(--text-muted); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; display: block;">Total Grams</label>
+                    <input type="number" id="liq_refined_grams" value="${grams}" readonly style="width: 100%; padding: 12px; font-weight: 600; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); pointer-events: none;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label style="color: var(--text-muted); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; display: block;">Total Volume</label>
+                    <input type="number" id="liq_refined_volume" value="${volume}" readonly style="width: 100%; padding: 12px; font-weight: 600; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); pointer-events: none;">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 16px; margin-bottom: 24px; padding: 16px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 12px;">
+                <div style="flex: 1; text-align: center; border-right: 1px solid var(--border);">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Pounds</div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;" id="liq_calc_pounds">${pounds.toFixed(2)}</div>
+                </div>
+                <div style="flex: 1; text-align: center; border-right: 1px solid var(--border);">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Density</div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;" id="liq_calc_density">${density.toFixed(2)}</div>
+                </div>
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Karat</div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;" id="liq_calc_karat">${karat.toFixed(2)}</div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block;">Current Local Price (GHS)</label>
+                <div style="position: relative;">
+                    <input type="number" id="liq_local_price" step="0.01" min="0.01" required placeholder="0.00" style="width: 100%; padding: 16px 16px 16px 44px; font-size: 1.2rem; font-weight: 600; background: var(--bg-main); border: 2px solid var(--border); border-radius: 12px; color: var(--text-main); transition: border-color 0.2s; outline: none;" onfocus="this.style.borderColor='#ff6b6b'" onblur="this.style.borderColor='var(--border)'" oninput="window.calculateKeeperLiqPayout()">
+                    <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 1.2rem;">₵</span>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; color: #ff6b6b; margin-bottom: 8px; display: block; text-align: center;">Total Payout (GHS)</label>
+                <input type="number" id="liq_total_payout" readonly required style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; color: #ff6b6b; background: rgba(255,107,107,0.05); border: 2px solid #ff6b6b; border-radius: 16px; pointer-events: none;">
+            </div>
+        `;
+    }
+};
+
+window.calculateKeeperLiqPayout = () => {
+    const goldType = document.getElementById('liq_gold_type').value;
+    const payoutInput = document.getElementById('liq_total_payout');
+    
+    if (goldType === 'balls') {
+        const blades = parseFloat(document.getElementById('liq_balls_blades').value) || 0;
+        const price = parseFloat(document.getElementById('liq_price_per_blade').value) || 0;
+        payoutInput.value = (blades * price).toFixed(2);
+    } else {
+        const pounds = parseFloat(document.getElementById('liq_calc_pounds').textContent) || 0;
+        const karat = parseFloat(document.getElementById('liq_calc_karat').textContent) || 0;
+        const price = parseFloat(document.getElementById('liq_local_price').value) || 0;
+        payoutInput.value = ((karat * price / 23) * pounds).toFixed(2);
+    }
 };
 
 window.reviewKeeperLiquidate = (event, customerId, customerName) => {
     event.preventDefault();
     
     const goldType = document.getElementById('liq_gold_type').value;
-    const gramsSold = document.getElementById('liq_grams_sold').value;
-    const payout = document.getElementById('liq_payout_ghs').value;
+    const payout = document.getElementById('liq_total_payout').value;
     
     let detailsHtml = `
         <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
@@ -644,11 +748,56 @@ window.reviewKeeperLiquidate = (event, customerId, customerName) => {
                 <span style="color: var(--text-muted);">Gold Type</span>
                 <span style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${goldType === 'balls' ? 'Gold Balls' : 'Refined Gold'}</span>
             </div>
+    `;
+
+    if (goldType === 'balls') {
+        const grams = document.getElementById('liq_balls_grams').value;
+        const blades = document.getElementById('liq_balls_blades').value;
+        const price = document.getElementById('liq_price_per_blade').value;
+        detailsHtml += `
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Grams to Sell</span>
-                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(gramsSold).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(grams).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Total Balls (Blades)</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(blades).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Price per Blade</span>
+                <span style="font-weight: 600; color: var(--text-main);">₵ ${parseFloat(price).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+            </div>
+        `;
+    } else {
+        const grams = document.getElementById('liq_refined_grams').value;
+        const volume = document.getElementById('liq_refined_volume').value;
+        const pounds = document.getElementById('liq_calc_pounds').textContent;
+        const density = document.getElementById('liq_calc_density').textContent;
+        const karat = document.getElementById('liq_calc_karat').textContent;
+        const price = document.getElementById('liq_local_price').value;
+        
+        detailsHtml += `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Grams to Sell</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(grams).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Volume</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(volume).toLocaleString('en-US', {minimumFractionDigits: 4})}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Pounds / Density / Karat</span>
+                <span style="font-weight: 600; color: var(--text-main);">${pounds} / ${density} / ${karat}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                <span style="color: var(--text-muted);">Current Local Price</span>
+                <span style="font-weight: 600; color: var(--text-main);">₵ ${parseFloat(price).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+            </div>
+        `;
+    }
+
+    detailsHtml += `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--border);">
                 <span style="color: var(--text-muted);">Total Payout</span>
                 <span style="font-weight: 700; color: #ff6b6b; font-size: 1.1rem;">₵ ${parseFloat(payout).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
             </div>
@@ -714,6 +863,10 @@ window.selectKeeperLiqGoldType = (type) => {
         radioBorderBalls.style.background = 'transparent';
         radioDotBalls.style.display = 'none';
     }
+
+    if (window.toggleKeeperLiqFields) {
+        window.toggleKeeperLiqFields();
+    }
 };
 
 window.confirmKeeperLiquidate = async (customerId) => {
@@ -721,12 +874,33 @@ window.confirmKeeperLiquidate = async (customerId) => {
     btn.disabled = true;
     btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
-    const payload = {
+    const goldType = document.getElementById('liq_gold_type').value;
+    
+    let payload = {
         customer_id: customerId,
-        gold_type: document.getElementById('liq_gold_type').value,
-        total_grams_sold: parseFloat(document.getElementById('liq_grams_sold').value),
-        total_payout_ghs: parseFloat(document.getElementById('liq_payout_ghs').value)
+        gold_type: goldType,
+        total_payout_ghs: parseFloat(document.getElementById('liq_total_payout').value)
     };
+
+    if (goldType === 'balls') {
+        payload.total_grams_sold = parseFloat(document.getElementById('liq_balls_grams').value);
+        payload.total_blades = parseFloat(document.getElementById('liq_balls_blades').value);
+        payload.local_price = parseFloat(document.getElementById('liq_price_per_blade').value);
+    } else {
+        payload.total_grams_sold = parseFloat(document.getElementById('liq_refined_grams').value);
+        payload.density = parseFloat(document.getElementById('liq_calc_density').textContent);
+        payload.karat = parseFloat(document.getElementById('liq_calc_karat').textContent);
+        payload.pounds = parseFloat(document.getElementById('liq_calc_pounds').textContent);
+        payload.local_price = parseFloat(document.getElementById('liq_local_price').value);
+    }
+
+    // validate grams sold > 0
+    if (!payload.total_grams_sold || payload.total_grams_sold <= 0) {
+        window.showToast('Keeper has no balance to liquidate.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">point_of_sale</span> Confirm Liquidation';
+        return;
+    }
 
     try {
         await window.api.post('/keepers/liquidate.php', payload);

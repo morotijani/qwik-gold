@@ -21,8 +21,8 @@ if ($customerId <= 0) {
 }
 
 try {
-    // Query to sum weight_grams grouped by gold_type for a specific keeper
-    $query = "SELECT gold_type, SUM(weight_grams) as total_grams 
+    // Query to sum weight_grams, volume, and total_blades grouped by gold_type for a specific keeper
+    $query = "SELECT gold_type, SUM(weight_grams) as total_grams, SUM(volume) as total_volume, SUM(total_blades) as total_blades 
               FROM gold_vault 
               WHERE customer_id = :customer_id 
                 AND ownership_status = 'keeper_held' 
@@ -37,14 +37,21 @@ try {
     // Default balances to 0
     $vault_totals = [
         'balls_grams' => 0.0,
-        'refined_grams' => 0.0
+        'balls_blades' => 0.0,
+        'refined_grams' => 0.0,
+        'refined_volume' => 0.0
     ];
     
     // Map database results to the balances array
     foreach ($results as $row) {
         $type = $row['gold_type'];
-        $key = $type . '_grams';
-        $vault_totals[$key] = (float)$row['total_grams'];
+        if ($type === 'balls') {
+            $vault_totals['balls_grams'] = (float)$row['total_grams'];
+            $vault_totals['balls_blades'] = (float)$row['total_blades'];
+        } else if ($type === 'refined') {
+            $vault_totals['refined_grams'] = (float)$row['total_grams'];
+            $vault_totals['refined_volume'] = (float)$row['total_volume'];
+        }
     }
     
     $responseData = [

@@ -176,6 +176,15 @@ label {
 .input-with-icon { position: relative; display: flex; align-items: center; }
 .input-with-icon .material-symbols-outlined { position: absolute; left: 16px; color: var(--text-muted); font-size: 1.2rem; }
 
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 input, select, textarea {
     width: 100%;
     background: var(--bg-main);

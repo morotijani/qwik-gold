@@ -30,6 +30,12 @@ $goldType = strtolower($data['gold_type']);
 $totalGramsSold = (float)$data['total_grams_sold'];
 $totalPayoutGhs = (float)$data['total_payout_ghs'];
 
+$localPrice = isset($data['local_price']) ? (float)$data['local_price'] : null;
+$density = isset($data['density']) ? (float)$data['density'] : null;
+$karat = isset($data['karat']) ? (float)$data['karat'] : null;
+$pounds = isset($data['pounds']) ? (float)$data['pounds'] : null;
+$totalBlades = isset($data['total_blades']) ? (float)$data['total_blades'] : null;
+
 if ($customerId <= 0 || $totalGramsSold <= 0 || $totalPayoutGhs <= 0) {
     sendResponse('error', 'Invalid numeric values provided', [], 400);
 }
@@ -83,8 +89,9 @@ try {
     }
 
     // 2. INSERT a record into gold_purchases
-    $insertPurchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (customer_id, gold_type, weight_grams, total_paid_ghs, origin) VALUES (?, ?, ?, ?, 'from_keeper')");
-    $insertPurchaseStmt->execute([$customerId, $goldType, $totalGramsSold, $totalPayoutGhs]);
+    $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
+    $insertPurchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'from_keeper')");
+    $insertPurchaseStmt->execute([$txnRef, $customerId, $goldType, $totalGramsSold, $totalPayoutGhs, $localPrice, $density, $karat, $pounds, $totalBlades]);
     $purchaseId = $pdo->lastInsertId();
 
     // 3. INSERT a record into capital_ledger
