@@ -31,6 +31,15 @@ try {
     $monthResult = $monthStmt->fetch();
     $totalThisMonth = $monthResult['total_month'] !== null ? (float)$monthResult['total_month'] : 0.0;
 
+    // 4) Calculate total expenses for today
+    $todayStmt = $pdo->query("
+        SELECT SUM(amount) AS total_today 
+        FROM expenses 
+        WHERE date = CURRENT_DATE()
+    ");
+    $todayResult = $todayStmt->fetch();
+    $totalToday = $todayResult['total_today'] !== null ? (float)$todayResult['total_today'] : 0.0;
+
     // 4) Format the results
     $formattedExpenses = [];
     foreach ($expenses as $row) {
@@ -46,6 +55,7 @@ try {
     sendResponse('success', 'Expenses retrieved successfully', [
         'total_lifetime_ghs' => $totalLifetime,
         'total_month_ghs' => $totalThisMonth,
+        'total_today_ghs' => $totalToday,
         'expenses' => $formattedExpenses
     ], 200);
 
