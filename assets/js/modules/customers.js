@@ -269,6 +269,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Date</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
+                                    <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Category</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Reference</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Amount (GHS)</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Details</th>
@@ -277,7 +278,7 @@ window.addEventListener('route-changed', async (e) => {
                             <tbody>
                                 ${journeyNodes.length === 0 ? `
                                     <tr>
-                                        <td colspan="5" style="padding: 32px; text-align: center; color: var(--text-muted);">This customer has not started their financial journey yet.</td>
+                                        <td colspan="6" style="padding: 32px; text-align: center; color: var(--text-muted);">This customer has not started their financial journey yet.</td>
                                     </tr>
                                 ` : journeyNodes.map(node => {
                                     if (node._type === 'loan') {
@@ -291,6 +292,9 @@ window.addEventListener('route-changed', async (e) => {
                                                     <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: var(--warning-bg); color: var(--warning); border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
                                                         <span class="material-symbols-outlined" style="font-size: 1rem;">account_balance_wallet</span> Loan Issued
                                                     </span>
+                                                </td>
+                                                <td style="padding: 16px; font-weight: 600; color: var(--text-muted); font-size: 0.85rem; text-transform: capitalize;">
+                                                    ${node.type || 'standard'}
                                                 </td>
                                                 <td style="padding: 16px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">
                                                     ${node.loan_uid || 'LN-' + String(node.id).padStart(6, '0')}
@@ -316,6 +320,9 @@ window.addEventListener('route-changed', async (e) => {
                                                     <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; background: var(--info-bg); color: var(--info); border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
                                                         <span class="material-symbols-outlined" style="font-size: 1rem;">add_shopping_cart</span> Walk-In Sale
                                                     </span>
+                                                </td>
+                                                <td style="padding: 16px; font-weight: 600; color: var(--text-muted); font-size: 0.85rem; text-transform: capitalize;">
+                                                    ${node.gold_type || 'N/A'}
                                                 </td>
                                                 <td style="padding: 16px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">
                                                     ${node.transaction_ref || 'SL-' + String(node.id).padStart(6, '0')}
@@ -1125,6 +1132,38 @@ window.renderSettleLoanWizard = () => {
                             <span style="color: var(--text-muted); font-weight: 500;">Gold Weight Used</span>
                             <span style="font-weight: 600;">${parseFloat(s.grams).toFixed(2)} g</span>
                         </div>
+                        ${s.goldType === 'refined' ? `
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Volume</span>
+                                <span style="font-weight: 600;">${parseFloat(s.volume).toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Current Local Price</span>
+                                <span style="font-weight: 600;">GHS ${parseFloat(s.currentLocalPrice).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Pounds (Lbs)</span>
+                                <span style="font-weight: 600;">${s.pounds}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Density</span>
+                                <span style="font-weight: 600;">${s.density}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Karat</span>
+                                <span style="font-weight: 600;">${s.karat}K</span>
+                            </div>
+                        ` : ''}
+                        ${s.goldType === 'balls' ? `
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Total Blades</span>
+                                <span style="font-weight: 600;">${parseFloat(s.totalBlades).toFixed(2)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span style="color: var(--text-muted); font-weight: 500;">Price per Blade</span>
+                                <span style="font-weight: 600;">GHS ${parseFloat(s.pricePerBlade).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                        ` : ''}
                     ` : ''}
                     
                     <div style="display: flex; justify-content: space-between; margin-top: 16px; border-top: 2px solid var(--border); padding-top: 16px;">
@@ -1176,7 +1215,7 @@ window.submitSettleLoanWizard = async () => {
         payload = {
             loan_id: s.loanId,
             customer_id: s.customerId,
-            amount_paid: parseFloat(s.amountPaid),
+            amount_paid_ghs: parseFloat(s.amountPaid),
             comment: s.notes
         };
     } else if (s.settleMethod === 'gold') {
@@ -1185,8 +1224,8 @@ window.submitSettleLoanWizard = async () => {
             loan_id: s.loanId,
             customer_id: s.customerId,
             gold_type: s.goldType,
-            grams_to_use: parseFloat(s.grams),
-            agreed_value_ghs: parseFloat(s.agreedValue),
+            weight_grams: parseFloat(s.grams),
+            gold_value_ghs: parseFloat(s.agreedValue),
             comment: s.notes,
             
             current_local_price: parseFloat(s.currentLocalPrice) || null,
