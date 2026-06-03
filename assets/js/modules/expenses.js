@@ -17,25 +17,25 @@ window.addEventListener('route-changed', async (e) => {
 
             container.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Office Expenditures</h2>
-                    <button class="btn btn-text" onclick="window.openRecordExpenseModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
+                    <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 700; color: var(--text-main);">Office Expenditures</h2>
+                    <button class="btn btn-primary" onclick="window.openRecordExpenseModal()">
                         <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">add</span> Record Expense
                     </button>
                 </div>
                 
-                <div class="metric-grid" style="margin-bottom: 24px;">
-                    <div class="metric-card">
-                        <div class="metric-icon" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b;">
+                <div class="metric-grid" style="margin-bottom: 32px;">
+                    <div class="metric-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                        <div class="metric-icon" style="background: var(--danger-bg); color: var(--danger);">
                             <span class="material-symbols-outlined">receipt_long</span>
                         </div>
                         <div class="metric-content">
                             <h3>Total Lifetime Expenses</h3>
-                            <div class="metric-value" style="color: #ff6b6b;">GHS ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                            <div class="metric-value" style="color: var(--danger);">GHS ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                         </div>
                     </div>
                     
-                    <div class="metric-card">
-                        <div class="metric-icon" style="background: rgba(255, 215, 0, 0.1); color: var(--gold-primary);">
+                    <div class="metric-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                        <div class="metric-icon" style="background: var(--warning-bg); color: var(--warning);">
                             <span class="material-symbols-outlined">calendar_month</span>
                         </div>
                         <div class="metric-content">
@@ -45,27 +45,32 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
                 </div>
 
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">No.</th>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th style="text-align: right;">Amount (GHS)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${response.expenses && response.expenses.length > 0 ? response.expenses.map((exp, index) => `
-                                <tr>
-                                    <td style="color: var(--text-muted);">${index + 1}</td>
-                                    <td>${new Date(exp.date).toLocaleDateString()}</td>
-                                    <td style="font-weight: 500;">${exp.description}</td>
-                                    <td style="text-align: right; font-weight: 600; color: #ff6b6b;">- ${Number(exp.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                </tr>
-                            `).join('') : '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No expenses recorded yet.</td></tr>'}
-                        </tbody>
-                    </table>
+                <div class="glass-panel" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 16px; color: var(--text-main);">Expenditure History</h3>
+                    <div class="journey-stream">
+                        ${response.expenses && response.expenses.length > 0 ? response.expenses.map(exp => `
+                            <div class="journey-node">
+                                <div class="journey-dot danger"></div>
+                                <div class="journey-card">
+                                    <div class="journey-card-left">
+                                        <div class="journey-icon" style="background: var(--danger-bg); color: var(--danger);">
+                                            <span class="material-symbols-outlined">payments</span>
+                                        </div>
+                                        <div class="journey-details">
+                                            <div class="journey-title">${exp.description}</div>
+                                            <div class="journey-date">${new Date(exp.date).toLocaleDateString()}</div>
+                                        </div>
+                                    </div>
+                                    <div class="journey-card-right">
+                                        <div class="journey-amount" style="color: var(--danger);">- ${Number(exp.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                        <div class="journey-ref" style="display: flex; gap: 8px;">
+                                            <span style="background: var(--bg-main); padding: 2px 6px; border-radius: 4px;">EXP-${String(exp.id).padStart(6, '0')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: var(--text-muted);">No expenses recorded yet.</p>'}
+                    </div>
                 </div>
             `;
         } catch (error) {
@@ -80,7 +85,7 @@ window.addEventListener('route-changed', async (e) => {
 
         modalBody.innerHTML = `
             <form id="record-expense-form" onsubmit="window.submitExpense(event)">
-                <div class="alert alert-warning" style="margin-bottom: 20px;">
+                <div style="background: var(--warning-bg); color: #b45309; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 0.9rem; display: flex; gap: 8px; align-items: center;">
                     <span class="material-symbols-outlined">info</span>
                     This amount will be directly deducted from the Capital Ledger.
                 </div>
@@ -100,7 +105,7 @@ window.addEventListener('route-changed', async (e) => {
                     <input type="date" id="expense_date">
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 24px; background: #ff6b6b; color: white;">
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 32px; background: var(--danger); color: white;">
                     <span class="material-symbols-outlined">payments</span> Deduct from Ledger
                 </button>
             </form>

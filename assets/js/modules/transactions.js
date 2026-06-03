@@ -5,559 +5,64 @@ window.addEventListener('route-changed', async (e) => {
     const container = e.detail.container;
 
     container.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2 style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Global Transactions</h2>
-        </div>
-        
-        <div style="border: 1px solid var(--border, #333); border-radius: 16px; padding: 24px; border-top: 4px solid var(--gold-primary); background: transparent; margin-bottom: 24px;">
-            <div style="color: var(--text-muted, #aaa); font-size: 0.9rem; margin-bottom: 8px;">Current Office Capital Balance</div>
-            <div style="font-size: 2rem; font-weight: bold; color: var(--gold-primary);" id="ledger-balance">GHS ...</div>
-        </div>
-
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">No.</th>
-                        <th>Transaction ID</th>
-                        <th>Date & Time</th>
-                        <th>Type</th>
-                        <th style="text-align: right;">Amount (GHS)</th>
-                    </tr>
-                </thead>
-                <tbody id="transactions-tbody">
-                    <tr><td colspan="5" style="text-align: center;">Loading history...</td></tr>
-                </tbody>
-            </table>
+        <div style="display: flex; justify-content: center; padding: 40px;">
+            <span class="material-symbols-outlined spin" style="font-size: 2rem; color: var(--gold-primary);">sync</span>
         </div>
     `;
 
     try {
-        const response = await window.api.get('/ledger/history.php?limit=100');
-        
-        document.getElementById('ledger-balance').textContent = 'GHS ' + Number(response.current_running_balance_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
-        
-        const tbody = document.getElementById('transactions-tbody');
-        if (!response.transactions || response.transactions.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No transactions found.</td></tr>';
-            return;
-        }
+        const data = await window.api.get('/ledger/history.php');
+        const transactionsList = data.transactions || [];
 
-        tbody.innerHTML = response.transactions.map((tx, index) => {
-            const isPositive = tx.amount_ghs > 0;
-            const amountColor = isPositive ? '#4cd137' : '#ff6b6b';
-            const amountSign = isPositive ? '+' : '';
+        container.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 class="page-title" style="margin: 0;">Global Transactions Ledger</h2>
+                <button class="btn btn-outline" onclick="window.location.hash='dashboard'" style="border-radius: var(--radius-pill); background: #ffffff;">
+                    <span class="material-symbols-outlined">payments</span> Inject Capital
+                </button>
+            </div>
             
-            // Format type
-            const displayType = tx.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            <div class="glass-panel" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                <div class="journey-stream">
+                    ${transactionsList.length === 0 ? '<p style="color: var(--text-muted);">No transactions found.</p>' : ''}
+                    ${transactionsList.map((tx, index) => {
+                        const isPositive = parseFloat(tx.amount_ghs) > 0;
+                        const iconType = isPositive ? 'arrow_downward' : 'arrow_upward';
+                        const dotColor = isPositive ? 'success' : 'danger';
+                        const amountColor = isPositive ? 'var(--success)' : 'var(--danger)';
+                        const displayType = tx.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                        const amountSign = isPositive ? '+' : '';
 
-            return `
-                <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-                    <td style="color: var(--text-muted);">${index + 1}</td>
-                    <td><span style="font-family: monospace; background: rgba(255,255,255,0.05); color: var(--text-main); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;">TX-${String(tx.id).padStart(6, '0')}</span></td>
-                    <td>${new Date(tx.date).toLocaleString()}</td>
-                    <td>${displayType} ${tx.reference_id ? `<span style="color: var(--text-muted); font-size: 0.8rem;">(Ref: ${tx.reference_id})</span>` : ''}</td>
-                    <td style="text-align: right; font-weight: 600; color: ${amountColor};">${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                </tr>
-            `;
-        }).join('');
+                        return `
+                        <div class="journey-node">
+                            <div class="journey-dot ${dotColor}"></div>
+                            <div class="journey-card">
+                                <div class="journey-card-left">
+                                    <div class="journey-icon" style="background: var(--${dotColor}-bg); color: var(--${dotColor});">
+                                        <span class="material-symbols-outlined">${iconType}</span>
+                                    </div>
+                                    <div class="journey-details">
+                                        <div class="journey-title">${displayType}</div>
+                                        <div class="journey-date">${new Date(tx.date).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="journey-card-right">
+                                    <div class="journey-amount" style="color: ${amountColor};">${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                    <div class="journey-ref" style="display: flex; gap: 8px;">
+                                        <span style="background: var(--bg-main); padding: 2px 6px; border-radius: 4px;">TX-${String(tx.id).padStart(6, '0')}</span>
+                                        ${tx.reference_id ? `<span style="color: var(--text-muted);">Ref: ${tx.reference_id}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+
     } catch (error) {
         console.error('Failed to load transactions', error);
-        document.getElementById('transactions-tbody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--danger);">Failed to load transactions.</td></tr>';
+        container.innerHTML = `<div class="alert alert-danger">Failed to load transactions.</div>`;
     }
 });
-
-window.loadTxForm = (type, prefillData = {}, targetContainerId = 'tx-form-container') => {
-    const formContainer = document.getElementById(targetContainerId);
-        
-        if (type === 'purchase') {
-            formContainer.innerHTML = `
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3>Walk-In Purchase</h3>
-                    <form id="form-purchase" style="margin-top: 16px;">
-                        <div class="form-group">
-                            <label>Gold Type</label>
-                            <select id="p_gold_type" required>
-                                <option value="balls">Balls</option>
-                                <option value="refined">Refined</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Weight (Grams)</label>
-                            <input type="number" step="0.01" id="p_weight" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Total Paid (GHS)</label>
-                            <input type="number" step="0.01" id="p_paid" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Execute Purchase</button>
-                    </form>
-                </div>
-            `;
-
-            document.getElementById('form-purchase').addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                const btn = ev.target.querySelector('button');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-                
-                try {
-                    await window.api.post('/sales/create.php', {
-                        customer_id: null, // anonymous
-                        gold_type: document.getElementById('p_gold_type').value,
-                        weight_grams: parseFloat(document.getElementById('p_weight').value),
-                        total_paid_ghs: parseFloat(document.getElementById('p_paid').value)
-                    });
-                    window.showToast('Purchase executed and vault updated', 'success');
-                    formContainer.innerHTML = '';
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Execute Purchase';
-                }
-            });
-        }
-        else if (type === 'market_sale') {
-            formContainer.innerHTML = `
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3>Market Execution</h3>
-                    <form id="form-market" style="margin-top: 16px;">
-                        <div class="form-group">
-                            <label>Gold Type to Sell</label>
-                            <select id="m_gold_type" required>
-                                <option value="balls">Balls</option>
-                                <option value="refined">Refined</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Weight (Grams)</label>
-                            <input type="number" step="0.01" id="m_weight" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Actual Revenue Received (GHS)</label>
-                            <input type="number" step="0.01" id="m_revenue" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--danger); border-color: var(--danger);">Confirm Liquidation</button>
-                    </form>
-                </div>
-            `;
-
-            document.getElementById('form-market').addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                const btn = ev.target.querySelector('button');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-                
-                try {
-                    await window.api.post('/sales/execute_market_sale.php', {
-                        gold_type: document.getElementById('m_gold_type').value,
-                        weight_grams: parseFloat(document.getElementById('m_weight').value),
-                        actual_revenue_ghs: parseFloat(document.getElementById('m_revenue').value)
-                    });
-                    window.showToast('Market sale executed', 'success');
-                    formContainer.innerHTML = '';
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Confirm Liquidation';
-                }
-            });
-        }
-        else if (type === 'issue_loan') {
-            window.wizardState = {
-                type: null,
-                customerId: prefillData.customerId || '',
-                amount: '',
-                goldType: 'balls',
-                weight: ''
-            };
-            const wizardState = window.wizardState;
-
-            const modalHtml = `
-                <div id="issue-loan-modal" class="modal-overlay active">
-                    <div class="modal-card" style="padding: 32px; max-width: 500px; position: relative;">
-                        <span class="material-symbols-outlined modal-close" style="position: absolute; right: 24px; top: 24px; z-index: 10;" onclick="document.getElementById('issue-loan-modal').remove()">close</span>
-                        <h3 style="margin-bottom: 20px; text-align: left; font-size: 1.1rem;">Issue Loan</h3>
-                    
-                    <!-- Progress Bar -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 24px;">
-                        <div id="wiz-prog-1" style="height: 4px; width: 40px; background: var(--info); border-radius: 2px; transition: var(--transition);"></div>
-                        <div id="wiz-prog-2" style="height: 4px; width: 40px; background: var(--border); border-radius: 2px; transition: var(--transition);"></div>
-                        <div id="wiz-prog-3" style="height: 4px; width: 40px; background: var(--border); border-radius: 2px; transition: var(--transition);"></div>
-                        <div id="wiz-prog-4" style="height: 4px; width: 40px; background: var(--border); border-radius: 2px; transition: var(--transition);"></div>
-                    </div>
-
-                    <!-- Step 1: Loan Type -->
-                    <div id="wiz-step-1" class="wiz-step" style="animation: fadeIn 0.3s ease;">
-                        <h4 style="margin-bottom: 12px; text-align: left; color: var(--text-muted); font-weight: 500; font-size: 0.9rem;">Select Loan Type</h4>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <button type="button" class="btn btn-outline" style="text-align: left; padding: 12px 16px; border-radius: 8px; display: flex; gap: 12px; align-items: center;" onclick="window.wizSelectType('standard')">
-                                <div style="width: 36px; height: 36px; min-width: 36px; background: var(--info-bg); color: var(--info); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">payments</span>
-                                </div>
-                                <div>
-                                    <strong style="font-size: 0.95rem; display: block; margin-bottom: 2px;">Standard Loan</strong>
-                                    <span style="opacity: 0.8; font-size: 0.8rem; font-weight: 400;">Give money, customer pays later. No collateral required.</span>
-                                </div>
-                            </button>
-                            <button type="button" class="btn btn-outline" style="text-align: left; padding: 12px 16px; border-radius: 8px; display: flex; gap: 12px; align-items: center;" onclick="window.wizSelectType('collateral')">
-                                <div style="width: 36px; height: 36px; min-width: 36px; background: rgba(245, 158, 11, 0.1); color: #d97706; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <span class="material-symbols-outlined" style="font-size: 1.2rem;">key</span>
-                                </div>
-                                <div>
-                                    <strong style="font-size: 0.95rem; display: block; margin-bottom: 2px;">Collateral Loan</strong>
-                                    <span style="opacity: 0.8; font-size: 0.8rem; font-weight: 400;">Give money, hold customer's gold in the vault.</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Core Details -->
-                    <div id="wiz-step-2" class="wiz-step" style="display: none; animation: fadeIn 0.3s ease;">
-                        <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Customer & Amount</h4>
-                        <div class="form-group">
-                            <label>Customer ID</label>
-                            <div class="input-with-icon">
-                                <span class="material-symbols-outlined">person</span>
-                                <input type="number" id="w_cust" required placeholder="Enter ID" value="${prefillData.customerId || ''}" ${prefillData.customerId ? 'readonly' : ''}>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Principal Amount (GHS)</label>
-                            <div class="input-with-icon">
-                                <span class="material-symbols-outlined">payments</span>
-                                <input type="number" step="0.01" id="w_amount" required placeholder="0.00">
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-top: 32px; justify-content: flex-end;">
-                            <button type="button" class="btn btn-outline" onclick="window.wizGoToStep(1)">Back</button>
-                            <button type="button" class="btn btn-primary" onclick="window.wizNextFromStep2()">Next Step</button>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Collateral -->
-                    <div id="wiz-step-3" class="wiz-step" style="display: none; animation: fadeIn 0.3s ease;">
-                        <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Collateral Details</h4>
-                        <div class="form-group">
-                            <label>Gold Type Deposited</label>
-                            <select id="w_gold" onchange="window.wizHandleGoldTypeChange(this.value)">
-                                <option value="balls">Gold Balls</option>
-                                <option value="refined">Refined Gold</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Weight (Grams)</label>
-                            <div class="input-with-icon">
-                                <span class="material-symbols-outlined">scale</span>
-                                <input type="number" step="0.01" id="w_weight" placeholder="0.00" oninput="window.wizCalcBlades()">
-                            </div>
-                        </div>
-                        <div class="form-group" id="w_volume_group" style="display: none;">
-                            <label>Volume (Refined Only)</label>
-                            <div class="input-with-icon">
-                                <span class="material-symbols-outlined">water_drop</span>
-                                <input type="number" step="0.01" id="w_volume" placeholder="0.00">
-                            </div>
-                        </div>
-                        <div class="form-group" id="w_blades_group">
-                            <label>Total Blades (Calculated)</label>
-                            <div class="input-with-icon">
-                                <span class="material-symbols-outlined">calculate</span>
-                                <input type="number" step="0.0001" id="w_blades" readonly placeholder="0.0000" style="background: var(--bg-hover);">
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; margin-top: 32px; justify-content: flex-end;">
-                            <button type="button" class="btn btn-outline" onclick="window.wizGoToStep(2)">Back</button>
-                            <button type="button" class="btn btn-primary" onclick="window.wizNextFromStep3()">Review Setup</button>
-                        </div>
-                    </div>
-
-                    <!-- Step 4: Summary -->
-                    <div id="wiz-step-4" class="wiz-step" style="display: none; animation: fadeIn 0.3s ease;">
-                        <h4 style="margin-bottom: 16px; text-align: center; color: var(--text-muted); font-weight: 400;">Summary & Confirm</h4>
-                        <div id="wiz-summary-box" style="background: var(--bg-hover); padding: 24px; border-radius: 12px; margin-bottom: 32px; border: 1px solid var(--border);"></div>
-                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                            <button type="button" id="wiz-btn-back-sum" class="btn btn-outline" onclick="window.wizBackFromSummary()">Back</button>
-                            <button type="button" id="wiz-btn-confirm" class="btn btn-primary" onclick="window.wizSubmit()">Confirm & Issue</button>
-                        </div>
-                    </div>
-                </div>
-                <style>
-                    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-                </style>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-            window.wizSelectType = (type) => {
-                wizardState.type = type;
-                window.wizGoToStep(2);
-            };
-
-            window.wizHandleGoldTypeChange = (type) => {
-                wizardState.goldType = type;
-                if (type === 'refined') {
-                    document.getElementById('w_volume_group').style.display = 'block';
-                    document.getElementById('w_blades_group').style.display = 'none';
-                } else {
-                    document.getElementById('w_volume_group').style.display = 'none';
-                    document.getElementById('w_blades_group').style.display = 'block';
-                }
-            };
-
-            window.wizCalcBlades = () => {
-                if (document.getElementById('w_gold').value === 'balls') {
-                    const wt = parseFloat(document.getElementById('w_weight').value) || 0;
-                    document.getElementById('w_blades').value = (wt / 0.8).toFixed(4);
-                }
-            };
-
-            window.wizGoToStep = (step) => {
-                document.querySelectorAll('.wiz-step').forEach(el => el.style.display = 'none');
-                document.getElementById('wiz-step-' + step).style.display = 'block';
-                
-                // Update Progress Bar
-                for(let i=1; i<=4; i++) {
-                    const prog = document.getElementById('wiz-prog-' + i);
-                    if (prog) {
-                        prog.style.background = i <= step ? 'var(--info)' : 'var(--border)';
-                    }
-                }
-            };
-
-            window.wizBackFromSummary = () => {
-                window.wizGoToStep(wizardState.type === 'collateral' ? 3 : 2);
-            };
-
-            window.wizNextFromStep2 = () => {
-                const cust = document.getElementById('w_cust').value;
-                const amt = document.getElementById('w_amount').value;
-                if (!cust || !amt) {
-                    window.showToast('Please fill all required fields', 'error');
-                    return;
-                }
-                wizardState.customerId = cust;
-                wizardState.amount = amt;
-                
-                if (wizardState.type === 'collateral') {
-                    window.wizGoToStep(3);
-                } else {
-                    window.wizRenderSummary();
-                    window.wizGoToStep(4);
-                }
-            };
-
-            window.wizNextFromStep3 = () => {
-                const wt = document.getElementById('w_weight').value;
-                if (!wt) {
-                    window.showToast('Please enter the gold weight', 'error');
-                    return;
-                }
-                wizardState.goldType = document.getElementById('w_gold').value;
-                wizardState.weight = wt;
-                wizardState.volume = document.getElementById('w_volume').value;
-                wizardState.totalBlades = document.getElementById('w_blades').value;
-                window.wizRenderSummary();
-                window.wizGoToStep(4);
-            };
-
-            window.wizRenderSummary = () => {
-                let html = `
-                    <p style="margin-bottom:8px;"><strong>Customer ID:</strong> ${wizardState.customerId}</p>
-                    <p style="margin-bottom:8px;"><strong>Principal Amount:</strong> GHS ${parseFloat(wizardState.amount).toFixed(2)}</p>
-                    <p style="margin-bottom:8px;"><strong>Loan Type:</strong> ${wizardState.type === 'collateral' ? 'Collateral Loan' : 'Standard (Pay Later)'}</p>
-                `;
-                if (wizardState.type === 'collateral') {
-                    html += `
-                        <p style="margin-top:16px; padding-top:16px; border-top: 1px solid var(--border);"><strong>Collateral Deposited:</strong> ${wizardState.weight}g of ${wizardState.goldType} gold</p>
-                    `;
-                    if (wizardState.goldType === 'refined') {
-                        html += `<p style="margin-bottom:8px;"><strong>Volume:</strong> ${wizardState.volume || '-'}</p>`;
-                    } else if (wizardState.goldType === 'balls') {
-                        html += `<p style="margin-bottom:8px;"><strong>Total Blades:</strong> ${wizardState.totalBlades || '-'}</p>`;
-                    }
-                }
-                document.getElementById('wiz-summary-box').innerHTML = html;
-            };
-
-            window.wizSubmit = async () => {
-                const btn = document.getElementById('wiz-btn-confirm');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-                
-                const payload = {
-                    customer_id: parseInt(wizardState.customerId),
-                    principal_amount: parseFloat(wizardState.amount),
-                    has_collateral: wizardState.type === 'collateral'
-                };
-                
-                if (payload.has_collateral) {
-                    payload.gold_type = wizardState.goldType;
-                    payload.weight_grams = parseFloat(wizardState.weight);
-                    if (wizardState.goldType === 'refined') {
-                        payload.volume = parseFloat(wizardState.volume) || null;
-                    } else if (wizardState.goldType === 'balls') {
-                        payload.total_blades = parseFloat(wizardState.totalBlades) || null;
-                    }
-                }
-                
-                try {
-                    await window.api.post('/loans/issue.php', payload);
-                    window.showToast('Loan successfully issued', 'success');
-                    document.getElementById('issue-loan-modal').remove();
-                    window.dispatchEvent(new Event('transaction-completed'));
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Confirm & Issue';
-                }
-            };
-        }
-        else if (type === 'offset_loan') {
-            formContainer.innerHTML = `
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3>Offset Loan with Gold</h3>
-                    <form id="form-offset" style="margin-top: 16px;">
-                        <div class="form-group">
-                            <label>Loan ID</label>
-                            <input type="number" id="o_loan" required value="${prefillData.loanId || ''}" ${prefillData.loanId ? 'readonly' : ''}>
-                        </div>
-                        <div class="form-group">
-                            <label>Gold Type</label>
-                            <select id="o_gold" required>
-                                <option value="balls">Balls</option>
-                                <option value="refined">Refined</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Weight (Grams)</label>
-                            <input type="number" step="0.01" id="o_weight" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Agreed Gold Value (GHS)</label>
-                            <input type="number" step="0.01" id="o_value" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--success);">Execute Offset</button>
-                    </form>
-                </div>
-            `;
-
-            document.getElementById('form-offset').addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                const btn = ev.target.querySelector('button');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-                
-                try {
-                    await window.api.post('/loans/offset.php', {
-                        loan_id: parseInt(document.getElementById('o_loan').value),
-                        gold_type: document.getElementById('o_gold').value,
-                        weight_grams: parseFloat(document.getElementById('o_weight').value),
-                        gold_value_ghs: parseFloat(document.getElementById('o_value').value)
-                    });
-                    window.showToast('Loan offset successfully', 'success');
-                    if (formContainer) formContainer.innerHTML = '';
-                    window.dispatchEvent(new Event('transaction-completed'));
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Execute Offset';
-                }
-            });
-        }
-        else if (type === 'offset_collateral') {
-            formContainer.innerHTML = `
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3>Offset Loan with Collateral</h3>
-                    <form id="form-offset-col" style="margin-top: 16px;">
-                        <div class="form-group">
-                            <label>Loan ID</label>
-                            <input type="number" id="oc_loan" required value="${prefillData.loanId || ''}" ${prefillData.loanId ? 'readonly' : ''}>
-                        </div>
-                        <div class="form-group">
-                            <label>Customer ID</label>
-                            <input type="number" id="oc_cust" required value="${prefillData.customerId || ''}" ${prefillData.customerId ? 'readonly' : ''}>
-                        </div>
-                        <div class="form-group">
-                            <label>Gold Type in Vault</label>
-                            <select id="oc_gold" required>
-                                <option value="balls">Balls</option>
-                                <option value="refined">Refined</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Grams to Deduct from Collateral</label>
-                            <input type="number" step="0.01" id="oc_weight" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Agreed Gold Value (GHS)</label>
-                            <input type="number" step="0.01" id="oc_value" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--gold-primary); color: #fff;">Process Collateral Offset</button>
-                    </form>
-                </div>
-            `;
-
-            document.getElementById('form-offset-col').addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                const btn = ev.target.querySelector('button');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-                
-                try {
-                    await window.api.post('/loans/offset_collateral.php', {
-                        loan_id: parseInt(document.getElementById('oc_loan').value),
-                        customer_id: parseInt(document.getElementById('oc_cust').value),
-                        gold_type: document.getElementById('oc_gold').value,
-                        grams_to_use: parseFloat(document.getElementById('oc_weight').value),
-                        agreed_value_ghs: parseFloat(document.getElementById('oc_value').value)
-                    });
-                    window.showToast('Loan offset with collateral successfully', 'success');
-                    if (formContainer) formContainer.innerHTML = '';
-                    window.dispatchEvent(new Event('transaction-completed'));
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Process Collateral Offset';
-                }
-            });
-        }
-        else if (type === 'repay_loan') {
-            formContainer.innerHTML = `
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3>Repay Loan with Cash</h3>
-                    <form id="form-repay" style="margin-top: 16px;">
-                        <div class="form-group">
-                            <label>Loan ID</label>
-                            <input type="number" id="r_loan" required value="${prefillData.loanId || ''}" ${prefillData.loanId ? 'readonly' : ''}>
-                        </div>
-                        <div class="form-group">
-                            <label>Amount Paid (GHS)</label>
-                            <input type="number" step="0.01" id="r_amount" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" style="background: var(--info); border-color: var(--info);">Process Cash Repayment</button>
-                    </form>
-                </div>
-            `;
-
-            document.getElementById('form-repay').addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                const btn = ev.target.querySelector('button');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
-                
-                try {
-                    await window.api.post('/loans/repay_cash.php', {
-                        loan_id: parseInt(document.getElementById('r_loan').value),
-                        amount_paid_ghs: parseFloat(document.getElementById('r_amount').value)
-                    });
-                    window.showToast('Loan repaid successfully', 'success');
-                    if (formContainer) formContainer.innerHTML = '';
-                    window.dispatchEvent(new Event('transaction-completed'));
-                } catch (e) {
-                    window.showToast(e.message, 'error');
-                    btn.disabled = false;
-                    btn.innerHTML = 'Process Cash Repayment';
-                }
-            });
-        }
-};

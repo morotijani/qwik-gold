@@ -2,96 +2,122 @@
 
 /**
  * Dashboard Module
- * Responsible for loading the high-level global metrics for the business owner.
+ * Re-designed as a Flowing UI
  */
 window.addEventListener('route-changed', async (e) => {
     if (e.detail.route !== 'dashboard') return;
     
     const container = e.detail.container;
 
-    // Build the skeleton structure for the dashboard
+    // Loading Skeleton
     container.innerHTML = `
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <h2 class="page-title">Office Overview</h2>
-            
-            <div class="metric-grid">
-            <div class="metric-card">
-                <div class="metric-header">
-                    <h3>Office Capital</h3>
-                    <div class="metric-icon icon-cash">
-                        <span class="material-symbols-outlined">payments</span>
-                    </div>
-                </div>
-                <div class="metric-value" id="dash-cash">GHS ...</div>
-                <div class="metric-sub">Total Available Liquidity</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-header">
-                    <h3>Company Gold</h3>
-                    <div class="metric-icon icon-gold">
-                        <span class="material-symbols-outlined">diamond</span>
-                    </div>
-                </div>
-                <div class="metric-value" id="dash-gold-company">... g</div>
-                <div class="metric-sub">Physical gold owned by business</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-header">
-                    <h3>Keeper Liabilities</h3>
-                    <div class="metric-icon icon-debt">
-                        <span class="material-symbols-outlined">balance</span>
-                    </div>
-                </div>
-                <div class="metric-value" id="dash-gold-keeper">... g</div>
-                <div class="metric-sub">Physical gold held for Keepers</div>
-            </div>
-            </div>
-
-            <div class="glass-panel" style="padding: 24px; margin-top: 32px;">
-                <h3 style="margin-bottom: 16px;">Inject External Capital</h3>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="window.showInjectCapitalModal()">
-                    <span class="material-symbols-outlined">payments</span> Inject Capital
-                </button>
-                <button class="btn btn-outline" onclick="window.location.hash='transactions'">
-                    <span class="material-symbols-outlined">add</span> New Transaction
-                </button>
-                <button class="btn btn-outline" onclick="window.location.hash='customers'">
-                    <span class="material-symbols-outlined">person_add</span> Add Customer
-                </button>
-            </div>
+        <div style="display: flex; justify-content: center; padding: 40px;">
+            <span class="material-symbols-outlined spin" style="font-size: 2rem; color: var(--gold-primary);">sync</span>
         </div>
     `;
 
     try {
-        // Fetch Dashboard Data concurrently for maximum speed
-        const [capitalData, vaultData] = await Promise.all([
+        const [capitalData, vaultData, recentTxData] = await Promise.all([
             window.api.get('/capital/balance.php'),
-            window.api.get('/vault/status.php')
+            window.api.get('/vault/status.php'),
+            window.api.get('/ledger/history.php') // Use this for the activity stream
         ]);
 
-        // Inject Data into DOM securely
-        
-        // 1. Format Currency
         const cashFmt = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(capitalData.available_cash_ghs);
-        document.getElementById('dash-cash').textContent = cashFmt;
-
-        // 2. Format Gold Weights
-        // Calculate totals dynamically from the structured vault response
         const companyTotal = (vaultData.company_owned.balls_grams + vaultData.company_owned.refined_grams).toFixed(2);
         const keeperTotal = (vaultData.keeper_held.balls_grams + vaultData.keeper_held.refined_grams).toFixed(2);
+        
+        // Grab top 5 recent transactions
+        const recentActivity = (recentTxData.transactions || []).slice(0, 5);
 
-        document.getElementById('dash-gold-company').textContent = `${companyTotal} g`;
-        document.getElementById('dash-gold-keeper').textContent = `${keeperTotal} g`;
+        container.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h2 class="page-title" style="margin: 0;">Enterprise Overview</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-outline" onclick="window.showInjectCapitalModal()" style="border-radius: var(--radius-pill); border: 1px solid var(--border); box-shadow: var(--shadow-sm); background: #fff;">
+                        <span class="material-symbols-outlined" style="font-size: 1.1rem;">payments</span> Inject Capital
+                    </button>
+                </div>
+            </div>
+            
+            <div class="metric-grid">
+                <div class="metric-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                    <div class="metric-icon" style="background: var(--success-bg); color: var(--success);">
+                        <span class="material-symbols-outlined">account_balance</span>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Available Liquidity</h3>
+                        <div class="metric-value">${cashFmt}</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                    <div class="metric-icon" style="background: var(--warning-bg); color: var(--warning);">
+                        <span class="material-symbols-outlined">diamond</span>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Company Gold</h3>
+                        <div class="metric-value">${companyTotal} g</div>
+                    </div>
+                </div>
+
+                <div class="metric-card" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+                    <div class="metric-icon" style="background: var(--info-bg); color: var(--info);">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                    </div>
+                    <div class="metric-content">
+                        <h3>Keeper Liabilities</h3>
+                        <div class="metric-value">${keeperTotal} g</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Stream Section -->
+            <div class="glass-panel" style="margin-top: 40px;">
+                <h3 style="font-size: 1.1rem; margin-bottom: 24px; color: var(--text-main);">Recent Activity Stream</h3>
+                <div class="journey-stream">
+                    ${recentActivity.length === 0 ? '<p style="color: var(--text-muted);">No recent activity.</p>' : ''}
+                    ${recentActivity.map(tx => {
+                        const isPositive = parseFloat(tx.amount_ghs) > 0;
+                        const iconType = isPositive ? 'arrow_downward' : 'arrow_upward';
+                        const dotColor = isPositive ? 'success' : 'danger';
+                        const amountColor = isPositive ? 'var(--success)' : 'var(--danger)';
+                        const displayType = tx.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                        const amountSign = isPositive ? '+' : '';
+
+                        return `
+                        <div class="journey-node">
+                            <div class="journey-dot ${dotColor}"></div>
+                            <div class="journey-card">
+                                <div class="journey-card-left">
+                                    <div class="journey-icon" style="background: var(--${dotColor}-bg); color: var(--${dotColor});">
+                                        <span class="material-symbols-outlined">${iconType}</span>
+                                    </div>
+                                    <div class="journey-details">
+                                        <div class="journey-title">${displayType}</div>
+                                        <div class="journey-date">${new Date(tx.date).toLocaleString()}</div>
+                                    </div>
+                                </div>
+                                <div class="journey-card-right">
+                                    <div class="journey-amount" style="color: ${amountColor};">${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                    ${tx.reference_id ? `<div class="journey-ref">Ref: ${tx.reference_id}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                ${recentActivity.length > 0 ? `
+                <div style="text-align: center; margin-top: 24px;">
+                    <button class="btn btn-text" onclick="window.location.hash='transactions'">View Full Ledger</button>
+                </div>
+                ` : ''}
+            </div>
+        `;
 
     } catch (error) {
-        // Error toast will automatically be handled by the API wrapper, 
-        // but we can update the UI to show failure state
-        document.getElementById('dash-cash').textContent = 'Error';
-        document.getElementById('dash-gold-company').textContent = 'Error';
-        document.getElementById('dash-gold-keeper').textContent = 'Error';
+        container.innerHTML = `<div class="alert alert-danger">Failed to load dashboard data.</div>`;
     }
 });
 
@@ -114,7 +140,7 @@ window.showInjectCapitalModal = () => {
             </div>
             <div style="display: flex; gap: 16px; margin-top: 32px;">
                 <button type="button" class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Inject Funds</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1; background: var(--success); color: white;">Inject Funds</button>
             </div>
         </form>
     `;
@@ -137,7 +163,6 @@ window.showInjectCapitalModal = () => {
             });
             window.showToast('Capital injected successfully!', 'success');
             window.closeModal();
-            // Reload the dashboard to update metrics
             window.dispatchEvent(new CustomEvent('route-changed', { detail: { route: 'dashboard', container: document.getElementById('view-container') } }));
         } catch (error) {
             window.showToast(error.message || 'Failed to inject capital', 'error');
