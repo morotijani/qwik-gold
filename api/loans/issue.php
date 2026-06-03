@@ -62,9 +62,10 @@ try {
     $cWeight = $hasCollateral ? $weightGrams : null;
     $cVolume = $hasCollateral && isset($data['volume']) ? (float)$data['volume'] : null;
     $cBlades = $hasCollateral && isset($data['total_blades']) ? (float)$data['total_blades'] : null;
+    $notes = isset($data['notes']) ? trim($data['notes']) : null;
 
-    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, original_principal, type, status, issued_by, collateral_gold_type, collateral_weight, collateral_volume, collateral_blades) VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)");
-    $stmt->execute([$customerId, $principalAmount, $principalAmount, $loanType, $current_user_id, $cGoldType, $cWeight, $cVolume, $cBlades]);
+    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, original_principal, type, status, issued_by, collateral_gold_type, collateral_weight, collateral_volume, collateral_blades, notes) VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$customerId, $principalAmount, $principalAmount, $loanType, $current_user_id, $cGoldType, $cWeight, $cVolume, $cBlades, $notes]);
     $loanId = $pdo->lastInsertId();
 
     // 1a. Generate a guaranteed unique loan_uid using the database's auto-increment ID

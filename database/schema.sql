@@ -54,6 +54,7 @@ CREATE TABLE loans (
     collateral_weight DECIMAL(10, 4) DEFAULT NULL,
     collateral_volume DECIMAL(10, 4) DEFAULT NULL,
     collateral_blades DECIMAL(10, 4) DEFAULT NULL,
+    notes TEXT DEFAULT NULL,
     settlement_note TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,

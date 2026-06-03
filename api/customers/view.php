@@ -34,7 +34,7 @@ try {
     }
 
     // 2) SELECT all loans (active and settled)
-    $loansStmt = $pdo->prepare("SELECT id, loan_uid, principal_amount, type, status, created_at FROM loans WHERE customer_id = ? ORDER BY created_at DESC");
+    $loansStmt = $pdo->prepare("SELECT id, customer_id, loan_uid, principal_amount, type, status, created_at FROM loans WHERE customer_id = ? ORDER BY created_at DESC");
     $loansStmt->execute([$customerId]);
     $allLoans = $loansStmt->fetchAll(PDO::FETCH_ASSOC);
     
