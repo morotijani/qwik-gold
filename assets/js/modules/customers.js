@@ -345,22 +345,14 @@ window.addEventListener('route-changed', async (e) => {
                                     ${data.all_loans && data.all_loans.length > 0 ? data.all_loans.map((l, index) => {
                 const statusColor = l.status === 'active' ? '#ff6b6b' : '#4cd137';
                 const statusBg = l.status === 'active' ? 'rgba(255, 107, 107, 0.1)' : 'rgba(76, 209, 55, 0.1)';
-                let goldTypeStr = '';
-                if (l.type === 'collateral' && data.current_kept_gold) {
-                    const types = [];
-                    if (data.current_kept_gold.refined_grams > 0) types.push('Refined');
-                    if (data.current_kept_gold.balls_grams > 0) types.push('Balls');
-                    if (types.length > 0) {
-                        goldTypeStr = ` (${types.join(' & ')})`;
-                    }
-                }
+                
                 return `
                                         <tr style="border-bottom: 1px solid var(--border, #333); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
                                             <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
                                             <td style="padding: 16px 24px; font-weight: 500;"><a href="#" onclick="window.openLoanDetailsModal(${l.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${l.loan_uid || 'LN-' + l.id}</a></td>
                                             <td style="padding: 16px 24px;">${new Date(l.created_at).toLocaleDateString()}</td>
                                             <td style="padding: 16px 24px; font-weight: 600;">GHS ${parseFloat(l.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                            <td style="padding: 16px 24px; text-transform: capitalize;">${l.type}${goldTypeStr}</td>
+                                            <td style="padding: 16px 24px; text-transform: capitalize;">${l.type}</td>
                                             <td style="padding: 16px 24px;">
                                                 <span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500;">
                                                     ${l.status.toUpperCase()}

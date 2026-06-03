@@ -57,8 +57,14 @@ try {
 
     // 1. INSERT a new record into the loans table (without loan_uid first)
     $loanType = $hasCollateral ? 'collateral' : 'standard';
-    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, original_principal, type, status, issued_by) VALUES (?, ?, ?, ?, 'active', ?)");
-    $stmt->execute([$customerId, $principalAmount, $principalAmount, $loanType, $current_user_id]);
+    
+    $cGoldType = $hasCollateral ? $goldType : null;
+    $cWeight = $hasCollateral ? $weightGrams : null;
+    $cVolume = $hasCollateral && isset($data['volume']) ? (float)$data['volume'] : null;
+    $cBlades = $hasCollateral && isset($data['total_blades']) ? (float)$data['total_blades'] : null;
+
+    $stmt = $pdo->prepare("INSERT INTO loans (customer_id, principal_amount, original_principal, type, status, issued_by, collateral_gold_type, collateral_weight, collateral_volume, collateral_blades) VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?)");
+    $stmt->execute([$customerId, $principalAmount, $principalAmount, $loanType, $current_user_id, $cGoldType, $cWeight, $cVolume, $cBlades]);
     $loanId = $pdo->lastInsertId();
 
     // 1a. Generate a guaranteed unique loan_uid using the database's auto-increment ID
@@ -69,11 +75,8 @@ try {
 
     // 1b. If collateral is provided, add it to gold_vault
     if ($hasCollateral) {
-        $volume = isset($data['volume']) ? (float)$data['volume'] : null;
-        $totalBlades = isset($data['total_blades']) ? (float)$data['total_blades'] : null;
-
         $insertVaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, total_blades, current_location, customer_id) VALUES (?, 'keeper_held', ?, ?, ?, 'office_vault', ?)");
-        $insertVaultStmt->execute([$goldType, $weightGrams, $volume, $totalBlades, $customerId]);
+        $insertVaultStmt->execute([$goldType, $weightGrams, $cVolume, $cBlades, $customerId]);
     }
 
     // 2. INSERT a record into the capital_ledger table

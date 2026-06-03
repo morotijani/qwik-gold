@@ -86,6 +86,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }).join('');
 
+            let collateralBlock = '';
+            if (loan.collateral_gold_type) {
+                let colStr = '';
+                if (loan.collateral_gold_type === 'refined') {
+                    colStr = `${parseFloat(loan.collateral_weight || 0).toFixed(2)}g (Vol: ${parseFloat(loan.collateral_volume || 0).toFixed(2)})`;
+                } else if (loan.collateral_gold_type === 'balls') {
+                    colStr = `${parseFloat(loan.collateral_weight || 0).toFixed(2)}g (${parseFloat(loan.collateral_blades || 0).toFixed(2)} blades)`;
+                }
+                collateralBlock = `
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border);">
+                        <div style="color: var(--gold-primary); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 4px;">Collateral Deposited (at issuance)</div>
+                        <div style="font-size: 1.1rem; color: var(--text-main); text-transform: capitalize;">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem; vertical-align: text-bottom; margin-right: 4px;">inventory_2</span>
+                            ${loan.collateral_gold_type}: ${colStr}
+                        </div>
+                    </div>
+                `;
+            }
+
             const html = `
                 <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 24px;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -106,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div style="font-size: 1rem; color: var(--text-main);">${loan.issuer_name || 'System'}</div>
                         </div>
                     </div>
+                    ${collateralBlock}
                 </div>
 
                 <h4 style="margin-bottom: 12px;">Settlement Timeline</h4>
