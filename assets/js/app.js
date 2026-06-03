@@ -4,7 +4,7 @@
  * Main Application Logic & Router
  */
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Core Elements
     const loginOverlay = document.getElementById('login-overlay');
     const appShell = document.getElementById('app-shell');
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showToast = (message, type = 'info') => {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        
+
         let icon = 'info';
         if (type === 'success') icon = 'check_circle';
         if (type === 'error') icon = 'error';
@@ -44,13 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === MODAL SYSTEM ===
     window.openModal = (title, htmlContent) => {
-        if(modalTitle) modalTitle.textContent = title;
-        if(modalBody) modalBody.innerHTML = htmlContent;
-        if(globalModal) globalModal.classList.add('active');
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalBody) modalBody.innerHTML = htmlContent;
+        if (globalModal) globalModal.classList.add('active');
     };
 
     window.closeModal = () => {
-        if(globalModal) globalModal.classList.remove('active');
+        if (globalModal) globalModal.classList.remove('active');
     };
 
     // === LOAN DETAILS MODAL ===
@@ -58,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await window.api.get(`/loans/details.php?loan_id=${loanId}`);
             const { loan, settlements } = data;
-            
-            let settlementRows = settlements.length === 0 
-                ? '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No settlement records found.</td></tr>' 
+
+            let settlementRows = settlements.length === 0
+                ? '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No settlement records found.</td></tr>'
                 : settlements.map(s => {
                     let details = '';
                     if (s.settlement_type === 'walk_in_gold' || s.settlement_type === 'collateral') {
@@ -146,19 +146,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     </table>
                 </div>
             `;
-            window.openModal(`Loan Details: ${loan.loan_uid || 'LN-'+loan.id}`, html);
+            window.openModal(`Loan Details: ${loan.loan_uid || 'LN-' + loan.id}`, html);
         } catch (e) {
             window.showToast('Failed to load loan details', 'error');
         }
     };
 
     // === AUTHENTICATION FLOW ===
-    
+
     // Check initial state
     const checkAuth = () => {
         const token = window.api.token;
         const userJson = localStorage.getItem('qwik_gold_user');
-        
+
         if (token && userJson) {
             const user = JSON.parse(userJson);
             showAppShell(user);
@@ -175,11 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const showAppShell = (user) => {
         loginOverlay.classList.remove('active');
         appShell.classList.remove('hidden');
-        
+
         // Populate User Info
         userNameEl.textContent = user.name;
         userRoleEl.textContent = user.role;
-        
+
         if (user.role === 'admin') {
             adminNav.classList.remove('hidden');
         } else {
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const btn = loginForm.querySelector('button');
-        
+
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Authenticating...';
 
@@ -205,14 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 username: usernameInput.value,
                 password: passwordInput.value
             });
-            
+
             // Save Token & User
             window.api.setToken(data.token);
             localStorage.setItem('qwik_gold_user', JSON.stringify(data.user));
-            
+
             showToast('Login successful', 'success');
             showAppShell(data.user);
-            
+
         } catch (error) {
             showToast(error.message, 'error');
         } finally {
@@ -265,6 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Clock
     setInterval(() => {
-        document.getElementById('clock').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }, 1000);
 });

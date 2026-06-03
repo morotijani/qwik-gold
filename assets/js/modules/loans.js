@@ -121,6 +121,11 @@
                 if (payload.has_collateral) {
                     payload.gold_type = window.wizardState.goldType;
                     payload.weight_grams = parseFloat(window.wizardState.weight);
+                    if (payload.gold_type === 'refined') {
+                        payload.volume = parseFloat(window.wizardState.volume) || null;
+                    } else if (payload.gold_type === 'balls') {
+                        payload.total_blades = parseFloat(window.wizardState.totalBlades) || null;
+                    }
                 }
 
                 try {
