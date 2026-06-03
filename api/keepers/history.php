@@ -50,7 +50,13 @@ try {
             'liquidate' as action, 
             weight_grams as grams, 
             gold_type,
-            total_paid_ghs as payout_ghs
+            total_paid_ghs as payout_ghs,
+            transaction_ref,
+            local_price,
+            density,
+            karat,
+            pounds,
+            total_blades
         FROM gold_purchases 
         WHERE origin = 'from_keeper' AND customer_id = ?
     ");

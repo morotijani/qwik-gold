@@ -219,8 +219,10 @@ window.viewKeeper = async (keeperId) => {
                 }
             }
 
+            const rowAction = !isDeposit ? `onclick='window.openKeeperLiquidationDetailsModal(${JSON.stringify(h).replace(/'/g, "&#39;")})' style="cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"` : `style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"`;
+
             return `
-                                        <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+                                        <tr ${rowAction}>
                                             <td style="padding: 16px 24px; color: var(--text-muted);">${new Date(h.created_at).toLocaleString()}</td>
                                             <td style="padding: 16px 24px;">
                                                 <span style="${badgeStyle}">
@@ -304,7 +306,7 @@ window.openKeeperDepositModal = (customerId, customerName) => {
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label style="font-weight: 600; color: var(--text-main); margin-bottom: 8px; display: block; text-align: center;">Deposit Weight</label>
                     <div style="position: relative;">
-                        <input type="number" id="deposit_weight_grams" step="0.01" min="0.01" required placeholder="0.00" oninput="window.calculateKeeperBlades()" style="width: 100%; padding: 20px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='var(--gold-primary)'" onblur="this.style.borderColor='var(--border)'">
+                        <input type="number" id="deposit_weight_grams" step="0.01" min="0.01" required placeholder="0.00" oninput="window.calculateKeeperBlades()" style="width: 100%; padding: 20px 80px; font-size: 2.5rem; font-weight: 700; text-align: center; background: var(--bg-main); border: 2px solid var(--border); border-radius: 16px; color: var(--text-main); transition: border-color 0.2s; outline: none; -moz-appearance: textfield;" onfocus="this.style.borderColor='var(--gold-primary)'" onblur="this.style.borderColor='var(--border)'">
                         <span style="position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--gold-primary); font-size: 1.2rem; pointer-events: none;">grams</span>
                     </div>
                 </div>
@@ -1067,4 +1069,86 @@ window.submitEditKeeper = async (event, customerId) => {
         btn.disabled = false;
         btn.innerHTML = '<span class="material-symbols-outlined">save</span> Save Changes';
     }
-};
+}
+
+window.openKeeperLiquidationDetailsModal = (data) => {
+    document.getElementById('modal-title').textContent = 'Liquidation Details';
+    const modalBody = document.getElementById('modal-body');
+
+    const dateStr = new Date(data.created_at).toLocaleString();
+    const isRefined = data.gold_type === 'refined';
+
+    let extraDetails = '';
+    if (isRefined) {
+        extraDetails = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Pounds</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(data.pounds || 0).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Density</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(data.density || 0).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Karat</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(data.karat || 0).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Local Price (GHS)</span>
+                <span style="font-weight: 600; color: var(--text-main);">₵${parseFloat(data.local_price || 0).toLocaleString()}</span>
+            </div>
+        `;
+    } else {
+        extraDetails = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Total Blades</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(data.total_blades || 0).toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Local Price per Blade (GHS)</span>
+                <span style="font-weight: 600; color: var(--text-main);">₵${parseFloat(data.local_price || 0).toLocaleString()}</span>
+            </div>
+        `;
+    }
+
+    modalBody.innerHTML = `
+        <div style="background: var(--bg-surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="display: inline-flex; background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 16px; border-radius: 50%; margin-bottom: 12px;">
+                    <span class="material-symbols-outlined" style="font-size: 36px;">receipt_long</span>
+                </div>
+                <h3 style="margin: 0; color: var(--text-main); font-size: 1.4rem;">${data.transaction_ref || 'N/A'}</h3>
+                <div style="color: var(--text-muted); margin-top: 4px;">${dateStr}</div>
+            </div>
+
+            <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Action</span>
+                    <span style="font-weight: 600; color: #ff6b6b; background: rgba(255, 107, 107, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem;">Liquidated</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Gold Type</span>
+                    <span style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">
+                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: var(--gold-primary); margin-right: 4px;">${isRefined ? 'diamond' : 'trip_origin'}</span>
+                        ${data.gold_type}
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Weight Liquidated</span>
+                    <span style="font-weight: 700; color: var(--text-main);">${parseFloat(data.grams || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+                </div>
+                ${extraDetails}
+                <div style="display: flex; justify-content: space-between; margin-top: 16px; background: rgba(255, 107, 107, 0.05); padding: 16px; border-radius: 8px; border: 1px dashed rgba(255, 107, 107, 0.3);">
+                    <span style="color: var(--text-main); font-weight: 600; font-size: 1.1rem;">Total Payout</span>
+                    <span style="font-weight: 800; color: #ff6b6b; font-size: 1.3rem;">₵${parseFloat(data.payout_ghs || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-block" onclick="window.closeModal()" style="padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px;">
+                Close
+            </button>
+        </div>
+    `;
+
+    document.getElementById('global-modal').classList.add('active');
+};;
