@@ -431,6 +431,7 @@ window.addEventListener('route-changed', async (e) => {
         const estCashFormatted = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 });
         const estGramsFormatted = Number(s.total_grams).toFixed(4);
         const estVolBladesFormatted = Number(s.gold_type === 'balls' ? s.total_blades : s.total_volume).toFixed(4);
+        const estPriceFormatted = Number(s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
         const formHtml = `
             <input type="hidden" id="cs_gold_type" value="${s.gold_type}">
@@ -450,7 +451,7 @@ window.addEventListener('route-changed', async (e) => {
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                         <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                             <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Est. Weight</div>
                             <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estGramsFormatted}g</div>
@@ -458,6 +459,10 @@ window.addEventListener('route-changed', async (e) => {
                         <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                             <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Est. ${s.gold_type === 'refined' ? 'Volume' : 'Blades'}</div>
                             <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estVolBladesFormatted}</div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Est. Price</div>
+                            <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${estPriceFormatted}</div>
                         </div>
                     </div>
                     
@@ -562,66 +567,118 @@ window.addEventListener('route-changed', async (e) => {
 
     window.viewSoldGoldDetails = (dataStr) => {
         const s = JSON.parse(decodeURIComponent(dataStr));
-        const dateStr = new Date(s.created_at).toLocaleString();
-
+        
         const diff = s.actual_cash - s.estimated_cash;
         const diffColor = diff >= 0 ? 'var(--success)' : 'var(--danger)';
-        const diffSign = diff >= 0 ? '+' : '';
+        const diffBg = diff >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+        const diffBorder = diff >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+        const diffLabel = diff >= 0 ? 'Profit' : 'Loss';
+        
+        const estCashFmt = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        const actCashFmt = Number(s.actual_cash).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        const diffCashFmt = Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        
+        const estGramsFmt = Number(s.total_grams).toFixed(4) + 'g';
+        const estVolBladesFmt = Number(s.gold_type === 'balls' ? s.total_blades : s.total_volume).toFixed(4);
+        const estPriceFmt = 'GHS ' + Number(s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
-        const modalHtml = `
-            <div style="padding: 16px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+        const actGramsFmt = Number(s.actual_grams_market || s.total_grams).toFixed(4) + 'g';
+        const actVolBladesFmt = Number(s.gold_type === 'balls' ? (s.actual_blades_market || s.total_blades) : (s.actual_volume_market || s.total_volume)).toFixed(4);
+        const actPriceFmt = 'GHS ' + Number(s.actual_local_price || s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
+
+        const dateStr = new Date(s.created_at).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        
+        const html = `
+            <div style="font-family: var(--font-main);">
+                
+                <!-- Header -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
                     <div>
-                        <div style="font-size: 0.9rem; color: var(--text-muted);">Sale ID</div>
-                        <div style="font-weight: 600;">${s.sale_uid}</div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="material-symbols-outlined" style="color: var(--primary);">receipt_long</span>
+                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">${s.sale_uid}</div>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${dateStr} &bull; <span style="text-transform: capitalize; font-weight: 600;">${s.gold_type}</span></div>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.9rem; color: var(--text-muted);">Date Sold</div>
-                        <div style="font-weight: 600;">${dateStr}</div>
+                    <div>
+                        <span style="background: var(--success-light); color: var(--success); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> COMPLETED</span>
                     </div>
                 </div>
 
-                <div class="glass-panel" style="margin-bottom: 24px;">
-                    <h4 style="margin: 0 0 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">System Estimated vs Actual Market</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div>
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Vault Grams</span>
-                            <div style="font-weight: 500;">${Number(s.total_grams).toFixed(4)}g</div>
+                <!-- Comparison Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    
+                    <!-- System Estimation -->
+                    <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 16px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--warning); display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">calculate</span> System Estimation
+                        </h4>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">Weight</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${estGramsFmt}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">${s.gold_type === 'refined' ? 'Volume' : 'Blades'}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${estVolBladesFmt}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">Price ${s.gold_type === 'refined' ? '' : '/ Blade'}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${estPriceFmt}</span>
+                            </div>
                         </div>
-                        <div>
-                            <span style="font-size: 0.85rem; color: var(--text-main);">Market Grams</span>
-                            <div style="font-weight: 700; color: var(--primary);">${Number(s.actual_grams_market).toFixed(4)}g</div>
-                        </div>
-                        <div>
-                            <span style="font-size: 0.85rem; color: var(--text-muted);">Vault Vol/Balls</span>
-                            <div style="font-weight: 500;">${Number(s.gold_type === 'balls' ? s.total_blades : s.total_volume).toFixed(4)}</div>
-                        </div>
-                        <div>
-                            <span style="font-size: 0.85rem; color: var(--text-main);">Market Vol/Balls</span>
-                            <div style="font-weight: 700; color: var(--primary);">${Number(s.gold_type === 'balls' ? s.actual_blades_market : s.actual_volume_market).toFixed(4)}</div>
+                        
+                        <div style="border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 12px;">
+                            <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Estimated Cash</div>
+                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">GHS ${estCashFmt}</div>
                         </div>
                     </div>
+                    
+                    <!-- Market Actuals -->
+                    <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 16px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--success); display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span> Market Actuals
+                        </h4>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">Weight</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${actGramsFmt}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">${s.gold_type === 'refined' ? 'Volume' : 'Blades'}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${actVolBladesFmt}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">Price ${s.gold_type === 'refined' ? '' : '/ Blade'}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${actPriceFmt}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="border-top: 1px dashed rgba(16, 185, 129, 0.3); padding-top: 12px;">
+                            <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Actual Brought In</div>
+                            <div style="font-size: 1.2rem; font-weight: 700; color: var(--success);">GHS ${actCashFmt}</div>
+                        </div>
+                    </div>
+                    
                 </div>
 
-                <div class="glass-panel">
-                    <h4 style="margin: 0 0 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 8px;">Financials</h4>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.1rem;">
-                        <span style="color: var(--text-muted);">System Estimated:</span>
-                        <span style="font-weight: 600;">GHS ${Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <!-- Variance -->
+                <div style="background: ${diffBg}; border: 1px solid ${diffBorder}; padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Net Variance</div>
+                        <div style="font-weight: 600; font-size: 1rem; color: ${diffColor};">${diffLabel} on Sale</div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 1.2rem;">
-                        <span style="color: var(--text-main);">Actual Brought In:</span>
-                        <span style="font-weight: 700; color: var(--success);">GHS ${Number(s.actual_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 1.1rem; padding-top: 12px; border-top: 1px dashed var(--border);">
-                        <span style="color: var(--text-muted);">Profit / Loss Variance:</span>
-                        <span style="font-weight: 700; color: ${diffColor};">${diffSign}GHS ${Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: ${diffColor};">${diff > 0 ? '+' : ''}${diff === 0 ? '' : 'GHS '}${diffCashFmt}</div>
                 </div>
+
+            </div>
+            <div style="text-align: right;">
+                <button type="button" class="btn btn-outline" onclick="window.closeModal()">Close Details</button>
             </div>
         `;
-
-        window.openModal('Sold Gold Details', modalHtml);
+        window.openModal('Sold Gold Details', html);
     };
 
     await window.loadLedgerDashboard();
