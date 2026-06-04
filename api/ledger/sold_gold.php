@@ -22,7 +22,7 @@ try {
 
     // Query sales
     $stmt = $pdo->prepare("
-        SELECT id, sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_cash, actual_cash, notes, created_at 
+        SELECT * 
         FROM market_sales 
         ORDER BY created_at DESC 
         LIMIT :limit OFFSET :offset
