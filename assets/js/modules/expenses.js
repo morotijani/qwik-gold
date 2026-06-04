@@ -4,6 +4,15 @@ window.addEventListener('route-changed', async (e) => {
     if (e.detail.route !== 'expenses') return;
     const container = e.detail.container;
 
+    if (!window._expensesState) {
+        window._expensesState = { statusFilter: 'active' };
+    }
+
+    window.setExpenseFilter = (status) => {
+        window._expensesState.statusFilter = status;
+        window.loadExpensesDashboard(); // Assuming we export render as loadExpensesDashboard
+    };
+
     // Loading State
     container.innerHTML = `
         <div style="display: flex; justify-content: center; padding: 40px;">
@@ -11,9 +20,10 @@ window.addEventListener('route-changed', async (e) => {
         </div>
     `;
 
-    const render = async () => {
+    window.loadExpensesDashboard = async () => {
         try {
-            const response = await window.api.get('/expenses/list.php');
+            const status = window._expensesState.statusFilter;
+            const response = await window.api.get(`/expenses/list.php?status=${status}`);
 
             let expensesHtml = '';
             if (!response.expenses || response.expenses.length === 0) {
@@ -27,27 +37,46 @@ window.addEventListener('route-changed', async (e) => {
                     </tr>
                 `;
             } else {
-                expensesHtml = response.expenses.map(exp => `
-                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
+                expensesHtml = response.expenses.map(exp => {
+                    const isVoided = exp.status === 'voided';
+                    const rowStyle = isVoided ? 'background: #fafafa; opacity: 0.8;' : 'background: white;';
+                    const textStyle = isVoided ? 'text-decoration: line-through; color: var(--text-muted);' : 'color: var(--danger);';
+                    
+                    let actionsHtml = '';
+                    if (isVoided) {
+                        actionsHtml = `
+                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--danger); color: var(--danger);" onclick="window.confirmPermanentDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
+                                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">delete_forever</span> Perm Delete
+                            </button>
+                        `;
+                    } else {
+                        actionsHtml = `
+                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--warning); color: var(--warning);" onclick="window.confirmDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
+                                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">block</span> Void
+                            </button>
+                        `;
+                    }
+
+                    return `
+                    <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s; ${rowStyle}" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='${isVoided ? '#fafafa' : 'white'}'">
                         <td style="padding: 16px; color: var(--text-main); font-weight: 500;">
                             ${new Date(exp.date).toLocaleDateString()}
                         </td>
                         <td style="padding: 16px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">
                             EXP-${String(exp.id).padStart(6, '0')}
+                            ${isVoided ? '<span style="background: var(--danger-light); color: var(--danger); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">VOIDED</span>' : ''}
                         </td>
                         <td style="padding: 16px; font-weight: 500; color: var(--text-main);">
                             ${exp.description}
                         </td>
-                        <td style="padding: 16px; font-weight: 700; color: var(--danger); text-align: right;">
+                        <td style="padding: 16px; font-weight: 700; ${textStyle} text-align: right;">
                             - GHS ${Number(exp.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </td>
                         <td style="padding: 16px; text-align: right;">
-                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--danger); color: var(--danger);" onclick="window.confirmDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
-                                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">delete</span> Void
-                            </button>
+                            ${actionsHtml}
                         </td>
                     </tr>
-                `).join('');
+                `;}).join('');
             }
 
             container.innerHTML = `
@@ -91,9 +120,16 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
 
                 <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid var(--border);">
-                    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="color: var(--text-muted);">history</span>
-                        <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">Expenditure History</h3>
+                    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--text-muted);">history</span>
+                            <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">Expenditure History</h3>
+                        </div>
+                        <div style="display: flex; background: var(--bg-main); border-radius: 8px; padding: 4px;">
+                            <button class="btn ${window._expensesState.statusFilter === 'active' ? 'btn-primary' : ''}" style="padding: 6px 12px; font-size: 0.85rem; border: none; ${window._expensesState.statusFilter !== 'active' ? 'background: transparent; color: var(--text-muted);' : ''}" onclick="window.setExpenseFilter('active')">Active</button>
+                            <button class="btn ${window._expensesState.statusFilter === 'voided' ? 'btn-primary' : ''}" style="padding: 6px 12px; font-size: 0.85rem; border: none; ${window._expensesState.statusFilter !== 'voided' ? 'background: transparent; color: var(--text-muted);' : ''}" onclick="window.setExpenseFilter('voided')">Voided</button>
+                            <button class="btn ${window._expensesState.statusFilter === 'all' ? 'btn-primary' : ''}" style="padding: 6px 12px; font-size: 0.85rem; border: none; ${window._expensesState.statusFilter !== 'all' ? 'background: transparent; color: var(--text-muted);' : ''}" onclick="window.setExpenseFilter('all')">All</button>
+                        </div>
                     </div>
                     <table style="width: 100%; border-collapse: collapse; min-width: 700px;">
                         <thead>
@@ -169,7 +205,7 @@ window.addEventListener('route-changed', async (e) => {
             await window.api.post('/expenses/create.php', payload);
             window.showToast('Expense recorded and ledger updated!', 'success');
             window.closeModal();
-            render();
+            window.loadExpensesDashboard();
         } catch (error) {
             window.showToast(error.message, 'error');
             btn.disabled = false;
@@ -180,13 +216,13 @@ window.addEventListener('route-changed', async (e) => {
     window.confirmDeleteExpense = (id, amount, description) => {
         const html = `
             <div style="text-align: center; padding: 10px 0;">
-                <div style="width: 64px; height: 64px; background: var(--danger-bg); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
-                    <span class="material-symbols-outlined" style="font-size: 32px;">warning</span>
+                <div style="width: 64px; height: 64px; background: var(--warning-bg); color: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px;">block</span>
                 </div>
                 <h3 style="margin-top: 0;">Void Expense</h3>
                 <p style="color: var(--text-muted); margin-bottom: 24px;">
                     Are you sure you want to void <strong>${description}</strong> for <strong>GHS ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>?<br><br>
-                    This will delete the expense record and refund the amount back to the Capital Ledger.
+                    This will mark the record as voided and refund the amount back to the Capital Ledger.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center;">
                     <button class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
@@ -205,10 +241,10 @@ window.addEventListener('route-changed', async (e) => {
         }
 
         try {
-            await window.api.post('/expenses/delete.php', { expense_id: id });
+            await window.api.post('/expenses/delete.php', { expense_id: id, permanent: false });
             window.showToast('Expense voided and ledger refunded.', 'success');
             window.closeModal();
-            render();
+            window.loadExpensesDashboard();
         } catch (e) {
             window.showToast(e.message || 'Failed to void expense', 'error');
             if (btn) {
@@ -218,5 +254,46 @@ window.addEventListener('route-changed', async (e) => {
         }
     };
 
-    render();
+    window.confirmPermanentDeleteExpense = (id, amount, description) => {
+        const html = `
+            <div style="text-align: center; padding: 10px 0;">
+                <div style="width: 64px; height: 64px; background: var(--danger-bg); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px;">delete_forever</span>
+                </div>
+                <h3 style="margin-top: 0;">Permanently Delete</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">
+                    Are you sure you want to permanently delete <strong>${description}</strong>?<br><br>
+                    This action cannot be undone. It will remove the record entirely from the database.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" id="btn-confirm-perm-delete" style="flex: 1; background: var(--danger); border-color: var(--danger); color: white;" onclick="window.executePermanentDeleteExpense(${id})">Permanently Delete</button>
+                </div>
+            </div>
+        `;
+        window.openModal('Confirm Permanent Delete', html, { maxWidth: '450px' });
+    };
+
+    window.executePermanentDeleteExpense = async (id) => {
+        const btn = document.getElementById('btn-confirm-perm-delete');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Deleting...';
+        }
+
+        try {
+            await window.api.post('/expenses/delete.php', { expense_id: id, permanent: true });
+            window.showToast('Expense permanently deleted.', 'success');
+            window.closeModal();
+            window.loadExpensesDashboard();
+        } catch (e) {
+            window.showToast(e.message || 'Failed to delete expense', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = 'Permanently Delete';
+            }
+        }
+    };
+
+    window.loadExpensesDashboard();
 });

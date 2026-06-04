@@ -12,13 +12,21 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse('error', 'Method not allowed. Use GET.', [], 405);
 }
 
-try {
-    // 1) Fetch all expenses ordered by date/created_at
-    $stmt = $pdo->query("SELECT id, description, amount, date, created_at FROM expenses ORDER BY date DESC, created_at DESC");
+    $statusFilter = isset($_GET['status']) ? $_GET['status'] : 'active';
+    
+    // 1) Fetch expenses based on filter
+    if ($statusFilter === 'all') {
+        $stmt = $pdo->query("SELECT id, description, amount, date, created_at, status FROM expenses ORDER BY date DESC, created_at DESC");
+    } else {
+        $validStatus = $statusFilter === 'voided' ? 'voided' : 'active';
+        $stmt = $pdo->prepare("SELECT id, description, amount, date, created_at, status FROM expenses WHERE status = ? ORDER BY date DESC, created_at DESC");
+        $stmt->execute([$validStatus]);
+    }
+    
     $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2) Calculate total lifetime expenses
-    $totalStmt = $pdo->query("SELECT SUM(amount) AS total_amount FROM expenses");
+    // 2) Calculate total lifetime expenses (only active)
+    $totalStmt = $pdo->query("SELECT SUM(amount) AS total_amount FROM expenses WHERE status = 'active'");
     $totalResult = $totalStmt->fetch();
     $totalLifetime = $totalResult['total_amount'] !== null ? (float)$totalResult['total_amount'] : 0.0;
 
@@ -26,7 +34,7 @@ try {
     $monthStmt = $pdo->query("
         SELECT SUM(amount) AS total_month 
         FROM expenses 
-        WHERE YEAR(date) = YEAR(CURRENT_DATE()) AND MONTH(date) = MONTH(CURRENT_DATE())
+        WHERE status = 'active' AND YEAR(date) = YEAR(CURRENT_DATE()) AND MONTH(date) = MONTH(CURRENT_DATE())
     ");
     $monthResult = $monthStmt->fetch();
     $totalThisMonth = $monthResult['total_month'] !== null ? (float)$monthResult['total_month'] : 0.0;
@@ -35,7 +43,7 @@ try {
     $todayStmt = $pdo->query("
         SELECT SUM(amount) AS total_today 
         FROM expenses 
-        WHERE date = CURRENT_DATE()
+        WHERE status = 'active' AND date = CURRENT_DATE()
     ");
     $todayResult = $todayStmt->fetch();
     $totalToday = $todayResult['total_today'] !== null ? (float)$todayResult['total_today'] : 0.0;
@@ -48,7 +56,8 @@ try {
             'description' => $row['description'],
             'amount_ghs' => (float)$row['amount'],
             'date' => $row['date'],
-            'created_at' => $row['created_at']
+            'created_at' => $row['created_at'],
+            'status' => $row['status']
         ];
     }
 
