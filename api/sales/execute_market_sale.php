@@ -35,14 +35,64 @@ try {
     // 0. Begin the database transaction
     $pdo->beginTransaction();
 
-    // 1. SELECT SUM(weight_grams) for company_owned gold that is currently in the office
-    $sumStmt = $pdo->query("SELECT SUM(weight_grams) as total_grams FROM gold_vault WHERE ownership_status = 'company_owned' AND current_location = 'office_vault' FOR UPDATE");
-    $sumResult = $sumStmt->fetch();
-    $gramsCleared = $sumResult ? (float)$sumResult['total_grams'] : 0.0;
+    // 1. SELECT and calculate totals for company_owned gold that is currently in the office
+    $sumStmt = $pdo->query("
+        SELECT 
+            gold_type,
+            SUM(weight_grams) as total_grams,
+            SUM(volume) as total_volume,
+            SUM(total_blades) as total_blades
+        FROM gold_vault 
+        WHERE ownership_status = 'company_owned' 
+        AND current_location = 'office_vault' 
+        GROUP BY gold_type
+        FOR UPDATE
+    ");
+    $items = $sumStmt->fetchAll();
 
-    if ($gramsCleared <= 0) {
+    $overallGrams = 0.0;
+    $overallVolume = 0.0;
+    $overallBlades = 0.0;
+    $hasRefined = false;
+    $hasBalls = false;
+
+    foreach ($items as $item) {
+        $overallGrams += (float)$item['total_grams'];
+        $overallVolume += (float)$item['total_volume'];
+        $overallBlades += (float)$item['total_blades'];
+        if ($item['gold_type'] === 'refined') $hasRefined = true;
+        if ($item['gold_type'] === 'balls') $hasBalls = true;
+    }
+
+    if ($overallGrams <= 0) {
         throw new Exception("No company_owned gold found in the office vault to sell.");
     }
+
+    $mixedType = ($hasRefined && $hasBalls) ? 'mixed' : ($hasRefined ? 'refined' : 'balls');
+
+    // Currently we don't have a global system price table, so we rely on the frontend to pass estimated_revenue_ghs, or we just set it to 0 if not provided
+    $estimatedCash = isset($data['estimated_revenue_ghs']) ? (float)$data['estimated_revenue_ghs'] : 0.0;
+    $localPrice = isset($data['local_price']) ? (float)$data['local_price'] : 0.0;
+
+    $saleUid = 'SALE-' . strtoupper(uniqid());
+
+    // 1.5 INSERT into market_sales
+    $insertSaleStmt = $pdo->prepare("
+        INSERT INTO market_sales 
+        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_cash, actual_cash, notes) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $insertSaleStmt->execute([
+        $saleUid, 
+        $mixedType, 
+        $overallGrams, 
+        $overallVolume, 
+        $overallBlades, 
+        $estimatedCash, 
+        $actualRevenueGhs, 
+        $data['notes'] ?? ''
+    ]);
+    $marketSaleId = $pdo->lastInsertId();
 
     // 2. UPDATE all these records, changing their location status to 'sold_main_market'
     $updateStmt = $pdo->prepare("UPDATE gold_vault SET current_location = 'sold_main_market' WHERE ownership_status = 'company_owned' AND current_location = 'office_vault'");
@@ -58,11 +108,10 @@ try {
     $newBalance = $currentBalance + $actualRevenueGhs;
 
     // Use transaction_type 'out_sale_revenue'
-    $insertLedgerStmt = $pdo->prepare("INSERT INTO capital_ledger (transaction_type, amount_ghs, running_balance, reference_id) VALUES ('out_sale_revenue', ?, ?, NULL)");
-    $insertLedgerStmt->execute([$actualRevenueGhs, $newBalance]);
+    $insertLedgerStmt = $pdo->prepare("INSERT INTO capital_ledger (transaction_type, amount_ghs, running_balance, reference_id) VALUES ('out_sale_revenue', ?, ?, ?)");
+    $insertLedgerStmt->execute([$actualRevenueGhs, $newBalance, $marketSaleId]);
 
-    
-    log_activity($pdo, $current_user_id ?? null, 'MARKET_SALE', 'capital_ledger', 1, null, ['actual_revenue' => $actualRevenueGhs]);
+    log_activity($pdo, $current_user_id ?? null, 'MARKET_SALE', 'capital_ledger', $marketSaleId, null, ['actual_revenue' => $actualRevenueGhs]);
     // 4. Commit Transaction
     $pdo->commit();
 

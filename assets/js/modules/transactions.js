@@ -1,5 +1,3 @@
-// assets/js/modules/transactions.js
-
 window._txState = { page: 1, limit: 15, type: 'all' };
 
 window.addEventListener('route-changed', async (e) => {
@@ -105,7 +103,7 @@ window.addEventListener('route-changed', async (e) => {
                                     <td style="padding: 16px; font-weight: 600; color: var(--text-muted);">TX-${String(tx.id).padStart(6, '0')}</td>
                                     <td style="padding: 16px; color: var(--text-main); font-weight: 500;">${dateStr}</td>
                                     <td style="padding: 16px; color: var(--text-muted); font-weight: 500;">${displayType}</td>
-                                    <td style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">${tx.reference_id ? `Ref: ${tx.reference_id}` : '-'}</td>
+                                    <td style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">${tx.reference_id ? 'Ref: ' + tx.reference_id : '-'}</td>
                                     <td style="padding: 16px 24px; font-weight: 700; text-align: right; color: ${amountColor};">
                                         ${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </td>
