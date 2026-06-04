@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse('error', 'Method not allowed. Use GET.', [], 405);
 }
 
+try {
     $statusFilter = isset($_GET['status']) ? $_GET['status'] : 'active';
     
     // 1) Fetch expenses based on filter
