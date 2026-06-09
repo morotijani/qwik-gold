@@ -21,6 +21,7 @@ $weightGrams = isset($input['weight_grams']) ? (float)$input['weight_grams'] : 0
 $totalPaid = isset($input['total_paid_ghs']) ? (float)$input['total_paid_ghs'] : 0.0;
 $notes = isset($input['notes']) ? trim($input['notes']) : null;
 $customerId = !empty($input['customer_id']) ? (int)$input['customer_id'] : null;
+$handlerId = $current_user_id ?? null;
 
 $localPrice = isset($input['local_price']) ? (float)$input['local_price'] : null;
 $density = isset($input['density']) ? (float)$input['density'] : null;
@@ -49,8 +50,8 @@ try {
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
 
     // 2. Insert into gold_purchases
-    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?)");
-    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $notes]);
+    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, handler_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?, ?)");
+    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $handlerId, $notes]);
     $purchaseId = $pdo->lastInsertId();
 
     // 3. Deduct from capital_ledger
@@ -82,7 +83,8 @@ try {
     sendResponse('success', 'Walk-in purchase successfully completed', [
         'transaction_id' => $txnRef,
         'grams_added' => $weightGrams,
-        'capital_deducted' => abs($deductionAmount)
+        'capital_deducted' => abs($deductionAmount),
+        'handled_by' => $current_user_name ?? 'Unknown Handler'
     ], 201);
 
 } catch (Exception $e) {

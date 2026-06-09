@@ -43,7 +43,7 @@ try {
     // 4) Query the api_tokens table to see if the token exists
     // Joining the users table to seamlessly handle step 5
     $stmt = $pdo->prepare("
-        SELECT u.id, u.role, t.expires_at 
+        SELECT u.id, u.role, u.name, t.expires_at 
         FROM api_tokens t
         JOIN users u ON t.user_id = u.id
         WHERE t.token = ?
@@ -68,8 +68,10 @@ try {
     // 5) Store the user's ID and role in global PHP variables for the endpoint to use
     global $current_user_id;
     global $current_user_role;
+    global $current_user_name;
     $current_user_id = (int)$session['id'];
     $current_user_role = $session['role'];
+    $current_user_name = $session['name'];
 
 } catch (\PDOException $e) {
     sendResponse('error', 'Authentication failed due to system error', [], 500);

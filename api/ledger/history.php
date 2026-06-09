@@ -38,14 +38,19 @@ try {
     $totalCount = (int)$countStmt->fetchColumn();
 
     // 2) Query the capital_ledger table for transaction history with pagination
-    $query = "SELECT id, transaction_type, amount_ghs, reference_id, created_at 
-              FROM capital_ledger ";
+    $query = "SELECT c.id, 
+                     IF(c.transaction_type = 'gold_purchase' AND gp.origin = 'from_keeper', 'from_keeper', c.transaction_type) as transaction_type, 
+                     c.amount_ghs, 
+                     COALESCE(gp.transaction_ref, c.reference_id) as reference_id, 
+                     c.created_at 
+              FROM capital_ledger c
+              LEFT JOIN gold_purchases gp ON c.transaction_type = 'gold_purchase' AND c.reference_id = gp.id ";
     
     if ($typeFilter) {
-        $query .= "WHERE transaction_type = :type ";
+        $query .= "WHERE c.transaction_type = :type ";
     }
     
-    $query .= "ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
+    $query .= "ORDER BY c.created_at DESC LIMIT :limit OFFSET :offset";
 
     $stmt = $pdo->prepare($query);
     
@@ -66,7 +71,7 @@ try {
             'id' => (int)$row['id'],
             'type' => $row['transaction_type'],
             'amount_ghs' => (float)$row['amount_ghs'],
-            'reference_id' => $row['reference_id'] !== null ? (int)$row['reference_id'] : null,
+            'reference_id' => $row['reference_id'] !== null ? $row['reference_id'] : null,
             'date' => $row['created_at']
         ];
     }

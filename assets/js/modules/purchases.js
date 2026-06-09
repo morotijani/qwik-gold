@@ -31,31 +31,52 @@ window.addEventListener('route-changed', async (e) => {
     const container = e.detail.container;
 
     container.innerHTML = `
-        <div style="max-width: 1100px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-                <h2 style="margin: 0; font-weight: 600; font-size: initial; color: var(--text-main);">Walk-In Purchases</h2>
-                <button class="btn-text" onclick="window.openNewPurchaseModal()" style="display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: 0.95rem; color: var(--text-main); border: none; cursor: pointer; padding: 6px 12px; transition: background 0.2s; border-radius: 6px;">
-                    <span class="material-symbols-outlined" style="font-size: 18px; font-weight: 300;">add</span> Add purchase
-                </button>
+        <div style="width: 100%; padding-bottom: 60px;">
+            <!-- Hero Banner -->
+            <div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 15px 35px rgba(30, 64, 175, 0.2);">
+                <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(40px);"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(59, 130, 246, 0.2); border-radius: 50%; filter: blur(30px);"></div>
+                <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="color: #93c5fd; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">diamond</span> Acquisitions
+                        </div>
+                        <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: white;">Walk-In Purchases</h2>
+                        <p style="margin: 0; color: #dbeafe; font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Process and track all incoming gold purchases from registered customers and walk-in sellers.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="window.openNewPurchaseModal()" style="background: white; color: #1d4ed8; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;">
+                        <span class="material-symbols-outlined">add_shopping_cart</span> New Purchase
+                    </button>
+                </div>
             </div>
             
-            <div class="table-container" style="overflow: visible;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Txn Ref</th>
-                            <th>Date</th>
-                            <th>Seller</th>
-                            <th>Gold Type</th>
-                            <th>Weight</th>
-                            <th>Amount Paid</th>
-                        </tr>
-                    </thead>
-                    <tbody id="purchases-tbody">
-                        <tr><td colspan="7" style="text-align: center;">Loading purchases...</td></tr>
-                    </tbody>
-                </table>
+            <div style="background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px;">
+                <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">list_alt</span> Purchase History
+                    </h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+                        <thead>
+                            <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
+                                <th style="padding: 16px 24px; font-weight: 700; border-bottom: 1px solid var(--border);">No.</th>
+                                <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border);">Txn Ref</th>
+                                <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border);">Date</th>
+                                <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border);">Seller</th>
+                                <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border);">Gold Type</th>
+                                <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border); text-align: right;">Weight</th>
+                                <th style="padding: 16px 24px; font-weight: 700; border-bottom: 1px solid var(--border); text-align: right;">Amount Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchases-tbody">
+                            <tr><td colspan="7" style="padding: 48px; text-align: center; color: var(--text-muted); font-size: 1.05rem;">
+                                <span class="material-symbols-outlined spin" style="font-size: 32px; color: var(--border); margin-bottom: 16px; display: block;">sync</span>
+                                Loading purchases...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div id="purchases-pagination"></div>
         </div>
@@ -100,19 +121,33 @@ window.renderPurchasesTable = () => {
 
     tbody.innerHTML = currentItems.map((p, index) => {
         const globalIndex = startIndex + index + 1;
+        const goldTypeBadge = p.gold_type === 'refined'
+            ? `<span style="padding: 4px 10px; background: rgba(59, 130, 246, 0.1); color: #2563eb; border-radius: 20px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.2);"><span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle; margin-right: 4px;">diamond</span>Refined</span>`
+            : `<span style="padding: 4px 10px; background: rgba(245, 158, 11, 0.1); color: #d97706; border-radius: 20px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(245, 158, 11, 0.2);"><span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle; margin-right: 4px;">scatter_plot</span>Balls</span>`;
+
         return `
-            <tr>
-                <td style="font-weight: 500; color: var(--text-muted);">${globalIndex}</td>
-                <td>
-                    <a href="javascript:void(0)" onclick="window.viewPurchaseReceipt(${p.id})" style="font-family: monospace; font-weight: 600; color: var(--gold-primary); text-decoration: none;">
+            <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
+                <td style="padding: 16px 24px; font-weight: 600; color: var(--text-muted);">${globalIndex}</td>
+                <td style="padding: 16px;">
+                    <a href="javascript:void(0)" onclick="window.viewPurchaseReceipt(${p.id})" style="background: var(--bg-main); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-family: monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-main); text-decoration: none; display: inline-block;">
                         ${p.transaction_ref || '#TXN-' + p.id}
                     </a>
                 </td>
-                <td>${new Date(p.created_at).toLocaleDateString()}</td>
-                <td><span class="badge badge-outline">${p.seller_display}</span></td>
-                <td style="text-transform: capitalize;">${p.gold_type}</td>
-                <td style="font-weight: 600;">${parseFloat(p.weight_grams).toFixed(2)}g</td>
-                <td style="color: #ff6b6b; font-weight: 600;">₵${parseFloat(p.total_paid_ghs).toLocaleString()}</td>
+                <td style="padding: 16px; color: var(--text-main); font-weight: 500;">
+                    ${new Date(p.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;">${new Date(p.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
+                </td>
+                <td style="padding: 16px;">
+                    <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">${p.seller_display}</div>
+                    ${p.seller_display.includes('Walk-In') ? `<span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-hover); padding: 2px 6px; border-radius: 4px;">One-Time</span>` : `<span style="font-size: 0.75rem; color: var(--success); background: var(--success-bg); padding: 2px 6px; border-radius: 4px;">Registered</span>`}
+                </td>
+                <td style="padding: 16px;">${goldTypeBadge}</td>
+                <td style="padding: 16px; font-weight: 700; color: var(--text-main); text-align: right; font-size: 1rem;">
+                    ${parseFloat(p.weight_grams).toFixed(2)}<span style="color: var(--text-muted); font-size: 0.8rem; margin-left: 4px;">g</span>
+                </td>
+                <td style="padding: 16px 24px; color: #ef4444; font-weight: 800; text-align: right; font-size: 1.1rem;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-right: 4px;">GHS</span>${parseFloat(p.total_paid_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
             </tr>
         `;
     }).join('');
@@ -175,20 +210,31 @@ window.renderWizardStep = () => {
 
     if (state.step === 1) {
         body.innerHTML = `
-            <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 5px 0; font-weight: 600; color: var(--text-color);">Seller Details</h3>
-                <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Select who is selling the gold.</p>
+            <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--info), #2563eb); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    <span class="material-symbols-outlined" style="font-size: 1.6rem;">person_search</span>
+                </div>
+                <div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: var(--info); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Step 1: Seller Details</div>
+                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Select whether this is a registered customer or a one-time walk-in seller.</div>
+                </div>
             </div>
             <div class="form-group" style="margin-bottom: 24px;">
-                <label style="margin-bottom: 8px;">Seller Type</label>
-                <div class="segmented-control">
-                    <label class="segment-label">
-                        <input type="radio" name="wiz_seller_type" value="registered" ${state.sellerType === 'registered' ? 'checked' : ''} onchange="window.updateWizardState('sellerType', 'registered')"> 
-                        <span><span class="material-symbols-outlined" style="font-size:18px; vertical-align:text-bottom;">person</span> Registered Customer</span>
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 12px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">Seller Type</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <label style="cursor: pointer; position: relative;">
+                        <input type="radio" name="wiz_seller_type" value="registered" ${state.sellerType === 'registered' ? 'checked' : ''} onchange="window.updateWizardState('sellerType', 'registered')" style="position: absolute; opacity: 0; pointer-events: none;">
+                        <div style="padding: 20px; border-radius: 16px; border: 2px solid ${state.sellerType === 'registered' ? 'var(--info)' : 'var(--border)'}; background: ${state.sellerType === 'registered' ? 'rgba(59, 130, 246, 0.05)' : 'var(--bg-main)'}; text-align: center; transition: all 0.2s; box-shadow: ${state.sellerType === 'registered' ? '0 4px 12px rgba(59,130,246,0.15)' : 'none'};">
+                            <span class="material-symbols-outlined" style="font-size: 2rem; color: ${state.sellerType === 'registered' ? 'var(--info)' : 'var(--text-muted)'}; margin-bottom: 8px;">person</span>
+                            <div style="font-weight: 700; color: ${state.sellerType === 'registered' ? 'var(--info)' : 'var(--text-main)'}; font-size: 1.05rem;">Registered Customer</div>
+                        </div>
                     </label>
-                    <label class="segment-label">
-                        <input type="radio" name="wiz_seller_type" value="walkin" ${state.sellerType === 'walkin' ? 'checked' : ''} onchange="window.updateWizardState('sellerType', 'walkin')"> 
-                        <span><span class="material-symbols-outlined" style="font-size:18px; vertical-align:text-bottom;">person_add</span> One-Time Walk-In</span>
+                    <label style="cursor: pointer; position: relative;">
+                        <input type="radio" name="wiz_seller_type" value="walkin" ${state.sellerType === 'walkin' ? 'checked' : ''} onchange="window.updateWizardState('sellerType', 'walkin')" style="position: absolute; opacity: 0; pointer-events: none;">
+                        <div style="padding: 20px; border-radius: 16px; border: 2px solid ${state.sellerType === 'walkin' ? 'var(--info)' : 'var(--border)'}; background: ${state.sellerType === 'walkin' ? 'rgba(59, 130, 246, 0.05)' : 'var(--bg-main)'}; text-align: center; transition: all 0.2s; box-shadow: ${state.sellerType === 'walkin' ? '0 4px 12px rgba(59,130,246,0.15)' : 'none'};">
+                            <span class="material-symbols-outlined" style="font-size: 2rem; color: ${state.sellerType === 'walkin' ? 'var(--info)' : 'var(--text-muted)'}; margin-bottom: 8px;">person_add</span>
+                            <div style="font-weight: 700; color: ${state.sellerType === 'walkin' ? 'var(--info)' : 'var(--text-main)'}; font-size: 1.05rem;">One-Time Walk-In</div>
+                        </div>
                     </label>
                 </div>
             </div>
@@ -198,7 +244,7 @@ window.renderWizardStep = () => {
                     <label>Select Customer</label>
                     <div class="input-with-icon">
                         <span class="material-symbols-outlined">person</span>
-                        <select id="wiz_customer_id" onchange="window.updateWizardState('customerId', this.value); window.updateWizardState('customerName', this.options[this.selectedIndex].text)">
+                        <select id="wiz_customer_id" onchange="window.updateWizardState('customerId', this.value); window.updateWizardState('customerName', this.options[this.selectedIndex].text)" style="padding-left: 44px;">
                             <option value="">-- Select a Customer --</option>
                             ${state.customers.map(c => `<option value="${c.id}" ${state.customerId == c.id ? 'selected' : ''}>${c.name} (${c.type})</option>`).join('')}
                         </select>
@@ -214,116 +260,127 @@ window.renderWizardStep = () => {
                 </div>
             `}
             
-            <button class="btn btn-primary btn-block" onclick="window.wizardNext(2)">Next Step <span class="material-symbols-outlined">arrow_forward</span></button>
+            <button class="btn btn-primary btn-block" style="padding: 14px; font-size: 1.05rem; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 32px;" onclick="window.wizardNext(2)">Proceed to Step 2 <span class="material-symbols-outlined">arrow_forward</span></button>
         `;
     }
     else if (state.step === 2) {
         body.innerHTML = `
-            <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 5px 0; font-weight: 600; color: var(--text-color);">Gold Calculation</h3>
-                <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Enter the weight and current market price.</p>
+            <div style="background: linear-gradient(145deg, rgba(234, 179, 8, 0.1) 0%, rgba(234, 179, 8, 0.02) 100%); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary)); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);">
+                    <span class="material-symbols-outlined" style="font-size: 1.6rem;">calculate</span>
+                </div>
+                <div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: var(--gold-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Step 2: Gold Calculation</div>
+                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Enter the gold type, weight, volume, and current market price.</div>
+                </div>
             </div>
             <div class="form-group" style="margin-bottom: 24px;">
-                <label style="margin-bottom: 8px;">Gold Type</label>
-                <div class="segmented-control">
-                    <label class="segment-label">
-                        <input type="radio" name="wiz_gold_type" value="refined" ${state.goldType === 'refined' ? 'checked' : ''} onchange="window.updateWizardState('goldType', 'refined')"> 
-                        <span><span class="material-symbols-outlined" style="font-size:18px; vertical-align:text-bottom;">diamond</span> Refined Gold</span>
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 12px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">Gold Type</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <label style="cursor: pointer; position: relative;">
+                        <input type="radio" name="wiz_gold_type" value="refined" ${state.goldType === 'refined' ? 'checked' : ''} onchange="window.updateWizardState('goldType', 'refined')" style="position: absolute; opacity: 0; pointer-events: none;">
+                        <div style="padding: 20px; border-radius: 16px; border: 2px solid ${state.goldType === 'refined' ? 'var(--gold-primary)' : 'var(--border)'}; background: ${state.goldType === 'refined' ? 'rgba(234, 179, 8, 0.05)' : 'var(--bg-main)'}; text-align: center; transition: all 0.2s; box-shadow: ${state.goldType === 'refined' ? '0 4px 12px rgba(234,179,8,0.15)' : 'none'};">
+                            <span class="material-symbols-outlined" style="font-size: 2rem; color: ${state.goldType === 'refined' ? 'var(--gold-primary)' : 'var(--text-muted)'}; margin-bottom: 8px;">diamond</span>
+                            <div style="font-weight: 700; color: ${state.goldType === 'refined' ? 'var(--gold-primary)' : 'var(--text-main)'}; font-size: 1.05rem;">Refined Gold</div>
+                        </div>
                     </label>
-                    <label class="segment-label">
-                        <input type="radio" name="wiz_gold_type" value="balls" ${state.goldType === 'balls' ? 'checked' : ''} onchange="window.updateWizardState('goldType', 'balls')"> 
-                        <span><span class="material-symbols-outlined" style="font-size:18px; vertical-align:text-bottom;">scatter_plot</span> Gold Balls</span>
+                    <label style="cursor: pointer; position: relative;">
+                        <input type="radio" name="wiz_gold_type" value="balls" ${state.goldType === 'balls' ? 'checked' : ''} onchange="window.updateWizardState('goldType', 'balls')" style="position: absolute; opacity: 0; pointer-events: none;">
+                        <div style="padding: 20px; border-radius: 16px; border: 2px solid ${state.goldType === 'balls' ? 'var(--gold-primary)' : 'var(--border)'}; background: ${state.goldType === 'balls' ? 'rgba(234, 179, 8, 0.05)' : 'var(--bg-main)'}; text-align: center; transition: all 0.2s; box-shadow: ${state.goldType === 'balls' ? '0 4px 12px rgba(234,179,8,0.15)' : 'none'};">
+                            <span class="material-symbols-outlined" style="font-size: 2rem; color: ${state.goldType === 'balls' ? 'var(--gold-primary)' : 'var(--text-muted)'}; margin-bottom: 8px;">scatter_plot</span>
+                            <div style="font-weight: 700; color: ${state.goldType === 'balls' ? 'var(--gold-primary)' : 'var(--text-main)'}; font-size: 1.05rem;">Gold Balls</div>
+                        </div>
                     </label>
                 </div>
             </div>
 
-            <!-- Current Price Info -->
-            ${state.goldType === 'refined' ? `
-                <div style="margin-bottom: 6px; font-weight: 700; color: #4b5563; font-size: 0.85rem;">
-                    Local Price
-                </div>
-                <div class="swap-input-card" style="margin-bottom: 25px;">
-                    <div class="swap-input-body">
-                        <input type="number" step="0.01" id="wiz_price_pound" placeholder="0.00" value="${state.pricePerPound || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0">
-                        <div class="swap-badge" style="background: var(--gold-primary);">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">payments</span> GHS
-                        </div>
-                    </div>
-                </div>
-            ` : `
-                <div style="margin-bottom: 6px; font-weight: 700; color: #4b5563; font-size: 0.85rem;">
-                    Price per Blade
-                </div>
-                <div class="swap-input-card" style="margin-bottom: 25px;">
-                    <div class="swap-input-body">
-                        <input type="number" step="0.01" id="wiz_price_blade" placeholder="0.00" value="${state.pricePerBlade || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0">
-                        <div class="swap-badge" style="background: var(--gold-primary);">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">payments</span> GHS
-                        </div>
-                    </div>
-                </div>
-            `}
-
             <!-- Grams Input -->
-            <div class="swap-input-card" style="${state.goldType === 'refined' ? 'margin-bottom: 4px;' : 'margin-bottom: 20px;'}">
-                <div class="swap-input-header">
-                    <span>Gram</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">more_horiz</span>
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Weight <span style="color: var(--danger);">*</span></label>
+                <div style="position: relative;">
+                    <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #eab308; pointer-events: none;">scale</span>
+                    <input type="number" step="0.0001" id="wiz_weight" placeholder="0.00" value="${state.grams || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0"
+                           style="width: 100%; padding: 16px 60px 16px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1.1rem; font-weight: 700; transition: all 0.2s;"
+                           onfocus="this.style.borderColor='#eab308'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                    <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 800; font-size: 0.85rem; pointer-events: none;">GRM</span>
                 </div>
-                <div class="swap-input-body">
-                    <input type="number" step="0.0001" id="wiz_weight" placeholder="0.00" value="${state.grams || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0">
-                    <div class="swap-badge" style="background: #eab308; color: white;">
-                        <span class="material-symbols-outlined" style="font-size: 16px;">scale</span> GRM
-                    </div>
-                </div>
-                
-                ${state.goldType === 'refined' ? `
-                    <div class="swap-icon-btn">
-                        <span class="material-symbols-outlined" style="font-size: 20px;">swap_vert</span>
-                    </div>
-                ` : ''}
             </div>
             
             ${state.goldType === 'refined' ? `
                 <!-- Volume Input -->
-                <div class="swap-input-card" style="margin-bottom: 20px;">
-                    <div class="swap-input-header">
-                        <span>Volume</span>
-                        <span class="material-symbols-outlined" style="font-size: 18px; cursor: pointer;">more_horiz</span>
-                    </div>
-                    <div class="swap-input-body">
-                        <input type="number" step="0.0001" id="wiz_volume" placeholder="0.00" value="${state.volume || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0">
-                        <div class="swap-badge" style="background: #3b82f6; color: white;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">water_drop</span> VLM
-                        </div>
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Volume <span style="color: var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #3b82f6; pointer-events: none;">water_drop</span>
+                        <input type="number" step="0.0001" id="wiz_volume" placeholder="0.00" value="${state.volume || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0"
+                               style="width: 100%; padding: 16px 60px 16px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1.1rem; font-weight: 700; transition: all 0.2s;"
+                               onfocus="this.style.borderColor='#3b82f6'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                        <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 800; font-size: 0.85rem; pointer-events: none;">VLM</span>
                     </div>
                 </div>
             ` : ''}
 
+            <!-- Current Price Info -->
+            ${state.goldType === 'refined' ? `
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Local Price <span style="color: var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gold-primary); pointer-events: none;">payments</span>
+                        <input type="number" step="0.01" id="wiz_price_pound" placeholder="0.00" value="${state.pricePerPound || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0"
+                               style="width: 100%; padding: 16px 60px 16px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1.1rem; font-weight: 700; transition: all 0.2s;"
+                               onfocus="this.style.borderColor='var(--gold-primary)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                        <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 800; font-size: 0.85rem; pointer-events: none;">GHS</span>
+                    </div>
+                </div>
+            ` : `
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Price per Blade <span style="color: var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gold-primary); pointer-events: none;">payments</span>
+                        <input type="number" step="0.01" id="wiz_price_blade" placeholder="0.00" value="${state.pricePerBlade || ''}" oninput="if(this.value < 0) this.value = Math.abs(this.value); window.calculatePurchaseMath()" min="0"
+                               style="width: 100%; padding: 16px 60px 16px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1.1rem; font-weight: 700; transition: all 0.2s;"
+                               onfocus="this.style.borderColor='var(--gold-primary)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                        <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 800; font-size: 0.85rem; pointer-events: none;">GHS</span>
+                    </div>
+                </div>
+            `}
+
+
             <!-- Total Amount & Metrics -->
-            <div class="swap-total-container" style="margin-bottom: 20px;">
-                <div class="swap-total-label">Total Amount</div>
-                <div class="swap-total-value">
-                    <span id="calc_total_payout">${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                    <span class="swap-total-symbol">₵</span>
+            <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 24px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);">
+                <div style="color: #64748b; font-weight: 800; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;">Total Payout Amount</div>
+                <div style="font-size: 3.2rem; font-weight: 800; color: var(--danger); letter-spacing: -1px; line-height: 1;">
+                    <span style="color: #94a3b8; font-size: 2rem; vertical-align: middle;">₵</span><span id="calc_total_payout">${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                 </div>
                 
                 ${state.goldType === 'refined' ? `
-                    <div class="swap-metrics-row">
-                        <span><span id="calc_density" style="font-weight: 700; color: #374151;">${(Number(state.calculatedDensity) || 0).toFixed(2)}</span> Density</span>
-                        <span><span id="calc_pounds" style="font-weight: 700; color: #374151;">${(Number(state.calculatedPounds) || 0).toFixed(2)}</span> Pounds</span>
-                        <span><span id="calc_karat" style="font-weight: 700; color: #374151;">${(Number(state.calculatedKarat) || 0).toFixed(2)}</span> Karat</span>
+                    <div style="display: flex; justify-content: center; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
+                        <div style="text-align: center;">
+                            <div id="calc_pounds" style="font-weight: 800; color: #334155; font-size: 1.2rem;">${(Number(state.calculatedPounds) || 0).toFixed(2)}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Pounds</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="calc_density" style="font-weight: 800; color: #334155; font-size: 1.2rem;">${(Number(state.calculatedDensity) || 0).toFixed(2)}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Density</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="calc_karat" style="font-weight: 800; color: #334155; font-size: 1.2rem;">${(Number(state.calculatedKarat) || 0).toFixed(2)}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Karat</div>
+                        </div>
                     </div>
                 ` : `
-                    <div class="swap-metrics-row">
-                        <span><span id="calc_blades" style="font-weight: 700; color: #374151;">${(Number(state.calculatedBlades) || 0).toFixed(4)}</span> Total Blades</span>
+                    <div style="display: flex; justify-content: center; margin-top: 16px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
+                        <div style="text-align: center;">
+                            <div id="calc_blades" style="font-weight: 800; color: #334155; font-size: 1.2rem;">${(Number(state.calculatedBlades) || 0).toFixed(4)}</div>
+                            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Total Blades</div>
+                        </div>
                     </div>
                 `}
             </div>
             
             <div class="form-group">
-                <label>Reference / Comments</label>
-                <input type="text" class="form-control" value="${state.notes}" oninput="window.updateWizardState('notes', this.value)" placeholder="Optional notes...">
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Reference / Comments</label>
+                <input type="text" class="form-control" value="${state.notes || ''}" oninput="window.updateWizardState('notes', this.value)" placeholder="Optional notes...">
             </div>
 
             <div style="display: flex; gap: 10px;">
@@ -334,9 +391,14 @@ window.renderWizardStep = () => {
     }
     else if (state.step === 3) {
         body.innerHTML = `
-            <div style="margin-bottom: 24px;">
-                <h3 style="margin: 0 0 5px 0; font-weight: 600; color: var(--text-color);">Summary & Confirm</h3>
-                <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Review the transaction details before confirming.</p>
+            <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.02) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--success), #059669); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                    <span class="material-symbols-outlined" style="font-size: 1.6rem;">check_circle</span>
+                </div>
+                <div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: var(--success); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Step 3: Summary & Confirm</div>
+                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Review the final details and complete the walk-in purchase.</div>
+                </div>
             </div>
             
             <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
@@ -369,8 +431,16 @@ window.renderWizardStep = () => {
                     </div>
                     <div style="flex: 1;">
                         <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem;">Total Weight</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">${parseFloat(state.grams).toFixed(4)} g</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${(parseFloat(state.grams) || 0).toFixed(4)} g</div>
                     </div>
+                    ${state.goldType === 'refined' ? `
+                    <div style="flex: 1; border-left: 1px solid var(--border); padding-left: 16px;">
+                        <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem; display: flex; align-items: center; gap: 4px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: #3b82f6;">water_drop</span> Volume
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${(parseFloat(state.volume) || 0).toFixed(4)} v</div>
+                    </div>
+                    ` : ''}
                 </div>
 
                 <!-- Price & Calculations -->
@@ -380,8 +450,8 @@ window.renderWizardStep = () => {
                         <span class="material-symbols-outlined" style="font-size: 20px; color: var(--text-muted);">analytics</span>
                     </div>
                     <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem;">Density & Karat</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Density: ${(Number(state.calculatedDensity) || 0).toFixed(2)} &bull; Karat: ${(Number(state.calculatedKarat) || 0).toFixed(2)} &bull; Pounds: ${(Number(state.calculatedPounds) || 0).toFixed(2)}</div>
+                        <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem;">Pounds, Density & Karat</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Pounds: ${(Number(state.calculatedPounds) || 0).toFixed(2)} &nbsp; &bull; &nbsp; Density: ${(Number(state.calculatedDensity) || 0).toFixed(2)} &nbsp; &bull; &nbsp; Karat: ${(Number(state.calculatedKarat) || 0).toFixed(2)}</div>
                     </div>
                     <div style="text-align: right;">
                         <div style="font-weight: 600; color: var(--text-color); font-size: 0.95rem;">₵ ${parseFloat(state.pricePerPound).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
@@ -418,15 +488,17 @@ window.renderWizardStep = () => {
                 ` : ''}
 
                 <!-- Total Amount -->
-                <div style="display: flex; align-items: center; padding: 16px; background: rgba(0,0,0,0.02);">
-                    <div style="background: var(--bg-hover); padding: 8px; border-radius: 6px; margin-right: 16px; display: flex;">
-                        <span class="material-symbols-outlined" style="font-size: 20px; color: var(--text-color);">payments</span>
-                    </div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: var(--text-color); font-size: 1rem;">Total Amount to Pay</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-weight: 700; color: var(--text-color); font-size: 1.15rem;">₵ ${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                <div style="padding: 24px; background: linear-gradient(135deg, #f8fafc, #f1f5f9);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-weight: 800; color: #475569; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Total Amount to Pay</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Will be deducted from vault</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 800; color: var(--danger); font-size: 2rem; letter-spacing: -0.5px;">
+                                <span style="font-size: 1.2rem; vertical-align: middle; color: #94a3b8;">₵</span>${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -455,13 +527,15 @@ window.renderWizardStep = () => {
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Txn Ref:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; font-family: monospace;">${state.transactionId}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Date:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Seller:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${sellerName}</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Handled By:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${state.handlerName}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${state.goldType}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(state.grams).toFixed(4)} g</td></tr>
                     ${state.goldType === 'refined' ? `
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Volume:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(parseFloat(state.volume) || 0).toFixed(4)} v</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(state.pricePerPound).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Pound</td></tr>
+                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedPounds) || 0).toFixed(2)}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Density:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedDensity) || 0).toFixed(2)}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Karat:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedKarat) || 0).toFixed(2)}</td></tr>
-                    <tr><td style="padding: 3px 0; color: var(--text-muted);">Pounds:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedPounds) || 0).toFixed(2)}</td></tr>
                     ` : `
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Local Price:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">₵ ${parseFloat(state.pricePerBlade).toLocaleString(undefined, { minimumFractionDigits: 2 })} / Blade</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Total Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${(Number(state.calculatedBlades) || 0).toFixed(4)}</td></tr>
@@ -620,6 +694,7 @@ window.submitWizardPurchase = async () => {
     try {
         const res = await window.api.post('/purchases/create.php', payload);
         state.transactionId = res.transaction_id || 'UNKNOWN';
+        state.handlerName = res.handled_by || 'Unknown';
         window.showToast('Purchase completed successfully!', 'success');
         window.dispatchEvent(new Event('hashchange')); // Refresh the view in background
 
@@ -656,6 +731,7 @@ window.viewPurchaseReceipt = (purchaseId) => {
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Txn Ref:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; font-family: monospace;">${txnId}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Date:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Seller:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.seller_display}</td></tr>
+                    ${purchase.handled_by ? `<tr><td style="padding: 3px 0; color: var(--text-muted);">Handled By:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${purchase.handled_by}</td></tr>` : ''}
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${purchase.gold_type}</td></tr>
                     <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(purchase.weight_grams).toFixed(4)} g</td></tr>
                     ${purchase.gold_type === 'refined' ? `

@@ -31,7 +31,7 @@ window.addEventListener('route-changed', async (e) => {
             const status = window._expensesState.statusFilter;
             const limit = window._expensesState.limit;
             const offset = (window._expensesState.page - 1) * limit;
-            
+
             const response = await window.api.get(`/expenses/list.php?status=${status}&limit=${limit}&offset=${offset}`);
 
             let expensesHtml = '';
@@ -47,48 +47,49 @@ window.addEventListener('route-changed', async (e) => {
             } else {
                 expensesHtml = response.expenses.map((exp, index) => {
                     const isVoided = exp.status === 'voided';
-                    const rowStyle = isVoided ? 'background: #fafafa; opacity: 0.8;' : 'background: white;';
-                    const textStyle = isVoided ? 'text-decoration: line-through; color: var(--text-muted);' : 'color: var(--danger);';
+                    const rowStyle = isVoided ? 'background: #fafafa; opacity: 0.7;' : 'background: white;';
+                    const textStyle = isVoided ? 'text-decoration: line-through; color: var(--text-muted);' : 'color: #f43f5e;';
                     const rowNumber = offset + index + 1;
-                    
+
                     let actionsHtml = '';
                     if (isVoided) {
                         actionsHtml = `
-                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--danger); color: var(--danger);" onclick="window.confirmPermanentDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
-                                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">delete_forever</span> Perm Delete
+                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #fca5a5; color: #ef4444; border-radius: 8px; background: white;" onclick="window.confirmPermanentDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
+                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">delete_forever</span> Perm Delete
                             </button>
                         `;
                     } else {
                         actionsHtml = `
-                            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--warning); color: var(--warning);" onclick="window.confirmDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
-                                <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle;">block</span> Void
+                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #fcd34d; color: #d97706; border-radius: 8px; background: white;" onclick="window.confirmDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
+                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">block</span> Void
                             </button>
                         `;
                     }
 
                     return `
                     <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s; ${rowStyle}" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='${isVoided ? '#fafafa' : 'white'}'">
-                        <td style="padding: 16px; color: var(--text-muted); font-weight: 500; width: 50px;">
+                        <td style="padding: 16px 24px; color: var(--text-muted); font-weight: 500; width: 50px;">
                             ${rowNumber}
                         </td>
                         <td style="padding: 16px; color: var(--text-main); font-weight: 500;">
-                            ${new Date(exp.date).toLocaleDateString()}
+                            ${new Date(exp.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
                         </td>
-                        <td style="padding: 16px; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;">
-                            EXP-${String(exp.id).padStart(6, '0')}
-                            ${isVoided ? '<span style="background: var(--danger-light); color: var(--danger); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">VOIDED</span>' : ''}
+                        <td style="padding: 16px; font-weight: 600; color: var(--text-muted);">
+                            <span style="background: var(--bg-main); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem;">EXP-${String(exp.id).padStart(6, '0')}</span>
+                            ${isVoided ? '<span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 12px;">cancel</span> VOIDED</span>' : ''}
                         </td>
-                        <td style="padding: 16px; font-weight: 500; color: var(--text-main);">
+                        <td style="padding: 16px; font-weight: 500; color: var(--text-main); font-size: 0.95rem;">
                             ${exp.description}
                         </td>
-                        <td style="padding: 16px; font-weight: 700; ${textStyle} text-align: right;">
-                            - GHS ${Number(exp.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        <td style="padding: 16px 24px; font-weight: 800; ${textStyle} text-align: right; font-size: 1.05rem;">
+                            - ${Number(exp.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </td>
                         <td style="padding: 16px; text-align: right;">
                             ${actionsHtml}
                         </td>
                     </tr>
-                `;}).join('');
+                `;
+                }).join('');
             }
 
             container.innerHTML = `
@@ -99,34 +100,56 @@ window.addEventListener('route-changed', async (e) => {
                     </button>
                 </div>
                 
-                <div class="metric-grid" style="margin-bottom: 32px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                    <div class="metric-card" style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.01) 100%); border: 1px solid rgba(239, 68, 68, 0.2);">
-                        <div class="metric-icon" style="background: var(--danger-bg); color: var(--danger);">
-                            <span class="material-symbols-outlined">receipt_long</span>
-                        </div>
-                        <div class="metric-content">
-                            <h3>Total Lifetime Expenses</h3>
-                            <div class="metric-value" style="color: var(--danger);">GHS ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                        </div>
-                    </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
                     
-                    <div class="metric-card" style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 100%); border: 1px solid rgba(245, 158, 11, 0.2);">
-                        <div class="metric-icon" style="background: var(--warning-bg); color: var(--warning);">
-                            <span class="material-symbols-outlined">calendar_month</span>
-                        </div>
-                        <div class="metric-content">
-                            <h3>Expenses This Month</h3>
-                            <div class="metric-value" style="color: var(--warning);">GHS ${Number(response.total_month_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                    <!-- Total Lifetime -->
+                    <div style="background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(185, 28, 28, 0.2);">
+                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                <div style="color: #fecaca; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Lifetime Expenses</div>
+                                <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                                    <span class="material-symbols-outlined" style="color: white; font-size: 24px;">receipt_long</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                                ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="metric-card" style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%); border: 1px solid rgba(16, 185, 129, 0.2);">
-                        <div class="metric-icon" style="background: #d1fae5; color: #10b981;">
-                            <span class="material-symbols-outlined">today</span>
+                    <!-- Expenses This Month -->
+                    <div style="background: linear-gradient(135deg, #78350f 0%, #d97706 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(217, 119, 6, 0.2);">
+                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                <div style="color: #fde68a; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Expenses This Month</div>
+                                <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                                    <span class="material-symbols-outlined" style="color: white; font-size: 24px;">calendar_month</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                                ${Number(response.total_month_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </div>
                         </div>
-                        <div class="metric-content">
-                            <h3>Expenses Today</h3>
-                            <div class="metric-value" style="color: #10b981;">GHS ${Number(response.total_today_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                    </div>
+
+                    <!-- Expenses Today -->
+                    <div style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2);">
+                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="position: relative; z-index: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                <div style="color: #a7f3d0; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Expenses Today</div>
+                                <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                                    <span class="material-symbols-outlined" style="color: white; font-size: 24px;">today</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                                ${Number(response.total_today_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -137,20 +160,20 @@ window.addEventListener('route-changed', async (e) => {
                             <span class="material-symbols-outlined" style="color: var(--text-muted);">history</span>
                             <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">Expenditure History</h3>
                         </div>
-                        <div style="display: flex; background: var(--bg-main); border-radius: 8px; padding: 4px;">
-                            <button class="btn ${window._expensesState.statusFilter === 'active' ? 'btn-primary' : ''}" style="padding: 6px 12px; font-size: 0.85rem; border: none; ${window._expensesState.statusFilter !== 'active' ? 'background: transparent; color: var(--text-muted);' : ''}" onclick="window.setExpenseFilter('active')">Active</button>
-                            <button class="btn ${window._expensesState.statusFilter === 'voided' ? 'btn-primary' : ''}" style="padding: 6px 12px; font-size: 0.85rem; border: none; ${window._expensesState.statusFilter !== 'voided' ? 'background: transparent; color: var(--text-muted);' : ''}" onclick="window.setExpenseFilter('voided')">Voided</button>
-                            <button class="btn ${window._expensesState.statusFilter === 'all' ? 'btn-primary' : ''}" style="padding: 6px 12px; font-size: 0.85rem; border: none; ${window._expensesState.statusFilter !== 'all' ? 'background: transparent; color: var(--text-muted);' : ''}" onclick="window.setExpenseFilter('all')">All</button>
+                        <div style="display: flex; background: var(--bg-main); border-radius: 12px; padding: 4px; border: 1px solid var(--border);">
+                            <button class="btn" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; transition: all 0.2s; border: none; ${window._expensesState.statusFilter === 'active' ? 'background: white; color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.05);' : 'background: transparent; color: var(--text-muted);'}" onclick="window.setExpenseFilter('active')">Active</button>
+                            <button class="btn" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; transition: all 0.2s; border: none; ${window._expensesState.statusFilter === 'voided' ? 'background: white; color: var(--danger); box-shadow: 0 2px 4px rgba(0,0,0,0.05);' : 'background: transparent; color: var(--text-muted);'}" onclick="window.setExpenseFilter('voided')">Voided</button>
+                            <button class="btn" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; transition: all 0.2s; border: none; ${window._expensesState.statusFilter === 'all' ? 'background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05);' : 'background: transparent; color: var(--text-muted);'}" onclick="window.setExpenseFilter('all')">All</button>
                         </div>
                     </div>
                     <table style="width: 100%; border-collapse: collapse; min-width: 700px;">
                         <thead>
                             <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
-                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); width: 50px;">#</th>
-                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">Date</th>
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); width: 50px;">#</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Date</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Reference</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Description</th>
-                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Amount (GHS)</th>
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Amount (GHS)</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Actions</th>
                             </tr>
                         </thead>
@@ -185,20 +208,18 @@ window.addEventListener('route-changed', async (e) => {
     window.openRecordExpenseModal = () => {
         const html = `
             <form id="record-expense-form" onsubmit="window.submitExpense(event)">
-                <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.2); color: #b45309; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 0.9rem; display: flex; gap: 12px; align-items: flex-start;">
-                    <span class="material-symbols-outlined" style="margin-top: 2px;">info</span>
+                <!-- Info Banner -->
+                <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.02) 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.05);">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--danger), #b91c1c); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                        <span class="material-symbols-outlined" style="font-size: 1.6rem;">account_balance_wallet</span>
+                    </div>
                     <div>
-                        <strong>Ledger Deduction</strong><br>
-                        This amount will be directly deducted from the Capital Ledger. Please ensure the amount and date are correct.
+                        <div style="font-size: 0.95rem; font-weight: 800; color: var(--danger); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Ledger Deduction</div>
+                        <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">This amount will be directly deducted from the Capital Ledger. Ensure the amount and date are correct before proceeding.</div>
                     </div>
                 </div>
-                
+
                 <style>
-                    #expense_amount:focus {
-                        outline: none !important;
-                        border-color: transparent !important;
-                        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
-                    }
                     #expense_amount::-webkit-outer-spin-button,
                     #expense_amount::-webkit-inner-spin-button {
                         -webkit-appearance: none;
@@ -208,29 +229,56 @@ window.addEventListener('route-changed', async (e) => {
                         -moz-appearance: textfield;
                     }
                 </style>
-                <div class="form-group" style="text-align: center; margin-bottom: 24px;">
-                    <label style="display: block; font-size: 1rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">Amount (GHS) <span style="color: var(--danger);">*</span></label>
-                    <input type="number" id="expense_amount" required step="0.01" min="0.01" placeholder="0.00" style="padding: 24px 16px; font-size: 3.5rem; font-weight: 800; text-align: center; height: 100px; border-radius: 16px; border: none; outline: none; color: var(--danger); background: var(--bg-main); letter-spacing: -1px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+
+                <!-- Amount Input -->
+                <div class="form-group" style="margin-bottom: 32px;">
+                    <label style="display: block; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; font-size: 0.85rem; text-align: center; letter-spacing: 1.5px; text-transform: uppercase;">Expense Amount <span style="color: var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-weight: 700; font-size: 1.8rem; pointer-events: none;">₵</span>
+                        <input type="number" id="expense_amount" required step="0.01" min="0.01" placeholder="0.00" 
+                               style="width: 100%; padding: 24px 64px; font-size: 2.8rem; font-weight: 800; border: 2px solid #e2e8f0; border-radius: 20px; background: #f8fafc; transition: all 0.3s; text-align: center; color: var(--danger); letter-spacing: -1px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);"
+                               onfocus="this.style.borderColor='var(--danger)'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(239, 68, 68, 0.1), inset 0 2px 4px rgba(0,0,0,0.02)';" 
+                               onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='inset 0 2px 6px rgba(0,0,0,0.02)';">
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Expense Description <span style="color: var(--danger);">*</span></label>
-                    <input type="text" id="expense_description" required placeholder="e.g. Fuel, Light Bill, Food..." style="padding: 12px; font-size: 1rem;">
+                <!-- Description & Date Inputs -->
+                <div style="margin-bottom: 32px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Description <span style="color: var(--danger);">*</span></label>
+                        <div style="position: relative;">
+                            <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">edit_note</span>
+                            <input type="text" id="expense_description" required placeholder="e.g. Fuel, Light Bill..." 
+                                   style="width: 100%; padding: 14px 16px 14px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1rem; transition: all 0.2s;"
+                                   onfocus="this.style.borderColor='var(--info)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="expense_date" style="padding: 12px;">
-                    <small style="color: var(--text-muted); display: block; margin-top: 4px;">Leave empty to use today's date</small>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Date</label>
+                    <div style="position: relative;">
+                        <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">calendar_today</span>
+                        <input type="date" id="expense_date" 
+                                style="width: 100%; padding: 14px 16px 14px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1rem; transition: all 0.2s; font-family: inherit;"
+                                onfocus="this.style.borderColor='var(--info)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top: -24px; margin-bottom: 32px;">
+                    <small style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">Leave date empty to use today's date</small>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 32px; background: var(--danger); border-color: var(--danger); color: white; font-size: 1rem; padding: 14px;">
-                    <span class="material-symbols-outlined">payments</span> Deduct from Ledger
-                </button>
+                <!-- Submit Action -->
+                <div style="padding-top: 24px; border-top: 1px dashed var(--border); margin-top: 16px;">
+                    <button type="submit" class="btn" style="width: 100%; background: linear-gradient(135deg, var(--danger), #b91c1c); color: white; border: none; font-weight: 700; padding: 16px; font-size: 1.1rem; border-radius: 12px; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
+                        <span class="material-symbols-outlined">payments</span> Deduct from Ledger
+                    </button>
+                </div>
             </form>
         `;
 
-        window.openModal('Record Office Expense', html);
+        window.openModal('Record Office Expense', html, { maxWidth: '600px' });
     };
 
     window.submitExpense = async (event) => {

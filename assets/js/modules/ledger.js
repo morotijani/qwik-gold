@@ -33,42 +33,65 @@ window.addEventListener('route-changed', async (e) => {
                         </button>
                     </div>
                     
-                    <div class="metric-grid" style="margin-bottom: 32px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-                        <div class="metric-card" style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%); border: 1px solid rgba(16, 185, 129, 0.2);">
-                            <div class="metric-icon" style="background: #d1fae5; color: #10b981;">
-                                <span class="material-symbols-outlined">account_balance</span>
-                            </div>
-                            <div class="metric-content">
-                                <h3>Total Capital</h3>
-                                <div class="metric-value" style="color: #10b981;">GHS ${Number(stats.total_capital_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-                            </div>
-                        </div>
-
-                        <div class="metric-card" style="background: linear-gradient(145deg, rgba(234, 179, 8, 0.05) 0%, rgba(234, 179, 8, 0.01) 100%); border: 1px solid rgba(234, 179, 8, 0.2);">
-                            <div class="metric-icon" style="background: #fef08a; color: #eab308;">
-                                <span class="material-symbols-outlined">circle</span>
-                            </div>
-                            <div class="metric-content">
-                                <h3>Vault: Gold Balls</h3>
-                                <div class="metric-value" style="color: #ca8a04;">
-                                    ${Number(stats.gold_balls.grams || 0).toFixed(4)}g 
-                                    <span style="font-size: 1rem; opacity: 0.8; font-weight: 500;">(${Number(stats.gold_balls.total_balls_blades || 0)} Balls)</span>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                        
+                        <!-- Total Capital -->
+                        <div style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2);">
+                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                            <div style="position: relative; z-index: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                    <div style="color: #a7f3d0; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Total Capital</div>
+                                    <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                                        <span class="material-symbols-outlined" style="color: white; font-size: 24px;">account_balance</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                                    ${Number(stats.total_capital_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="metric-card" style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 100%); border: 1px solid rgba(245, 158, 11, 0.2);">
-                            <div class="metric-icon" style="background: #fde68a; color: #f59e0b;">
-                                <span class="material-symbols-outlined">diamond</span>
-                            </div>
-                            <div class="metric-content">
-                                <h3>Vault: Refined Gold</h3>
-                                <div class="metric-value" style="color: #d97706;">
-                                    ${Number(stats.refined_gold.grams || 0).toFixed(4)}g 
-                                    <span style="font-size: 1rem; opacity: 0.8; font-weight: 500;">(${Number(stats.refined_gold.volume || 0)} Vol)</span>
+                        <!-- Gold Balls Vault -->
+                        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; filter: blur(30px);"></div>
+                            <div style="position: relative; z-index: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                    <div style="color: #94a3b8; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Vault: Gold Balls</div>
+                                    <div style="background: rgba(245, 158, 11, 0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(245, 158, 11, 0.2);">
+                                        <span class="material-symbols-outlined" style="color: #fbbf24; font-size: 24px;">scatter_plot</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                    ${Number(stats.gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; opacity: 0.7;">g</span>
+                                </div>
+                                <div style="margin-top: 10px; font-size: 0.95rem; color: #fbbf24; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">category</span>
+                                    ${Number(stats.gold_balls.total_balls_blades || 0)} Total Balls/Blades
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Refined Gold Vault -->
+                        <div style="background: linear-gradient(135deg, #b45309 0%, #92400e 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(146, 64, 14, 0.2);">
+                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 50%; filter: blur(30px);"></div>
+                            <div style="position: relative; z-index: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                    <div style="color: #fde68a; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Vault: Refined Gold</div>
+                                    <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+                                        <span class="material-symbols-outlined" style="color: white; font-size: 24px;">diamond</span>
+                                    </div>
+                                </div>
+                                <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    ${Number(stats.refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; opacity: 0.8;">g</span>
+                                </div>
+                                <div style="margin-top: 10px; font-size: 0.95rem; color: #fef3c7; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">water_drop</span>
+                                    ${Number(stats.refined_gold.volume || 0)} Total Volume
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     
                     <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid var(--border);">
@@ -111,12 +134,19 @@ window.addEventListener('route-changed', async (e) => {
 
                 const isPending = s.status === 'pending';
                 const statusBadge = isPending
-                    ? '<span style="background: #fef08a; color: #a16207; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">PENDING</span>'
-                    : '<span style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">COMPLETED</span>';
+                    ? `<span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                          <span class="material-symbols-outlined" style="font-size: 14px;">pending</span> PENDING
+                       </span>`
+                    : `<span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                          <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> COMPLETED
+                       </span>`;
 
                 const clickHandler = isPending
                     ? `window.openCompleteSaleModal('${encodeURIComponent(JSON.stringify(s))}')`
                     : `window.viewSoldGoldDetails('${encodeURIComponent(JSON.stringify(s))}')`;
+                
+                const typeIcon = s.gold_type === 'refined' ? 'diamond' : 'scatter_plot';
+                const typeColor = s.gold_type === 'refined' ? '#f59e0b' : '#64748b';
 
                 return `
                                     <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s; cursor: pointer;" 
@@ -124,12 +154,17 @@ window.addEventListener('route-changed', async (e) => {
                                         onclick="${clickHandler}">
                                         <td style="padding: 16px 24px;">${statusBadge}</td>
                                         <td style="padding: 16px; color: var(--text-main); font-weight: 500;">${dateStr}</td>
-                                        <td style="padding: 16px; color: var(--text-muted); text-transform: capitalize;">${s.gold_type}</td>
-                                        <td style="padding: 16px; color: var(--text-main); font-weight: 500;">${Number(s.total_grams).toFixed(4)}g</td>
+                                        <td style="padding: 16px;">
+                                            <span style="display: inline-flex; align-items: center; gap: 6px; color: ${typeColor}; font-weight: 600; font-size: 0.95rem;">
+                                                <span class="material-symbols-outlined" style="font-size: 18px;">${typeIcon}</span>
+                                                <span style="color: var(--text-muted); text-transform: capitalize;">${s.gold_type}</span>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 16px; color: var(--text-main); font-weight: 600;">${Number(s.total_grams).toFixed(4)}g</td>
                                         <td style="padding: 16px; font-weight: 500; text-align: right; color: var(--text-muted);">
                                             ${Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </td>
-                                        <td style="padding: 16px 24px; font-weight: 700; text-align: right; color: ${isPending ? 'var(--text-muted)' : 'var(--success)'};">
+                                        <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${isPending ? 'var(--text-muted)' : 'var(--success)'}; font-size: 1.05rem;">
                                             ${isPending ? '-' : '+' + Number(s.actual_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </td>
                                     </tr>

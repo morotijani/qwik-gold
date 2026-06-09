@@ -9,28 +9,38 @@
         // Initial Skeleton
         container.innerHTML = `
             <div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 700; color: var(--text-main);">Loan Portfolio</h2>
-                    <button class="btn btn-primary" onclick="window.openIssueLoanModal()">
-                        <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">add</span> Issue New Loan
-                    </button>
+                <div style="background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 15px 35px rgba(49, 46, 129, 0.2);">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(40px);"></div>
+                    <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(30px);"></div>
+                    <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="color: #a5b4fc; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">account_balance</span> Enterprise Credit
+                            </div>
+                            <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: white;">Loan Portfolio</h2>
+                            <p style="margin: 0; color: #c7d2fe; font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Manage active credit lines, collateral-backed financing, and track enterprise settlements across all registered keepers.</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="window.openIssueLoanModal()" style="background: white; color: #3730a3; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;">
+                            <span class="material-symbols-outlined">add</span> Issue New Loan
+                        </button>
+                    </div>
                 </div>
                 
                 <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid var(--border);">
                     <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;">
-                        <span class="material-symbols-outlined" style="color: var(--text-muted);">account_balance_wallet</span>
-                        <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">All Issued Loans</h3>
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">receipt_long</span>
+                        <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">Issued Loans Ledger</h3>
                     </div>
-                    <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
                         <thead>
                             <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
-                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">No.</th>
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); width: 50px;">#</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Loan ID</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Customer Name</th>
-                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Principal Amount</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Principal Amount</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Status</th>
-                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">Date Issued</th>
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Date Issued</th>
                             </tr>
                         </thead>
                         <tbody id="loans-table-body">
@@ -56,24 +66,33 @@
 
             let html = '';
             res.forEach((loan, index) => {
-                const date = new Date(loan.created_at).toLocaleDateString();
+                const date = new Date(loan.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
                 const typeBadge = loan.type === 'collateral'
-                    ? '<span class="badge" style="background: rgba(245, 158, 11, 0.1); color: #d97706;">Collateral</span>'
-                    : '<span class="badge" style="background: var(--info-bg); color: var(--info);">Standard</span>';
+                    ? `<span style="background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 14px;">diamond</span> Collateral</span>`
+                    : `<span style="background: rgba(59, 130, 246, 0.1); color: #2563eb; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 14px;">description</span> Standard</span>`;
 
                 const statusBadge = loan.status === 'active'
-                    ? '<span class="status-active">Active</span>'
-                    : '<span class="status-settled">Settled</span>';
+                    ? `<span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 14px;">trending_up</span> Active</span>`
+                    : `<span style="background: rgba(100, 116, 139, 0.1); color: #475569; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Settled</span>`;
 
                 html += `
                     <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
-                        <td style="padding: 16px 24px; color: var(--text-muted);">${index + 1}</td>
-                        <td style="padding: 16px; font-weight: 600;"><a href="#" onclick="window.openLoanDetailsModal(${loan.id}); return false;" style="color: var(--gold-primary); text-decoration: none;">${loan.loan_uid || 'LN-'+loan.id}</a></td>
-                        <td style="padding: 16px; font-weight: 600;"><a href="#" onclick="window.previewCustomerLoans(${loan.customer_id}); return false;" style="color: var(--text-main); text-decoration: none;">${loan.customer_name}</a></td>
-                        <td style="padding: 16px; font-weight: 700; color: var(--text-main);">GHS ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td style="padding: 16px 24px; color: var(--text-muted); font-weight: 500;">${index + 1}</td>
+                        <td style="padding: 16px; font-weight: 600;">
+                            <a href="#" onclick="window.openLoanDetailsModal(${loan.id}); return false;" style="background: var(--bg-main); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; color: var(--gold-primary); text-decoration: none; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border)'">${loan.loan_uid || 'LN-'+String(loan.id).padStart(6, '0')}</a>
+                        </td>
+                        <td style="padding: 16px; font-weight: 600;">
+                            <a href="#" onclick="window.previewCustomerLoans(${loan.customer_id}); return false;" style="color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--gold-light); display: flex; align-items: center; justify-content: center; color: var(--gold-dark); font-size: 0.8rem;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">person</span>
+                                </div>
+                                ${loan.customer_name}
+                            </a>
+                        </td>
+                        <td style="padding: 16px; font-weight: 800; color: var(--text-main); text-align: right; font-size: 1.05rem;">GHS ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td style="padding: 16px;">${typeBadge}</td>
                         <td style="padding: 16px;">${statusBadge}</td>
-                        <td style="padding: 16px 24px; color: var(--text-muted); font-size: 0.9rem;">${date}</td>
+                        <td style="padding: 16px 24px; color: var(--text-muted); font-size: 0.95rem; text-align: right; font-weight: 500;">${date}</td>
                     </tr>
                 `;
             });

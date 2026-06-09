@@ -22,11 +22,13 @@ try {
             p.karat,
             p.pounds,
             p.total_blades,
+            u2.name as handled_by,
             p.notes, 
             p.created_at,
             c.name as customer_name
         FROM gold_purchases p
         LEFT JOIN customers c ON p.customer_id = c.id
+        LEFT JOIN users u2 ON p.handler_id = u2.id
         WHERE p.origin = 'walk_in'
         ORDER BY p.created_at DESC
     ");
