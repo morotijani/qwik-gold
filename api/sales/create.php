@@ -99,5 +99,6 @@ try {
          sendResponse('error', 'Invalid customer_id: Customer does not exist.', [], 400);
     }
     
-    sendResponse('error', 'Failed to record purchase: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

@@ -126,5 +126,6 @@ try {
     }
     
     // Pass the specific error message along in the response
-    sendResponse('error', 'Liquidation failed: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

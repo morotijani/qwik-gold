@@ -10,6 +10,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
     <!-- Custom Design System -->
     <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    <link rel="apple-touch-icon" href="assets/img/icon-192x192.png">
 </head>
 <body class="light-theme">
 
@@ -145,7 +150,7 @@
                 </div>
                 <div class="topbar-right">
                     <span id="clock" class="clock hidden"></span>
-                    <button class="btn-icon notification-btn"><span class="material-symbols-outlined">notifications</span></button>
+                    <button class="btn-icon" onclick="window.openNewPurchaseModal()" title="Quick Walk-In Purchase" style="color: var(--success);"><span class="material-symbols-outlined">storefront</span></button>
                     <div class="user-profile-top" style="cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="window.location.hash='profile'" title="My Profile">
                         <div class="user-avatar-small">
                             <span class="material-symbols-outlined">account_circle</span>
@@ -186,5 +191,17 @@
     <script src="assets/js/modules/settings.js"></script>
     <script src="assets/js/modules/users.js"></script>
     <script src="assets/js/modules/help.js"></script>
+    
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker error:', err));
+            });
+        }
+    </script>
 </body>
 </html>

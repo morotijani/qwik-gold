@@ -121,5 +121,6 @@ try {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    sendResponse('error', 'Repayment failed: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

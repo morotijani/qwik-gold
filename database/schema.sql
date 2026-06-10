@@ -23,7 +23,10 @@ CREATE TABLE capital_ledger (
     running_balance DECIMAL(15, 2) NOT NULL,
     reference_id INT DEFAULT NULL, -- Links to specific loan, purchase, or expense ID
     description VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_transaction_type (transaction_type),
+    INDEX idx_reference_id (reference_id),
+    INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- gold_vault (The Physical Gold Tracker)
@@ -101,6 +104,8 @@ CREATE TABLE gold_purchases (
     origin ENUM('walk_in', 'from_keeper', 'loan_offset') NOT NULL,
     notes VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_transaction_ref (transaction_ref),
+    INDEX idx_created_at (created_at),
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

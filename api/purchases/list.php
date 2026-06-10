@@ -48,5 +48,6 @@ try {
 
     sendResponse('success', 'Purchases retrieved successfully', $purchases, 200);
 } catch (Exception $e) {
-    sendResponse('error', 'Failed to fetch purchases: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

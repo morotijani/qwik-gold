@@ -66,5 +66,6 @@ try {
 
 } catch (\PDOException $e) {
     // Output error response
-    sendResponse('error', 'Database error occurred while forecasting: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

@@ -48,5 +48,6 @@ try {
     ], 200);
 
 } catch (\Exception $e) {
-    sendResponse('error', 'Failed to retrieve loan details: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

@@ -73,5 +73,6 @@ try {
     sendResponse('success', 'Keeper history retrieved', $history, 200);
 
 } catch (\PDOException $e) {
-    sendResponse('error', 'Database error occurred: ' . $e->getMessage(), [], 500);
+    error_log("System Error: " . $e->getMessage());
+    sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }
