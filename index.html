@@ -70,20 +70,14 @@
             </div>
             
             <nav class="sidebar-nav">
+                <div class="nav-section-title">Overview</div>
                 <a href="#dashboard" class="nav-link active" data-route="dashboard">
                     <span class="material-symbols-outlined">monitoring</span> Dashboard
                 </a>
+                
+                <div class="nav-section-title">Core Operations</div>
                 <a href="#customers" class="nav-link" data-route="customers">
                     <span class="material-symbols-outlined">group</span> Customers
-                </a>
-                <a href="#loans" class="nav-link" data-route="loans">
-                    <span class="material-symbols-outlined">account_balance_wallet</span> Loans
-                </a>
-                <a href="#transactions" class="nav-link" data-route="transactions">
-                    <span class="material-symbols-outlined">sync_alt</span> Transactions
-                </a>
-                <a href="#expenses" class="nav-link" data-route="expenses">
-                    <span class="material-symbols-outlined">receipt_long</span> Expenditures
                 </a>
                 <a href="#purchases" class="nav-link" data-route="purchases">
                     <span class="material-symbols-outlined">add_shopping_cart</span> Walk-In Purchases
@@ -91,15 +85,29 @@
                 <a href="#keepers" class="nav-link" data-route="keepers">
                     <span class="material-symbols-outlined">inventory_2</span> Keepers Vault
                 </a>
+
+                <div class="nav-section-title">Finance & Ledger</div>
+                <a href="#loans" class="nav-link" data-route="loans">
+                    <span class="material-symbols-outlined">account_balance_wallet</span> Loans
+                </a>
+                <a href="#expenses" class="nav-link" data-route="expenses">
+                    <span class="material-symbols-outlined">receipt_long</span> Expenditures
+                </a>
                 <a href="#ledger" class="nav-link" data-route="ledger">
                     <span class="material-symbols-outlined">menu_book</span> Capital Ledger
                 </a>
+                <a href="#transactions" class="nav-link" data-route="transactions">
+                    <span class="material-symbols-outlined">sync_alt</span> Transactions
+                </a>
+
+                <div class="nav-section-title">Preferences</div>
                 <a href="#profile" class="nav-link" data-route="profile">
-                    <span class="material-symbols-outlined">manage_accounts</span> Admin Profile
+                    <span class="material-symbols-outlined">manage_accounts</span> My Profile
                 </a>
                 <a href="#settings" class="nav-link" data-route="settings">
-                    <span class="material-symbols-outlined">settings</span> Settings
+                    <span class="material-symbols-outlined">settings</span> System Settings
                 </a>
+
                 <!-- Admin Only Links will be injected via JS if role === 'admin' -->
                 <div id="admin-nav" class="hidden">
                     <div class="nav-section-title">Administration</div>

@@ -923,41 +923,70 @@ window.openCreateKeeperModal = () => {
 
     modalBody.innerHTML = `
         <form id="create-keeper-form" onsubmit="window.submitCreateKeeper(event)">
-            <div class="form-group">
-                <label>Keeper Full Name <span style="color: var(--danger);">*</span></label>
-                <input type="text" id="new_keeper_name" required placeholder="e.g. Kwame Mensah">
-            </div>
-            
-            <div class="form-group">
-                <label>Business Name <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
-                <input type="text" id="new_keeper_business" placeholder="e.g. Gold Vault Keepers Ltd">
-            </div>
-
-            <div class="form-group">
-                <label>Entity Type</label>
-                <select id="new_keeper_entity" required>
-                    <option value="individual">Individual</option>
-                    <option value="group">Group / Company</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Phone Number <span style="color: var(--danger);">*</span></label>
-                <input type="text" id="new_keeper_phone" required placeholder="e.g. 0244123456">
+            <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    <span class="material-symbols-outlined" style="font-size: 1.6rem;">how_to_reg</span>
+                </div>
+                <div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #2563eb; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Register Keeper</div>
+                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Create a profile to securely track keeper deposits and liquidations.</div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Email Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
-                <input type="email" id="new_keeper_email" placeholder="e.g. contact@domain.com">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Full Name <span style="color: var(--danger);">*</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="text" id="new_keeper_name" required placeholder="Kwame Mensah" style="padding-left: 44px; width: 100%;">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Business Name <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 400;">(Optional)</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">storefront</span>
+                        <input type="text" id="new_keeper_business" placeholder="Keepers Ltd" style="padding-left: 44px; width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Entity Type</label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">domain</span>
+                        <select id="new_keeper_entity" required style="padding-left: 44px; width: 100%;">
+                            <option value="individual">Individual</option>
+                            <option value="group">Group / Company</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Phone Number <span style="color: var(--danger);">*</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">call</span>
+                        <input type="text" id="new_keeper_phone" required placeholder="0244123456" style="padding-left: 44px; width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Email Address <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 400;">(Optional)</span></label>
+                <div class="input-with-icon">
+                    <span class="material-symbols-outlined">mail</span>
+                    <input type="email" id="new_keeper_email" placeholder="contact@domain.com" style="padding-left: 44px; width: 100%;">
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Physical Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
-                <textarea id="new_keeper_address" rows="2" placeholder="e.g. 15 Kumasi Rd"></textarea>
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Physical Address <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 400;">(Optional)</span></label>
+                <textarea id="new_keeper_address" rows="2" placeholder="e.g. 15 Kumasi Rd" class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid var(--border); padding: 12px;"></textarea>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
-                <span class="material-symbols-outlined">how_to_reg</span> Register Keeper
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.05rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
+                <span class="material-symbols-outlined">how_to_reg</span> Complete Registration
             </button>
         </form>
     `;
@@ -1000,40 +1029,69 @@ window.openEditKeeperModal = (profile) => {
 
     modalBody.innerHTML = `
         <form id="edit-keeper-form" onsubmit="window.submitEditKeeper(event, ${profile.id})">
-            <div class="form-group">
-                <label>Keeper Full Name <span style="color: var(--danger);">*</span></label>
-                <input type="text" id="edit_keeper_name" required value="${profile.name}">
-            </div>
-            
-            <div class="form-group">
-                <label>Business Name <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
-                <input type="text" id="edit_keeper_business" value="${profile.business_name || ''}">
-            </div>
-
-            <div class="form-group">
-                <label>Entity Type</label>
-                <select id="edit_keeper_entity" required>
-                    <option value="individual" ${profile.entity_type === 'individual' ? 'selected' : ''}>Individual</option>
-                    <option value="group" ${profile.entity_type === 'group' ? 'selected' : ''}>Group / Company</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Phone Number <span style="color: var(--danger);">*</span></label>
-                <input type="text" id="edit_keeper_phone" required value="${profile.phone || ''}">
+            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    <span class="material-symbols-outlined" style="font-size: 1.6rem;">edit_document</span>
+                </div>
+                <div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #d97706; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Update Keeper</div>
+                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Modify existing profile details for this keeper.</div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Email Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
-                <input type="email" id="edit_keeper_email" value="${profile.email || ''}">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Full Name <span style="color: var(--danger);">*</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="text" id="edit_keeper_name" required value="${profile.name}" style="padding-left: 44px; width: 100%;">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Business Name <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 400;">(Optional)</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">storefront</span>
+                        <input type="text" id="edit_keeper_business" value="${profile.business_name || ''}" style="padding-left: 44px; width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Entity Type</label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">domain</span>
+                        <select id="edit_keeper_entity" required style="padding-left: 44px; width: 100%;">
+                            <option value="individual" ${profile.entity_type === 'individual' ? 'selected' : ''}>Individual</option>
+                            <option value="group" ${profile.entity_type === 'group' ? 'selected' : ''}>Group / Company</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin: 0;">
+                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Phone Number <span style="color: var(--danger);">*</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined">call</span>
+                        <input type="text" id="edit_keeper_phone" required value="${profile.phone || ''}" style="padding-left: 44px; width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Email Address <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 400;">(Optional)</span></label>
+                <div class="input-with-icon">
+                    <span class="material-symbols-outlined">mail</span>
+                    <input type="email" id="edit_keeper_email" value="${profile.email || ''}" style="padding-left: 44px; width: 100%;">
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Physical Address <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span></label>
-                <textarea id="edit_keeper_address" rows="2">${profile.address || ''}</textarea>
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Physical Address <span style="color: var(--text-muted); font-size: 0.8rem; font-weight: 400;">(Optional)</span></label>
+                <textarea id="edit_keeper_address" rows="2" class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid var(--border); padding: 12px;">${profile.address || ''}</textarea>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+            <button type="submit" class="btn" style="width: 100%; background: #f59e0b; color: white; padding: 16px; font-size: 1.05rem; font-weight: 600; border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); cursor: pointer;">
                 <span class="material-symbols-outlined">save</span> Save Changes
             </button>
         </form>

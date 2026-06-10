@@ -36,36 +36,36 @@ window.addEventListener('route-changed', async (e) => {
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
                         
                         <!-- Total Capital -->
-                        <div style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2);">
-                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05);">
+                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                             <div style="position: relative; z-index: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                    <div style="color: #a7f3d0; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Total Capital</div>
-                                    <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-                                        <span class="material-symbols-outlined" style="color: white; font-size: 24px;">account_balance</span>
+                                    <div style="color: #059669; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Total Capital</div>
+                                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
+                                        <span class="material-symbols-outlined" style="font-size: 24px;">account_balance</span>
                                     </div>
                                 </div>
-                                <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                    <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                    <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
                                     ${Number(stats.total_capital_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Gold Balls Vault -->
-                        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); border: 1px solid rgba(255,255,255,0.05);">
-                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="background: linear-gradient(145deg, rgba(71, 85, 105, 0.15) 0%, rgba(71, 85, 105, 0.03) 100%); border: 1px solid rgba(71, 85, 105, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(71, 85, 105, 0.05);">
+                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(71, 85, 105, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                             <div style="position: relative; z-index: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                    <div style="color: #94a3b8; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Vault: Gold Balls</div>
-                                    <div style="background: rgba(245, 158, 11, 0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(245, 158, 11, 0.2);">
-                                        <span class="material-symbols-outlined" style="color: #fbbf24; font-size: 24px;">scatter_plot</span>
+                                    <div style="color: #475569; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Vault: Gold Balls</div>
+                                    <div style="background: linear-gradient(135deg, #64748b, #475569); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(71, 85, 105, 0.3);">
+                                        <span class="material-symbols-outlined" style="font-size: 24px;">scatter_plot</span>
                                     </div>
                                 </div>
-                                <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                    ${Number(stats.gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; opacity: 0.7;">g</span>
+                                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                    ${Number(stats.gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">g</span>
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.95rem; color: #fbbf24; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <div style="margin-top: 10px; font-size: 0.95rem; color: #475569; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">category</span>
                                     ${Number(stats.gold_balls.total_balls_blades || 0)} Total Balls/Blades
                                 </div>
@@ -73,19 +73,19 @@ window.addEventListener('route-changed', async (e) => {
                         </div>
 
                         <!-- Refined Gold Vault -->
-                        <div style="background: linear-gradient(135deg, #b45309 0%, #92400e 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(146, 64, 14, 0.2);">
-                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);">
+                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                             <div style="position: relative; z-index: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                    <div style="color: #fde68a; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Vault: Refined Gold</div>
-                                    <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-                                        <span class="material-symbols-outlined" style="color: white; font-size: 24px;">diamond</span>
+                                    <div style="color: #d97706; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Vault: Refined Gold</div>
+                                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
+                                        <span class="material-symbols-outlined" style="font-size: 24px;">diamond</span>
                                     </div>
                                 </div>
-                                <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                    ${Number(stats.refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; opacity: 0.8;">g</span>
+                                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                    ${Number(stats.refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">g</span>
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.95rem; color: #fef3c7; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <div style="margin-top: 10px; font-size: 0.95rem; color: #d97706; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">water_drop</span>
                                     ${Number(stats.refined_gold.volume || 0)} Total Volume
                                 </div>

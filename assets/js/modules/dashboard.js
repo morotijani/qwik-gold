@@ -32,18 +32,21 @@ window.addEventListener('route-changed', async (e) => {
 
         container.innerHTML = `
             <!-- Dashboard Hero -->
-            <div style="background: linear-gradient(135deg, var(--gold-primary) 0%, #b45309 100%); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2);">
-                <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px);"></div>
-                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(30px);"></div>
+            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);">
+                <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(40px);"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                 <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="color: #fef08a; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">dashboard</span> Executive Overview
+                        <div style="color: #d97706; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); margin-right: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">dashboard</span>
+                            </div>
+                            Executive Overview
                         </div>
-                        <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: white;">Welcome back to Qwik-Gold</h2>
-                        <p style="margin: 0; color: #fef9c3; font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Here is your business performance and liquidity overview for today.</p>
+                        <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main);">Welcome back to Qwik-Gold</h2>
+                        <p style="margin: 0; color: var(--text-muted); font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Here is your business performance and liquidity overview for today.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="window.showInjectCapitalModal()" style="background: white; color: #b45309; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;">
+                    <button class="btn btn-primary" onclick="window.showInjectCapitalModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                         <span class="material-symbols-outlined">payments</span> Inject Capital
                     </button>
                 </div>
@@ -52,43 +55,43 @@ window.addEventListener('route-changed', async (e) => {
             <!-- Key Metrics Grid -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px;">
                 <!-- Available Liquidity -->
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
-                    <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #10b981;"></div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: #10b981; flex-shrink: 0;">
+                <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
+                    <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(20px);"></div>
+                    <div style="display: flex; align-items: center; gap: 12px; position: relative; z-index: 1;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
                             <span class="material-symbols-outlined" style="font-size: 24px;">account_balance</span>
                         </div>
-                        <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Available Liquidity</div>
+                        <div style="color: #059669; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Available Liquidity</div>
                     </div>
-                    <div style="font-size: 2.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; white-space: nowrap;">
+                    <div style="font-size: 2.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; white-space: nowrap; position: relative; z-index: 1;">
                         <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${capitalData.available_cash_ghs.toLocaleString(undefined, {minimumFractionDigits:2})}
                     </div>
                 </div>
 
                 <!-- Company Gold -->
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
-                    <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #f59e0b;"></div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; color: #d97706; flex-shrink: 0;">
+                <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
+                    <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(20px);"></div>
+                    <div style="display: flex; align-items: center; gap: 12px; position: relative; z-index: 1;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
                             <span class="material-symbols-outlined" style="font-size: 24px;">diamond</span>
                         </div>
-                        <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Company Gold</div>
+                        <div style="color: #d97706; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Company Gold</div>
                     </div>
-                    <div style="font-size: 2.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; white-space: nowrap;">
+                    <div style="font-size: 2.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; white-space: nowrap; position: relative; z-index: 1;">
                         ${companyTotal} <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 600;">g</span>
                     </div>
                 </div>
 
                 <!-- Keeper Liabilities -->
-                <div style="background: white; border-radius: 20px; padding: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.03); border: 1px solid var(--border); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
-                    <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3b82f6;"></div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; flex-shrink: 0;">
+                <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.03) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
+                    <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; filter: blur(20px);"></div>
+                    <div style="display: flex; align-items: center; gap: 12px; position: relative; z-index: 1;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
                             <span class="material-symbols-outlined" style="font-size: 24px;">inventory_2</span>
                         </div>
-                        <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Keeper Liabilities</div>
+                        <div style="color: #2563eb; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Keeper Liabilities</div>
                     </div>
-                    <div style="font-size: 2.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; white-space: nowrap;">
+                    <div style="font-size: 2.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 8px; white-space: nowrap; position: relative; z-index: 1;">
                         ${keeperTotal} <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 600;">g</span>
                     </div>
                 </div>

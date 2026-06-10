@@ -33,18 +33,21 @@ window.addEventListener('route-changed', async (e) => {
     container.innerHTML = `
         <div style="width: 100%; padding-bottom: 60px;">
             <!-- Hero Banner -->
-            <div style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 15px 35px rgba(30, 64, 175, 0.2);">
-                <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%; filter: blur(40px);"></div>
-                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(59, 130, 246, 0.2); border-radius: 50%; filter: blur(30px);"></div>
+            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);">
+                <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(40px);"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                 <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="color: #93c5fd; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <span class="material-symbols-outlined" style="font-size: 18px;">diamond</span> Acquisitions
+                        <div style="color: #d97706; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); margin-right: 4px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">diamond</span>
+                            </div>
+                            Acquisitions
                         </div>
-                        <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: white;">Walk-In Purchases</h2>
-                        <p style="margin: 0; color: #dbeafe; font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Process and track all incoming gold purchases from registered customers and walk-in sellers.</p>
+                        <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main);">Walk-In Purchases</h2>
+                        <p style="margin: 0; color: var(--text-muted); font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Process and track all incoming gold purchases from registered customers and walk-in sellers.</p>
                     </div>
-                    <button class="btn btn-primary" onclick="window.openNewPurchaseModal()" style="background: white; color: #1d4ed8; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;">
+                    <button class="btn btn-primary" onclick="window.openNewPurchaseModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                         <span class="material-symbols-outlined">add_shopping_cart</span> New Purchase
                     </button>
                 </div>

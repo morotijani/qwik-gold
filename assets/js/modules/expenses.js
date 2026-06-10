@@ -103,51 +103,51 @@ window.addEventListener('route-changed', async (e) => {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
                     
                     <!-- Total Lifetime -->
-                    <div style="background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(185, 28, 28, 0.2);">
-                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                    <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.03) 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05);">
+                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                         <div style="position: relative; z-index: 1;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <div style="color: #fecaca; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Lifetime Expenses</div>
-                                <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-                                    <span class="material-symbols-outlined" style="color: white; font-size: 24px;">receipt_long</span>
+                                <div style="color: #b91c1c; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Lifetime Expenses</div>
+                                <div style="background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                                    <span class="material-symbols-outlined" style="font-size: 24px;">receipt_long</span>
                                 </div>
                             </div>
-                            <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
                                 ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
                         </div>
                     </div>
 
                     <!-- Expenses This Month -->
-                    <div style="background: linear-gradient(135deg, #78350f 0%, #d97706 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(217, 119, 6, 0.2);">
-                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);">
+                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                         <div style="position: relative; z-index: 1;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <div style="color: #fde68a; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Expenses This Month</div>
-                                <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-                                    <span class="material-symbols-outlined" style="color: white; font-size: 24px;">calendar_month</span>
+                                <div style="color: #d97706; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Expenses This Month</div>
+                                <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
+                                    <span class="material-symbols-outlined" style="font-size: 24px;">calendar_month</span>
                                 </div>
                             </div>
-                            <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
                                 ${Number(response.total_month_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
                         </div>
                     </div>
 
                     <!-- Expenses Today -->
-                    <div style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2);">
-                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                    <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05);">
+                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(30px);"></div>
                         <div style="position: relative; z-index: 1;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <div style="color: #a7f3d0; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Expenses Today</div>
-                                <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
-                                    <span class="material-symbols-outlined" style="color: white; font-size: 24px;">today</span>
+                                <div style="color: #059669; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Expenses Today</div>
+                                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
+                                    <span class="material-symbols-outlined" style="font-size: 24px;">today</span>
                                 </div>
                             </div>
-                            <div style="font-size: 2.2rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 8px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <span style="font-size: 1.2rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
+                                <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
                                 ${Number(response.total_today_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
                         </div>

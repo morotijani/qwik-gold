@@ -57,17 +57,17 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
                 
                 <!-- Hero Capital Banner -->
-                <div style="background: linear-gradient(135deg, #064e3b 0%, #059669 100%); border-radius: 20px; padding: 40px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(5, 150, 105, 0.2);">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px);"></div>
+                <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 40px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);">
+                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(40px);"></div>
                     <div style="position: relative; z-index: 1;">
-                        <div style="color: #a7f3d0; font-size: 1rem; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Current Capital Balance</div>
-                        <div style="font-size: 3.5rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 12px; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            <span style="font-size: 1.8rem; opacity: 0.8; font-weight: 600;">GHS</span> 
+                        <div style="color: #059669; font-size: 1rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Current Capital Balance</div>
+                        <div style="font-size: 3.5rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 12px; line-height: 1;">
+                            <span style="font-size: 1.8rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
                             ${Number(data.current_running_balance_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
-                    <div style="background: rgba(255,255,255,0.1); width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.2);">
-                        <span class="material-symbols-outlined" style="color: white; font-size: 40px;">account_balance</span>
+                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); position: relative; z-index: 1;">
+                        <span class="material-symbols-outlined" style="font-size: 40px;">account_balance</span>
                     </div>
                 </div>
                 

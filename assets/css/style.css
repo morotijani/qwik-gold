@@ -248,26 +248,32 @@ input:focus, select:focus, textarea:focus {
 }
 .sidebar-logo { width: 36px; height: auto; margin-right: 12px; border-radius: 8px; }
 
-.sidebar-nav { flex: 1; padding: 16px 16px; overflow-y: auto; }
+.sidebar-nav { flex: 1; padding: 24px 20px; overflow-y: auto; }
 
 .nav-link {
-    display: flex; align-items: center; padding: 12px 16px;
-    color: var(--text-muted); text-decoration: none; margin-bottom: 4px;
+    display: flex; align-items: center; padding: 14px 18px;
+    color: var(--text-muted); text-decoration: none; margin-bottom: 6px;
     border-radius: var(--radius-sm); transition: var(--transition);
-    font-size: 0.95rem; font-weight: 500; position: relative;
+    font-size: 0.95rem; font-weight: 600; position: relative;
 }
 
-.nav-link .material-symbols-outlined { margin-right: 16px; font-size: 1.3rem; transition: var(--transition); }
-.nav-link:hover { background: var(--bg-main); color: var(--text-main); }
+.nav-link .material-symbols-outlined { margin-right: 16px; font-size: 1.35rem; transition: var(--transition); font-weight: 300; }
+.nav-link:hover { background: var(--bg-hover); color: var(--text-main); transform: translateX(4px); }
+.nav-link:hover .material-symbols-outlined { color: var(--warning); }
 .nav-link.active {
-    background: var(--text-main); color: #ffffff; font-weight: 600;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.0) 100%); 
+    color: var(--warning); 
+    font-weight: 700;
+    box-shadow: none;
+    border-left: 4px solid var(--warning);
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
-.nav-link.active .material-symbols-outlined { color: #ffffff; }
+.nav-link.active .material-symbols-outlined { color: var(--warning); font-weight: 600; }
 
 .nav-section-title {
-    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
-    color: #94a3b8; margin: 32px 0 12px 16px; font-weight: 700;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: #94a3b8; margin: 24px 0 12px 18px; font-weight: 800;
 }
 
 .main-content {
