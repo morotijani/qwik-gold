@@ -50,8 +50,8 @@ if ($type !== 'individual' && $type !== 'group' && $type !== 'keeper') {
 
 try {
     // Insert new customer
-    $stmt = $pdo->prepare("INSERT INTO customers (name, business_name, type, entity_type, phone, email, address) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$name, $businessName, $type, $entityType, $phone, $email, $address]);
+    $stmt = $pdo->prepare("INSERT INTO customers (name, business_name, type, entity_type, phone, email, address, handler_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$name, $businessName, $type, $entityType, $phone, $email, $address, $current_user_id ?? null]);
     
     $customerId = $pdo->lastInsertId();
 

@@ -107,10 +107,16 @@
                 <a href="#settings" class="nav-link" data-route="settings">
                     <span class="material-symbols-outlined">settings</span> System Settings
                 </a>
+                <a href="#help" class="nav-link" data-route="help">
+                    <span class="material-symbols-outlined">help</span> Help Center
+                </a>
 
                 <!-- Admin Only Links will be injected via JS if role === 'admin' -->
                 <div id="admin-nav" class="hidden">
                     <div class="nav-section-title">Administration</div>
+                    <a href="#users" class="nav-link" data-route="users">
+                        <span class="material-symbols-outlined">admin_panel_settings</span> System Admins
+                    </a>
                     <a href="#audit" class="nav-link" data-route="audit">
                         <span class="material-symbols-outlined">shield</span> Audit Trail
                     </a>
@@ -174,5 +180,7 @@
     <script src="assets/js/modules/audit.js"></script>
     <script src="assets/js/modules/profile.js"></script>
     <script src="assets/js/modules/settings.js"></script>
+    <script src="assets/js/modules/users.js"></script>
+    <script src="assets/js/modules/help.js"></script>
 </body>
 </html>

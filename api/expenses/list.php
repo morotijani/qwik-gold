@@ -22,7 +22,10 @@ try {
         $countStmt = $pdo->query("SELECT COUNT(*) FROM expenses");
         $totalCount = (int)$countStmt->fetchColumn();
 
-        $stmt = $pdo->prepare("SELECT id, description, amount, date, created_at, status FROM expenses ORDER BY date DESC, created_at DESC LIMIT :limit OFFSET :offset");
+        $stmt = $pdo->prepare("SELECT e.id, e.description, e.amount, e.date, e.created_at, e.status, u.username as handler_name 
+                               FROM expenses e 
+                               LEFT JOIN users u ON e.handler_id = u.id 
+                               ORDER BY e.date DESC, e.created_at DESC LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -33,7 +36,11 @@ try {
         $countStmt->execute([$validStatus]);
         $totalCount = (int)$countStmt->fetchColumn();
 
-        $stmt = $pdo->prepare("SELECT id, description, amount, date, created_at, status FROM expenses WHERE status = :status ORDER BY date DESC, created_at DESC LIMIT :limit OFFSET :offset");
+        $stmt = $pdo->prepare("SELECT e.id, e.description, e.amount, e.date, e.created_at, e.status, u.username as handler_name 
+                               FROM expenses e 
+                               LEFT JOIN users u ON e.handler_id = u.id 
+                               WHERE e.status = :status 
+                               ORDER BY e.date DESC, e.created_at DESC LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':status', $validStatus, PDO::PARAM_STR);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -74,7 +81,8 @@ try {
             'amount_ghs' => (float)$row['amount'],
             'date' => $row['date'],
             'created_at' => $row['created_at'],
-            'status' => $row['status']
+            'status' => $row['status'],
+            'handler_name' => $row['handler_name'] ? $row['handler_name'] : 'System'
         ];
     }
 

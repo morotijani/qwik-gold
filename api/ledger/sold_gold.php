@@ -22,9 +22,10 @@ try {
 
     // Query sales
     $stmt = $pdo->prepare("
-        SELECT * 
-        FROM market_sales 
-        ORDER BY created_at DESC 
+        SELECT ms.*, u.username as handler_name 
+        FROM market_sales ms
+        LEFT JOIN users u ON ms.handler_id = u.id
+        ORDER BY ms.created_at DESC 
         LIMIT :limit OFFSET :offset
     ");
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);

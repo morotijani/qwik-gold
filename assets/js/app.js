@@ -97,23 +97,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="display: flex; flex-direction: column;">
                     
                     <!-- Beautiful Header Banner -->
-                    <div style="background: linear-gradient(135deg, var(--gold-primary), var(--bg-main)); border-radius: 20px; padding: 32px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 24px; position: relative; overflow: hidden;">
-                        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.03); border-radius: 50%;"></div>
-                        <div style="position: absolute; bottom: -30px; right: 40px; width: 120px; height: 120px; background: rgba(245,158,11,0.08); border-radius: 50%;"></div>
+                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(245,158,11,0.05); margin-bottom: 24px; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(245,158,11,0.1); border-radius: 50%; filter: blur(30px);"></div>
+                        <div style="position: absolute; bottom: -30px; right: 40px; width: 120px; height: 120px; background: rgba(245,158,11,0.1); border-radius: 50%; filter: blur(20px);"></div>
                         
                         <div style="position: relative; z-index: 1;">
-                            <div style="font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Loan Reference</div>
-                            <div style="font-size: 2rem; font-weight: 800; color: white; letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px;">
+                            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Loan Reference</div>
+                            <div style="font-size: 2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px;">
                                 ${loan.loan_uid || 'LN-' + String(loan.id).padStart(6, '0')}
-                                <span style="font-size: 0.75rem; padding: 6px 12px; border-radius: 20px; font-weight: 800; background: ${loan.status === 'active' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(16, 185, 129, 0.2)'}; color: ${loan.status === 'active' ? '#fde68a' : '#a7f3d0'}; border: 1px solid ${loan.status === 'active' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.4)'}; text-transform: uppercase; letter-spacing: 1px; backdrop-filter: blur(4px);">
+                                <span style="font-size: 0.75rem; padding: 6px 12px; border-radius: 20px; font-weight: 800; background: ${loan.status === 'active' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; color: ${loan.status === 'active' ? '#d97706' : '#059669'}; border: 1px solid ${loan.status === 'active' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'}; text-transform: uppercase; letter-spacing: 1px;">
                                     ${loan.status}
                                 </span>
                             </div>
                         </div>
                         
                         <div style="text-align: right; position: relative; z-index: 1;">
-                            <div style="font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Current Outstanding</div>
-                            <div style="font-size: 2.5rem; font-weight: 800; color: ${loan.principal_amount > 0 ? '#fca5a5' : '#a7f3d0'}; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Current Outstanding</div>
+                            <div style="font-size: 2.5rem; font-weight: 800; color: ${loan.principal_amount > 0 ? '#ef4444' : '#10b981'};">
                                 ₵ ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
                         </div>

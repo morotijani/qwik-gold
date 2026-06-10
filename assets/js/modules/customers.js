@@ -239,10 +239,11 @@ window.addEventListener('route-changed', async (e) => {
                                     <span style="font-size: 0.85rem; padding: 6px 14px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);"><span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Active</span>
                                     <span style="font-size: 0.85rem; padding: 6px 14px; background: var(--bg-hover); color: var(--text-muted); border-radius: 20px; font-weight: 700; text-transform: capitalize; box-shadow: inset 0 0 0 1px var(--border);"><span class="material-symbols-outlined" style="font-size: 14px;">storefront</span> ${data.profile.type}</span>
                                 </h3>
-                                <div style="display: flex; align-items: center; gap: 24px; color: var(--text-muted); font-size: 1rem; font-weight: 500;">
+                                <div style="display: flex; align-items: center; gap: 24px; color: var(--text-muted); font-size: 1rem; font-weight: 500; flex-wrap: wrap;">
                                     <span style="display: flex; align-items: center; gap: 8px; background: var(--bg-main); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);"><span class="material-symbols-outlined" style="font-size: 18px; color: #0284c7;">badge</span> ${data.profile.customer_uid || '#' + data.profile.id}</span>
                                     <span style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">call</span> ${data.profile.phone || 'No phone'}</span>
                                     ${data.profile.business_name ? `<span style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">store</span> ${data.profile.business_name}</span>` : ''}
+                                    <span style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">support_agent</span> Handled by: <span style="font-weight: 700; color: var(--text-main);">${data.profile.handler_name || 'System'}</span></span>
                                 </div>
                             </div>
                         </div>

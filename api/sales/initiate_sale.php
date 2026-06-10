@@ -85,8 +85,8 @@ try {
     // 2. Insert into market_sales as pending
     $insertSaleStmt = $pdo->prepare("
         INSERT INTO market_sales 
-        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_local_price, estimated_cash, status, notes) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_local_price, estimated_cash, status, notes, handler_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
     ");
     $insertSaleStmt->execute([
         $saleUid, 
@@ -96,7 +96,8 @@ try {
         $overallBlades, 
         $estimatedPrice,
         $estimatedCash, 
-        $data['notes'] ?? ''
+        $data['notes'] ?? '',
+        $current_user_id ?? null
     ]);
     $marketSaleId = $pdo->lastInsertId();
 

@@ -14,7 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 try {
     // Query the customers table, ordered alphabetically by name
-    $stmt = $pdo->query("SELECT id, customer_uid, name, business_name, type, entity_type, phone, email, address FROM customers ORDER BY name ASC");
+    $stmt = $pdo->query("
+        SELECT c.id, c.customer_uid, c.name, c.business_name, c.type, c.entity_type, c.phone, c.email, c.address, u.username as handler_name 
+        FROM customers c
+        LEFT JOIN users u ON c.handler_id = u.id
+        ORDER BY c.name ASC
+    ");
     $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     sendResponse('success', 'Customers retrieved successfully', $customers, 200);

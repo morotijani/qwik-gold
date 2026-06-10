@@ -27,12 +27,16 @@ $password = $data['password'];
 
 try {
     // 1) Query the users table for the username
-    $stmt = $pdo->prepare("SELECT id, name, username, password_hash, role FROM users WHERE username = ? LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, name, username, password_hash, role, status FROM users WHERE username = ? LIMIT 1");
     $stmt->execute([$username]);
     $user = $stmt->fetch();
 
-    // 2) Verify user exists and password matches
+    // 2) Verify user exists, password matches, and user is active
     if ($user && password_verify($password, $user['password_hash'])) {
+        
+        if ($user['status'] === 'suspended') {
+            sendResponse('error', 'Your account has been suspended. Contact an administrator.', [], 403);
+        }
         
         // 3) Generate secure 64-character token
         $token = bin2hex(random_bytes(32));

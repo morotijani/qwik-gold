@@ -44,8 +44,8 @@ try {
     $pdo->beginTransaction();
 
     // 1. INSERT a new record into the expenses table
-    $stmt = $pdo->prepare("INSERT INTO expenses (description, amount, date) VALUES (?, ?, ?)");
-    $stmt->execute([$description, $amountGhs, $date]);
+    $stmt = $pdo->prepare("INSERT INTO expenses (description, amount, date, handler_id) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$description, $amountGhs, $date, $current_user_id ?? null]);
     $expenseId = $pdo->lastInsertId();
 
     // 2. INSERT a record into the capital_ledger table

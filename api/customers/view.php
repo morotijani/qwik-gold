@@ -25,7 +25,12 @@ if ($customerId <= 0) {
 
 try {
     // 1) SELECT customer details
-    $custStmt = $pdo->prepare("SELECT id, customer_uid, name, business_name, type, entity_type, phone, email, address, created_at FROM customers WHERE id = ?");
+    $custStmt = $pdo->prepare("
+        SELECT c.id, c.customer_uid, c.name, c.business_name, c.type, c.entity_type, c.phone, c.email, c.address, c.created_at, u.username as handler_name 
+        FROM customers c
+        LEFT JOIN users u ON c.handler_id = u.id
+        WHERE c.id = ?
+    ");
     $custStmt->execute([$customerId]);
     $customer = $custStmt->fetch(PDO::FETCH_ASSOC);
 

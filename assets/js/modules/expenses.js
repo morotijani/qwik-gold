@@ -84,6 +84,14 @@ window.addEventListener('route-changed', async (e) => {
                         <td style="padding: 16px 24px; font-weight: 800; ${textStyle} text-align: right; font-size: 1.05rem;">
                             - ${Number(exp.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </td>
+                        <td style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
+                                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--text-main);">
+                                    ${(exp.handler_name || 'System').charAt(0).toUpperCase()}
+                                </div>
+                                <span style="font-weight: 600;">${exp.handler_name || 'System'}</span>
+                            </div>
+                        </td>
                         <td style="padding: 16px; text-align: right;">
                             ${actionsHtml}
                         </td>
@@ -174,6 +182,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Reference</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Description</th>
                                 <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Amount (GHS)</th>
+                                <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Handler</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Actions</th>
                             </tr>
                         </thead>
@@ -265,7 +274,7 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
                 </div>
 
-                <div style="text-align: right; margin-top: -24px; margin-bottom: 32px;">
+                <div style="text-align: right; margin-top: 17px; margin-bottom: 32px;">
                     <small style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">Leave date empty to use today's date</small>
                 </div>
                 

@@ -18,7 +18,7 @@ CREATE TABLE customers (
 -- capital_ledger (The Single Source of Truth for Cash)
 CREATE TABLE capital_ledger (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_type ENUM('loan_issued', 'loan_repaid', 'gold_purchase', 'expense', 'out_sale_revenue', 'external_capital_in') NOT NULL,
+    transaction_type ENUM('loan_issued', 'loan_repaid', 'gold_purchase', 'expense', 'out_sale_revenue', 'external_capital_in', 'expense_refunded') NOT NULL,
     amount_ghs DECIMAL(15, 2) NOT NULL,
     running_balance DECIMAL(15, 2) NOT NULL,
     reference_id INT DEFAULT NULL, -- Links to specific loan, purchase, or expense ID
@@ -110,5 +110,8 @@ CREATE TABLE expenses (
     description VARCHAR(255) NOT NULL,
     amount DECIMAL(15, 2) NOT NULL,
     date DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status ENUM('active', 'voided') NOT NULL DEFAULT 'active',
+    handler_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (handler_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

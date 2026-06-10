@@ -40,6 +40,9 @@ async function renderKeepers(container) {
                                 <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
                                     <span class="material-symbols-outlined" style="font-size: 14px;">call</span> ${k.phone || 'No phone'}
                                 </div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">support_agent</span> Registered by: <span style="font-weight: 600;">${k.handler_name || 'System'}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -134,6 +137,7 @@ window.viewKeeper = async (keeperId) => {
                                 <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">call</span> ${profile.phone || 'No phone'}</span>
                                 ${profile.email ? `<span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">mail</span> ${profile.email}</span>` : ''}
                                 <span style="display: flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 16px;">calendar_today</span> Joined ${profile.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}</span>
+                                <span style="display: flex; align-items: center; gap: 4px; background: rgba(0,0,0,0.05); padding: 2px 8px; border-radius: 6px;"><span class="material-symbols-outlined" style="font-size: 16px;">support_agent</span> Handled by: <span style="font-weight: 600;">${profile.handler_name || 'System'}</span></span>
                             </div>
                         </div>
                     </div>
@@ -1014,7 +1018,7 @@ window.submitCreateKeeper = async (event) => {
         await window.api.post('/customers/create.php', payload);
         window.showToast('Keeper registered successfully', 'success');
         window.closeModal();
-        window.loadKeepersData(); // Refresh list
+        window.dispatchEvent(new Event('hashchange')); // Refresh list
     } catch (error) {
         console.error('Error creating keeper:', error);
         window.showToast('Network error', 'error');
