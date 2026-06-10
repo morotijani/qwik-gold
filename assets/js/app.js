@@ -229,6 +229,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // === MOBILE MENU SYSTEM ===
+    window.toggleMobileMenu = () => {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('mobile-backdrop');
+        if (sidebar && backdrop) {
+            sidebar.classList.toggle('open');
+            backdrop.classList.toggle('active');
+        }
+    };
+    
+    window.closeMobileMenu = () => {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('mobile-backdrop');
+        if (sidebar && backdrop) {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('active');
+        }
+    };
+
     // === AUTHENTICATION FLOW ===
 
     // Check initial state
@@ -324,6 +343,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 link.classList.add('active');
             }
         });
+
+        // Close mobile menu on navigation
+        if (window.closeMobileMenu) {
+            window.closeMobileMenu();
+        }
 
         // Clear View Container
         viewContainer.innerHTML = '<div style="text-align:center; padding: 50px;"><span class="material-symbols-outlined spin gold-text" style="font-size: 2rem;">sync</span></div>';
