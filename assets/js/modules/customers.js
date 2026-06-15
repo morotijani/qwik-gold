@@ -15,10 +15,10 @@ window.addEventListener('route-changed', async (e) => {
             const customers = await window.api.get('/customers/list.php');
 
             container.innerHTML = `
-                <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);">
+                <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: clamp(24px, 5vw, 40px); position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);">
                     <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(40px);"></div>
                     <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                    <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
                         <div>
                             <div style="color: #d97706; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                                 <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); margin-right: 4px;">
@@ -26,10 +26,10 @@ window.addEventListener('route-changed', async (e) => {
                                 </div>
                                 Network
                             </div>
-                            <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main);">Customer Directory</h2>
-                            <p style="margin: 0; color: var(--text-muted); font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Manage all your suppliers, track their interactions, and build deep relationships through comprehensive profile tracking.</p>
+                            <h2 style="margin: 0 0 12px 0; font-size: clamp(1.8rem, 6vw, 2.2rem); font-weight: 800; color: var(--text-main);">Customer Directory</h2>
+                            <p style="margin: 0; color: var(--text-muted); font-size: clamp(0.95rem, 3vw, 1.05rem); max-width: 500px; line-height: 1.5;">Manage all your suppliers, track their interactions, and build deep relationships through comprehensive profile tracking.</p>
                         </div>
-                        <button class="btn btn-primary" onclick="window.openCreateCustomerModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; font-weight: 700; padding: 14px 28px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 8px; font-size: 1.05rem; border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <button class="btn btn-primary" onclick="window.openCreateCustomerModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; font-weight: 700; padding: clamp(12px, 3vw, 14px) clamp(20px, 4vw, 28px); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 8px; font-size: clamp(0.95rem, 3vw, 1.05rem); border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                             <span class="material-symbols-outlined">person_add</span> Add Contact
                         </button>
                     </div>
@@ -212,34 +212,34 @@ window.addEventListener('route-changed', async (e) => {
             container.innerHTML = `
                 <div style="width: 100%; padding-bottom: 60px;">
                     <!-- Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <button class="btn btn-text" onclick="window.location.hash = '#${returnRoute}'; window.dispatchEvent(new CustomEvent('route-changed', {detail:{route:'${returnRoute}', container: document.getElementById('view-container')}}))" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; padding: 8px 16px; border-radius: 12px; transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-                            <span class="material-symbols-outlined">arrow_back</span> Back to Directory
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                        <button class="btn btn-text" onclick="window.location.hash = '#${returnRoute}'; window.dispatchEvent(new CustomEvent('route-changed', {detail:{route:'${returnRoute}', container: document.getElementById('view-container')}}))" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; padding: 8px 16px; border-radius: 12px; transition: background 0.2s; white-space: nowrap; font-size: clamp(0.85rem, 2vw, 1rem);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                            <span class="material-symbols-outlined">arrow_back</span> Back
                         </button>
-                        <div style="display: flex; gap: 12px;">
-                            <button class="btn btn-outline" onclick='window.openEditCustomerModal(${JSON.stringify(data.profile).replace(/'/g, "&#39;")})' style="background: white; border-color: var(--border); border-radius: 12px; font-weight: 600;">
+                        <div style="display: flex; gap: clamp(8px, 2vw, 12px); flex-wrap: wrap;">
+                            <button class="btn btn-outline" onclick='window.openEditCustomerModal(${JSON.stringify(data.profile).replace(/'/g, "&#39;")})' style="background: white; border-color: var(--border); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit Profile
                             </button>
-                            <button class="btn btn-primary" onclick="window.openCustomerIssueLoanModal(${data.profile.id})" style="background: linear-gradient(135deg, var(--warning), #d97706); border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); border-radius: 12px; font-weight: 600;">
+                            <button class="btn btn-primary" onclick="window.openCustomerIssueLoanModal(${data.profile.id})" style="background: linear-gradient(135deg, var(--warning), #d97706); border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">payments</span> Issue New Loan
                             </button>
                         </div>
                     </div>
 
                     <!-- Main Profile Card -->
-                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; border: 1px solid rgba(245, 158, 11, 0.2); position: relative; overflow: hidden;">
+                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border-radius: 20px; padding: clamp(24px, 5vw, 40px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; border: 1px solid rgba(245, 158, 11, 0.2); position: relative; overflow: hidden; flex-wrap: wrap; gap: 20px;">
                         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                        <div style="display: flex; align-items: center; gap: 32px; position: relative; z-index: 1;">
-                            <div style="width: 100px; height: 100px; border-radius: 24px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: white; font-weight: 800; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);">
+                        <div style="display: flex; align-items: center; gap: clamp(16px, 4vw, 32px); position: relative; z-index: 1; flex-wrap: wrap;">
+                            <div style="width: clamp(64px, 15vw, 100px); height: clamp(64px, 15vw, 100px); border-radius: 24px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center; font-size: clamp(2rem, 5vw, 3rem); color: white; font-weight: 800; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);">
                                 ${data.profile.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <h3 style="font-size: 2.2rem; font-weight: 800; margin: 0 0 12px 0; color: var(--text-main); display: flex; align-items: center; gap: 16px;">
+                                <h3 style="font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 800; margin: 0 0 12px 0; color: var(--text-main); display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                     ${data.profile.name}
                                     <span style="font-size: 0.85rem; padding: 6px 14px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);"><span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Active</span>
                                     <span style="font-size: 0.85rem; padding: 6px 14px; background: var(--bg-hover); color: var(--text-muted); border-radius: 20px; font-weight: 700; text-transform: capitalize; box-shadow: inset 0 0 0 1px var(--border);"><span class="material-symbols-outlined" style="font-size: 14px;">storefront</span> ${data.profile.type}</span>
                                 </h3>
-                                <div style="display: flex; align-items: center; gap: 24px; color: var(--text-muted); font-size: 1rem; font-weight: 500; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: clamp(12px, 2vw, 24px); color: var(--text-muted); font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 500; flex-wrap: wrap;">
                                     <span style="display: flex; align-items: center; gap: 8px; background: var(--bg-main); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);"><span class="material-symbols-outlined" style="font-size: 18px; color: #0284c7;">badge</span> ${data.profile.customer_uid || '#' + data.profile.id}</span>
                                     <span style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">call</span> ${data.profile.phone || 'No phone'}</span>
                                     ${data.profile.business_name ? `<span style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">store</span> ${data.profile.business_name}</span>` : ''}

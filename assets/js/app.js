@@ -97,13 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div style="display: flex; flex-direction: column;">
                     
                     <!-- Beautiful Header Banner -->
-                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(245,158,11,0.05); margin-bottom: 24px; position: relative; overflow: hidden;">
+                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: clamp(20px, 4vw, 32px); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 24px; box-shadow: 0 10px 30px rgba(245,158,11,0.05); margin-bottom: 24px; position: relative; overflow: hidden;">
                         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(245,158,11,0.1); border-radius: 50%; filter: blur(30px);"></div>
                         <div style="position: absolute; bottom: -30px; right: 40px; width: 120px; height: 120px; background: rgba(245,158,11,0.1); border-radius: 50%; filter: blur(20px);"></div>
                         
-                        <div style="position: relative; z-index: 1;">
+                        <div style="position: relative; z-index: 1; flex: 1; min-width: 250px;">
                             <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Loan Reference</div>
-                            <div style="font-size: 2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px;">
+                            <div style="font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                 ${loan.loan_uid || 'LN-' + String(loan.id).padStart(6, '0')}
                                 <span style="font-size: 0.75rem; padding: 6px 12px; border-radius: 20px; font-weight: 800; background: ${loan.status === 'active' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; color: ${loan.status === 'active' ? '#d97706' : '#059669'}; border: 1px solid ${loan.status === 'active' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'}; text-transform: uppercase; letter-spacing: 1px;">
                                     ${loan.status}
@@ -111,17 +111,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                         
-                        <div style="text-align: right; position: relative; z-index: 1;">
+                        <div style="text-align: left; position: relative; z-index: 1; flex: 1; min-width: 250px;">
                             <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Current Outstanding</div>
-                            <div style="font-size: 2.5rem; font-weight: 800; color: ${loan.principal_amount > 0 ? '#ef4444' : '#10b981'}; margin-bottom: 8px;">
+                            <div style="font-size: clamp(1.8rem, 6vw, 2.5rem); font-weight: 800; color: ${loan.principal_amount > 0 ? '#ef4444' : '#10b981'}; margin-bottom: 12px; word-break: break-word;">
                                 ₵ ${parseFloat(loan.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
-                            ${loan.status === 'active' ? `<button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.openSettleLoanWizard(${loan.id}, ${loan.customer_id}, '${loan.type}', ${loan.principal_amount}), 300);" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 15px rgba(245,158,11,0.3); border: none;">Settle Loan</button>` : ''}
+                            ${loan.status === 'active' ? `<button class="btn btn-primary" onclick="window.closeModal(); setTimeout(() => window.openSettleLoanWizard(${loan.id}, ${loan.customer_id}, '${loan.type}', ${loan.principal_amount}), 300);" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 15px rgba(245,158,11,0.3); border: none; display: inline-flex; align-items: center; justify-content: center;">Settle Loan</button>` : ''}
                         </div>
                     </div>
 
                     <!-- Information Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
                         <!-- Original Principal -->
                         <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: flex-start; gap: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
                             <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); color: var(--warning); display: flex; align-items: center; justify-content: center;">
@@ -170,8 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 Settlement Timeline
                             </h4>
                         </div>
-                        <div style="background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-                            <table style="width: 100%; border-collapse: collapse;">
+                        <div style="background: white; border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
                                 <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
                                     <tr>
                                         <th style="padding: 16px 20px; text-align: left; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Date</th>
@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showLogin = () => {
         loginOverlay.classList.add('active');
         appShell.classList.add('hidden');
+        document.getElementById('login-form').reset();
     };
 
     const showAppShell = (user) => {
