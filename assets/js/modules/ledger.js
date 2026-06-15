@@ -249,23 +249,23 @@ window.addEventListener('route-changed', async (e) => {
 
         if (s.goldType === 'balls') {
             const blades = parseFloat(s.estimated_blades) || 0;
-            s.estimated_cash = blades * clp;
-
+            s.estimated_cash = Math.floor(blades * clp);
+            
             if (document.getElementById('calc_est_cash_text')) {
-                document.getElementById('calc_est_cash_text').innerText = 'GHS ' + s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                document.getElementById('calc_est_cash_text').innerText = 'GHS ' + s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             }
         } else {
             const vol = parseFloat(s.estimated_volume) || 0;
             s.pounds = truncate2(grams / 7.75);
             s.density = vol > 0 ? truncate2(grams / vol) : 0;
             s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
-            s.estimated_cash = (s.karat * clp / 23) * s.pounds;
-
+            s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
+            
             if (document.getElementById('calc_pounds')) document.getElementById('calc_pounds').innerText = s.pounds.toFixed(2) + ' lbs';
             if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
             if (document.getElementById('calc_karat')) document.getElementById('calc_karat').innerText = s.karat.toFixed(2);
             if (document.getElementById('calc_est_cash_text')) {
-                document.getElementById('calc_est_cash_text').innerText = 'GHS ' + s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 2 });
+                document.getElementById('calc_est_cash_text').innerText = 'GHS ' + s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             }
         }
     };
@@ -363,7 +363,7 @@ window.addEventListener('route-changed', async (e) => {
                 
                 <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.3);">
                     <div style="color: var(--success); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Estimated Total Cash</div>
-                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="calc_est_cash_text">GHS ${s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span></div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="calc_est_cash_text">GHS ${s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></div>
                 </div>
                 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -472,7 +472,7 @@ window.addEventListener('route-changed', async (e) => {
 
     window.openCompleteSaleModal = (dataStr) => {
         const s = JSON.parse(decodeURIComponent(dataStr));
-        const estCashFormatted = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        const estCashFormatted = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const estGramsFormatted = Number(s.total_grams).toFixed(4);
         const estVolBladesFormatted = Number(s.gold_type === 'balls' ? s.total_blades : s.total_volume).toFixed(4);
         const estPriceFormatted = Number(s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
@@ -618,7 +618,7 @@ window.addEventListener('route-changed', async (e) => {
         const diffBorder = diff >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
         const diffLabel = diff >= 0 ? 'Profit' : 'Loss';
         
-        const estCashFmt = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        const estCashFmt = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const actCashFmt = Number(s.actual_cash).toLocaleString(undefined, { minimumFractionDigits: 2 });
         const diffCashFmt = Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 });
         

@@ -978,7 +978,7 @@ window.calculateSettleGold = () => {
             s.totalBlades = grams / 0.8;
         }
         
-        s.agreedValue = s.totalBlades * ppb;
+        s.agreedValue = Math.floor(s.totalBlades * ppb);
         
         if (document.getElementById('calc_blades')) document.getElementById('calc_blades').innerText = s.totalBlades.toFixed(4);
     } else {
@@ -992,7 +992,7 @@ window.calculateSettleGold = () => {
         } else {
             s.karat = 0;
         }
-        s.agreedValue = (s.karat * clp / 23) * s.pounds;
+        s.agreedValue = Math.floor((s.karat * clp / 23) * s.pounds);
         
         if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
         if (document.getElementById('calc_karat')) document.getElementById('calc_karat').innerText = s.karat.toFixed(2);
@@ -1000,7 +1000,7 @@ window.calculateSettleGold = () => {
     }
     
     if (document.getElementById('calc_agreed_value_text')) {
-        document.getElementById('calc_agreed_value_text').innerText = 'GHS ' + s.agreedValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('calc_agreed_value_text').innerText = 'GHS ' + s.agreedValue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
     }
     
     if (document.getElementById('calc_agreed_value_input')) {

@@ -353,7 +353,7 @@ window.renderWizardStep = () => {
             <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 24px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);">
                 <div style="color: #64748b; font-weight: 800; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px;">Total Payout Amount</div>
                 <div style="font-size: 3.2rem; font-weight: 800; color: var(--danger); letter-spacing: -1px; line-height: 1;">
-                    <span style="color: #94a3b8; font-size: 2rem; vertical-align: middle;">₵</span><span id="calc_total_payout">${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span style="color: #94a3b8; font-size: 2rem; vertical-align: middle;">₵</span><span id="calc_total_payout">${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                 </div>
                 
                 ${state.goldType === 'refined' ? `
@@ -499,7 +499,7 @@ window.renderWizardStep = () => {
                         </div>
                         <div style="text-align: right;">
                             <div style="font-weight: 800; color: var(--danger); font-size: 2rem; letter-spacing: -0.5px;">
-                                <span style="font-size: 1.2rem; vertical-align: middle; color: #94a3b8;">₵</span>${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                <span style="font-size: 1.2rem; vertical-align: middle; color: #94a3b8;">₵</span>${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                             </div>
                         </div>
                     </div>
@@ -547,7 +547,7 @@ window.renderWizardStep = () => {
                 
                 <div style="background: var(--bg-hover); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <span style="font-weight: 600; font-size: 0.9rem;">Amount Paid:</span>
-                    <span style="font-size: 1.1rem; font-weight: 700; color: var(--danger);">₵${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    <span style="font-size: 1.1rem; font-weight: 700; color: var(--danger);">₵${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; margin-top: 30px;">
@@ -665,24 +665,24 @@ window.calculatePurchaseMath = () => {
             state.calculatedKarat = 0;
         }
 
-        state.totalPayout = (state.calculatedKarat * pricePerPound / 23) * state.calculatedPounds;
+        state.totalPayout = Math.floor((state.calculatedKarat * pricePerPound / 23) * state.calculatedPounds);
 
         if (document.getElementById('calc_pounds')) {
             document.getElementById('calc_pounds').innerText = state.calculatedPounds.toFixed(2);
             document.getElementById('calc_density').innerText = state.calculatedDensity.toFixed(2);
             document.getElementById('calc_karat').innerText = typeof state.calculatedKarat === 'number' ? state.calculatedKarat.toFixed(2) : '0.00';
-            document.getElementById('calc_total_payout').innerText = state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 });
+            document.getElementById('calc_total_payout').innerText = state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
     } else {
         const pricePerBlade = parseFloat(document.getElementById('wiz_price_blade')?.value) || 0;
 
         state.pricePerBlade = pricePerBlade;
         state.calculatedBlades = grams / 0.8;
-        state.totalPayout = state.calculatedBlades * pricePerBlade;
+        state.totalPayout = Math.floor(state.calculatedBlades * pricePerBlade);
 
         if (document.getElementById('calc_blades')) {
             document.getElementById('calc_blades').innerText = state.calculatedBlades.toFixed(4);
-            document.getElementById('calc_total_payout').innerText = state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2 });
+            document.getElementById('calc_total_payout').innerText = state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
     }
 };
@@ -774,7 +774,7 @@ window.getThermalPrintHTML = (purchaseObj, dateObj, sellerName) => {
             </div>
             <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.3rem;">
                 <span>Amount:</span>
-                <span>₵${parseFloat(purchaseObj.total_paid_ghs || purchaseObj.totalPayout || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span>₵${parseFloat(purchaseObj.total_paid_ghs || purchaseObj.totalPayout || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
             </div>
         </div>
         

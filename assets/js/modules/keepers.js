@@ -367,10 +367,10 @@ window.openKeeperDepositModal = (customerId, customerName) => {
 
 window.reviewKeeperDeposit = (event, customerId, customerName) => {
     event.preventDefault();
-    
+
     const goldType = document.getElementById('deposit_gold_type').value;
     const weight = document.getElementById('deposit_weight_grams').value;
-    
+
     let detailsHtml = `
         <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
@@ -387,7 +387,7 @@ window.reviewKeeperDeposit = (event, customerId, customerName) => {
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Deposit Weight</span>
-                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(weight).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(weight).toLocaleString('en-US', { minimumFractionDigits: 2 })} g</span>
             </div>
     `;
 
@@ -412,7 +412,7 @@ window.reviewKeeperDeposit = (event, customerId, customerName) => {
     detailsHtml += `</div>`;
 
     document.getElementById('deposit-review-details').innerHTML = detailsHtml;
-    
+
     document.getElementById('deposit-step-1').style.display = 'none';
     document.getElementById('deposit-step-2').style.display = 'block';
 };
@@ -424,7 +424,7 @@ window.backToKeeperDeposit = () => {
 
 window.selectKeeperDepositGoldType = (type) => {
     document.getElementById('deposit_gold_type').value = type;
-    
+
     // Elements for balls
     const cardBalls = document.getElementById('card_deposit_balls');
     const iconBgBalls = document.getElementById('icon_bg_deposit_balls');
@@ -636,11 +636,11 @@ window.toggleKeeperLiqFields = () => {
     const goldType = document.getElementById('liq_gold_type').value;
     const form = document.getElementById('keeper-liquidate-form');
     const container = document.getElementById('liq_dynamic_container');
-    
+
     if (goldType === 'balls') {
         const grams = parseFloat(form.dataset.ballsGrams) || 0;
         const blades = parseFloat(form.dataset.ballsBlades) || 0;
-        
+
         container.innerHTML = `
             <div style="display: flex; gap: 16px; margin-bottom: 24px;">
                 <div class="form-group" style="flex: 1;">
@@ -669,12 +669,12 @@ window.toggleKeeperLiqFields = () => {
     } else {
         const grams = parseFloat(form.dataset.refinedGrams) || 0;
         const volume = parseFloat(form.dataset.refinedVolume) || 0;
-        
+
         const truncate2 = (num) => Math.floor(num * 100) / 100;
         const pounds = truncate2(grams / 7.75);
         const density = volume > 0 ? truncate2(grams / volume) : 0;
         const karat = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
-        
+
         container.innerHTML = `
             <div style="display: flex; gap: 16px; margin-bottom: 16px;">
                 <div class="form-group" style="flex: 1;">
@@ -721,25 +721,25 @@ window.toggleKeeperLiqFields = () => {
 window.calculateKeeperLiqPayout = () => {
     const goldType = document.getElementById('liq_gold_type').value;
     const payoutInput = document.getElementById('liq_total_payout');
-    
+
     if (goldType === 'balls') {
         const blades = parseFloat(document.getElementById('liq_balls_blades').value) || 0;
         const price = parseFloat(document.getElementById('liq_price_per_blade').value) || 0;
-        payoutInput.value = (blades * price).toFixed(2);
+        payoutInput.value = Math.floor(blades * price);
     } else {
         const pounds = parseFloat(document.getElementById('liq_calc_pounds').textContent) || 0;
         const karat = parseFloat(document.getElementById('liq_calc_karat').textContent) || 0;
         const price = parseFloat(document.getElementById('liq_local_price').value) || 0;
-        payoutInput.value = ((karat * price / 23) * pounds).toFixed(2);
+        payoutInput.value = Math.floor((karat * price / 23) * pounds);
     }
 };
 
 window.reviewKeeperLiquidate = (event, customerId, customerName) => {
     event.preventDefault();
-    
+
     const goldType = document.getElementById('liq_gold_type').value;
     const payout = document.getElementById('liq_total_payout').value;
-    
+
     let detailsHtml = `
         <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
@@ -763,15 +763,15 @@ window.reviewKeeperLiquidate = (event, customerId, customerName) => {
         detailsHtml += `
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Grams to Sell</span>
-                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(grams).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(grams).toLocaleString('en-US', { minimumFractionDigits: 2 })} g</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Total Balls (Blades)</span>
-                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(blades).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(blades).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Price per Blade</span>
-                <span style="font-weight: 600; color: var(--text-main);">₵ ${parseFloat(price).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                <span style="font-weight: 600; color: var(--text-main);">₵ ${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
         `;
     } else {
@@ -781,15 +781,15 @@ window.reviewKeeperLiquidate = (event, customerId, customerName) => {
         const density = document.getElementById('liq_calc_density').textContent;
         const karat = document.getElementById('liq_calc_karat').textContent;
         const price = document.getElementById('liq_local_price').value;
-        
+
         detailsHtml += `
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Grams to Sell</span>
-                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(grams).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+                <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${parseFloat(grams).toLocaleString('en-US', { minimumFractionDigits: 2 })} g</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Volume</span>
-                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(volume).toLocaleString('en-US', {minimumFractionDigits: 4})}</span>
+                <span style="font-weight: 600; color: var(--text-main);">${parseFloat(volume).toLocaleString('en-US', { minimumFractionDigits: 4 })}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Pounds / Density / Karat</span>
@@ -797,7 +797,7 @@ window.reviewKeeperLiquidate = (event, customerId, customerName) => {
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                 <span style="color: var(--text-muted);">Current Local Price</span>
-                <span style="font-weight: 600; color: var(--text-main);">₵ ${parseFloat(price).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                <span style="font-weight: 600; color: var(--text-main);">₵ ${parseFloat(price).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
         `;
     }
@@ -805,13 +805,13 @@ window.reviewKeeperLiquidate = (event, customerId, customerName) => {
     detailsHtml += `
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px; margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--border);">
                 <span style="color: var(--text-muted);">Total Payout</span>
-                <span style="font-weight: 700; color: #ff6b6b; font-size: 1.1rem;">₵ ${parseFloat(payout).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                <span style="font-weight: 700; color: #ff6b6b; font-size: 1.1rem;">₵ ${parseFloat(payout).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
         </div>
     `;
 
     document.getElementById('liq-review-details').innerHTML = detailsHtml;
-    
+
     document.getElementById('liq-step-1').style.display = 'none';
     document.getElementById('liq-step-2').style.display = 'block';
 };
@@ -823,7 +823,7 @@ window.backToKeeperLiquidate = () => {
 
 window.selectKeeperLiqGoldType = (type) => {
     document.getElementById('liq_gold_type').value = type;
-    
+
     // Elements for balls
     const cardBalls = document.getElementById('card_liq_balls');
     const iconBgBalls = document.getElementById('icon_bg_liq_balls');
@@ -881,7 +881,7 @@ window.confirmKeeperLiquidate = async (customerId) => {
     btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
     const goldType = document.getElementById('liq_gold_type').value;
-    
+
     let payload = {
         customer_id: customerId,
         gold_type: goldType,
@@ -1197,12 +1197,12 @@ window.openKeeperLiquidationDetailsModal = (data) => {
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
                     <span style="color: var(--text-muted);">Weight Liquidated</span>
-                    <span style="font-weight: 700; color: var(--text-main);">${parseFloat(data.grams || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} g</span>
+                    <span style="font-weight: 700; color: var(--text-main);">${parseFloat(data.grams || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} g</span>
                 </div>
                 ${extraDetails}
                 <div style="display: flex; justify-content: space-between; margin-top: 16px; background: rgba(255, 107, 107, 0.05); padding: 16px; border-radius: 8px; border: 1px dashed rgba(255, 107, 107, 0.3);">
                     <span style="color: var(--text-main); font-weight: 600; font-size: 1.1rem;">Total Payout</span>
-                    <span style="font-weight: 800; color: #ff6b6b; font-size: 1.3rem;">₵${parseFloat(data.payout_ghs || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                    <span style="font-weight: 800; color: #ff6b6b; font-size: 1.3rem;">₵${parseFloat(data.payout_ghs || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
             </div>
 
