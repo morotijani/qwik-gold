@@ -1147,6 +1147,12 @@ window.openKeeperLiquidationDetailsModal = (data) => {
                 <span style="color: var(--text-muted);">Pounds</span>
                 <span style="font-weight: 600; color: var(--text-main);">${parseFloat(data.pounds || 0).toFixed(2)}</span>
             </div>
+            ${data.density && parseFloat(data.density) > 0 ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span style="color: var(--text-muted);">Volume</span>
+                <span style="font-weight: 600; color: var(--text-main);">${(parseFloat(data.grams || data.weight_grams) / parseFloat(data.density)).toFixed(4)}</span>
+            </div>
+            ` : ''}
             <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
                 <span style="color: var(--text-muted);">Density</span>
                 <span style="font-weight: 600; color: var(--text-main);">${parseFloat(data.density || 0).toFixed(2)}</span>
