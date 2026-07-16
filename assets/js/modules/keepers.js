@@ -170,7 +170,7 @@ window.viewKeeper = async (keeperId) => {
                             </div>
                         </div>
                         ${parseFloat(ballsGrams) > 0 ? `
-                        <button class="btn" onclick="window.openConvertBallsModal(${parseFloat(ballsGrams)}, 'keeper', ${profile.id}, () => window.viewKeeper(${profile.id}))" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); font-weight: 600; cursor: pointer;">
+                        <button class="btn" onclick="window.openConvertBallsModal(${parseFloat(ballsGrams)}, 'keeper_held', ${profile.id}, () => window.viewKeeper(${profile.id}))" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); font-weight: 600; cursor: pointer;">
                             <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span> Convert
                         </button>
                         ` : ''}
