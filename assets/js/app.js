@@ -230,6 +230,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    window.getThermalPrintHTMLLoan = (loan, dateObj) => {
+        const loanUid = loan.loan_uid || 'LN-' + String(loan.id).padStart(6, '0');
+        const customerName = loan.customer_name || 'Walk-In';
+
+        return `
+        <div class="print-only thermal-receipt" style="display: none; position: fixed; top: 0; left: 0; font-family: monospace !important; color: black; background: white; width: 100%; max-width: 300px; padding: 20px; z-index: 999999; box-sizing: border-box;">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 1.2rem; font-weight: bold;">Mukhlis Farhan Trading Limited</div>
+                <div style="font-size: 0.9rem;">AC-0064-9566, Konongo - Odumase</div>
+                <div style="font-size: 0.9rem;">+233 55 400 1608 / +233 55 369 8903</div>
+                <div style="margin-top: 5px; font-weight: bold;">LOAN ISSUE RECEIPT</div>
+            </div>
+            
+            <div style="font-size: 1.1rem; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Loan Ref:</span>
+                    <span>${loanUid}</span>
+                </div>
+                ${loan.collateral_gold_type ? `
+                <div style="border-top: 1px dashed black; margin: 5px 0;"></div>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9rem;">Collateral</div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Gold Type:</span>
+                    <span style="text-transform: capitalize;">${loan.collateral_gold_type}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Weight (g):</span>
+                    <span>${parseFloat(loan.collateral_weight).toFixed(2)}</span>
+                </div>
+                ${loan.collateral_gold_type === 'refined' ? `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Volume:</span>
+                    <span>${parseFloat(loan.collateral_volume || 0).toFixed(2)}</span>
+                </div>
+                ` : `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Blades:</span>
+                    <span>${parseFloat(loan.collateral_blades || 0).toFixed(4)}</span>
+                </div>
+                `}
+                <div style="border-top: 1px dashed black; margin: 5px 0;"></div>
+                ` : `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span>Collateral:</span>
+                    <span>None</span>
+                </div>
+                `}
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.3rem; margin-top: 10px;">
+                    <span>Principal:</span>
+                    <span>₵${parseFloat(loan.original_principal).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px dashed black; margin: 10px 0;"></div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <span>Customer,</span>
+                <span>${customerName}</span>
+            </div>
+            
+            <div style="border-top: 1px dashed black; margin: 10px 0;"></div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <span>${dateObj.toLocaleDateString()}</span>
+                <span>${dateObj.toLocaleTimeString()}</span>
+            </div>
+            <div style="text-align: center; margin-top: 15px; font-size: 0.8rem;">
+                Powered by Qwik-Gold
+            </div>
+        </div>
+        `;
+    };
+
+    window.viewLoanIssueReceipt = async (loanId) => {
+        try {
+            const data = await window.api.get(`/loans/details.php?loan_id=${loanId}`);
+            const { loan } = data;
+            
+            document.getElementById('modal-title').textContent = 'Loan Issue Receipt';
+            const modalBody = document.getElementById('modal-body');
+
+            const dateObj = new Date(loan.created_at);
+            const loanUid = loan.loan_uid || 'LN-' + String(loan.id).padStart(6, '0');
+
+            modalBody.innerHTML = `
+                <div class="no-print">
+                    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                        <div class="receipt-box" style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; width: 100%; max-width: 400px; background: white;">
+                            <div style="text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 15px; margin-bottom: 15px;">
+                                <h2 style="margin: 0; color: var(--gold-primary); font-family: 'Outfit', sans-serif;">QWIK GOLD</h2>
+                                <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Loan Issue Receipt</p>
+                            </div>
+                            
+                            <table style="width: 100%; margin-bottom: 15px; font-size: 0.85rem;">
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Loan Ref:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; font-family: monospace;">${loanUid}</td></tr>
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Date:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString()}</td></tr>
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Customer:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${loan.customer_name || 'Walk-In'}</td></tr>
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Issued By:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${loan.issuer_name || 'System'}</td></tr>
+                                
+                                ${loan.collateral_gold_type ? `
+                                <tr><td colspan="2" style="padding: 10px 0 5px 0; font-weight: 700; color: var(--text-main); border-bottom: 1px dashed #eee;">Collateral Deposited</td></tr>
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Gold Type:</td><td style="padding: 3px 0; text-align: right; font-weight: 600; text-transform: capitalize;">${loan.collateral_gold_type}</td></tr>
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Weight:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(loan.collateral_weight).toFixed(2)} g</td></tr>
+                                ${loan.collateral_gold_type === 'refined' ? `
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Volume:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(loan.collateral_volume || 0).toFixed(2)}</td></tr>
+                                ` : `
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Blades:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">${parseFloat(loan.collateral_blades || 0).toFixed(2)}</td></tr>
+                                `}
+                                ` : `
+                                <tr><td colspan="2" style="padding: 10px 0 5px 0; font-weight: 700; color: var(--text-main); border-bottom: 1px dashed #eee;">Collateral</td></tr>
+                                <tr><td style="padding: 3px 0; color: var(--text-muted);">Status:</td><td style="padding: 3px 0; text-align: right; font-weight: 600;">None (Unsecured)</td></tr>
+                                `}
+                            </table>
+                            
+                            <div style="background: rgba(239, 68, 68, 0.05); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                <span style="font-weight: 600; font-size: 0.9rem; color: var(--danger);">Principal Issued:</span>
+                                <span style="font-size: 1.1rem; font-weight: 800; color: var(--danger);">₵${parseFloat(loan.original_principal).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                            </div>
+                            
+                            <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">
+                                Please retain this receipt for your records.
+                            </div>
+                        </div>
+                    </div>
+            
+                    <button class="btn btn-primary btn-block" onclick="window.print()">
+                        <span class="material-symbols-outlined">print</span> Print Receipt
+                    </button>
+                </div>
+                ${typeof window.getThermalPrintHTMLLoan === 'function' ? window.getThermalPrintHTMLLoan(loan, dateObj) : ''}
+            `;
+            
+            document.getElementById('global-modal').classList.add('active');
+        } catch (err) {
+            window.showToast('Failed to load loan receipt: ' + err.message, 'error');
+        }
+    };
+
     // === MOBILE MENU SYSTEM ===
     window.toggleMobileMenu = () => {
         const sidebar = document.getElementById('sidebar');
@@ -330,6 +468,132 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('You have been logged out.', 'info');
     });
 
+
+    // Global Modal for Converting Gold Balls to Refined
+    window.openConvertBallsModal = (maxGramsAvailable, ownershipStatus, customerId = null, callback = null) => {
+        const html = `
+            <div style="padding: 24px;">
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                    <div style="font-size: 0.85rem; color: var(--warning); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Available Balls to Convert</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">${maxGramsAvailable} <span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                </div>
+
+                <!-- Hidden field for balls used to keep logic intact -->
+                <input type="hidden" id="convert-balls-used" value="${maxGramsAvailable}">
+
+                <div style="border-top: 1px dashed var(--border); margin: 24px 0;"></div>
+
+                <h4 style="margin: 0 0 16px 0; font-size: 1.1rem; color: var(--text-main);">Resulting Refined Gold</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label>Refined Weight (Grams)</label>
+                        <div class="input-with-icon">
+                            <span class="material-symbols-outlined">diamond</span>
+                            <input type="number" id="convert-refined-grams" step="0.0001" min="0.0001">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                        <label>Refined Volume</label>
+                        <div class="input-with-icon">
+                            <span class="material-symbols-outlined">water_drop</span>
+                            <input type="number" id="convert-refined-volume" step="0.0001" min="0.0001">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; text-align: center;">
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Density</div>
+                        <div id="convert-calc-density" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Karat</div>
+                        <div id="convert-calc-karat" style="font-size: 1.1rem; font-weight: 700; color: var(--warning);">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Pounds (lb)</div>
+                        <div id="convert-calc-pounds" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">-</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="window.submitConvertBalls('${ownershipStatus}', ${customerId})" style="background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                        <span class="material-symbols-outlined">local_fire_department</span> Smelt & Convert
+                    </button>
+                </div>
+            </div>
+        `;
+
+        window.openModal('Convert Gold Balls', html, { maxWidth: '500px' });
+
+        const uInput = document.getElementById('convert-balls-used');
+        const gInput = document.getElementById('convert-refined-grams');
+        const vInput = document.getElementById('convert-refined-volume');
+        const dSpan = document.getElementById('convert-calc-density');
+        const kSpan = document.getElementById('convert-calc-karat');
+        const pSpan = document.getElementById('convert-calc-pounds');
+
+        const updateCalcs = () => {
+            const g = parseFloat(gInput.value) || 0;
+            const v = parseFloat(vInput.value) || 0;
+
+            if (g > 0) {
+                pSpan.innerText = (g * 0.00220462).toFixed(4);
+            } else {
+                pSpan.innerText = '-';
+            }
+
+            if (g > 0 && v > 0) {
+                const density = g / v;
+                dSpan.innerText = density.toFixed(4);
+                // Karat Logic matching backend (approx)
+                if (density >= 19.3) {
+                    kSpan.innerText = '24k';
+                } else {
+                    const karat = (density - 10.5) / 0.366;
+                    kSpan.innerText = Math.max(0, Math.min(24, karat)).toFixed(1) + 'k';
+                }
+            } else {
+                dSpan.innerText = '-';
+                kSpan.innerText = '-';
+            }
+        };
+
+        gInput.addEventListener('input', updateCalcs);
+        vInput.addEventListener('input', updateCalcs);
+
+        window.submitConvertBalls = async (status, custId) => {
+            const btn = event.currentTarget;
+            const used = parseFloat(uInput.value);
+            const refG = parseFloat(gInput.value);
+            const refV = parseFloat(vInput.value);
+
+            if (!used || used <= 0 || used > maxGramsAvailable) return window.showToast('Invalid balls used', 'error');
+            if (!refG || refG <= 0) return window.showToast('Invalid refined weight', 'error');
+            if (!refV || refV <= 0) return window.showToast('Invalid volume', 'error');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Converting...';
+
+            try {
+                await window.api.post('/vault/convert_balls.php', {
+                    ownership_status: status,
+                    customer_id: custId,
+                    balls_grams_used: used,
+                    refined_grams_produced: refG,
+                    refined_volume: refV
+                });
+                window.showToast('Gold successfully converted!', 'success');
+                window.closeModal();
+                if (callback) callback();
+            } catch (err) {
+                window.showToast(err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined">local_fire_department</span> Smelt & Convert';
+            }
+        };
+    };
 
     // === SIMPLE ROUTER ===
     const handleRouting = () => {

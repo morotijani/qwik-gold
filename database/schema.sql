@@ -37,10 +37,12 @@ CREATE TABLE gold_vault (
     weight_grams DECIMAL(10, 4) NOT NULL,
     volume DECIMAL(10, 4) DEFAULT NULL,
     total_blades DECIMAL(10, 2) DEFAULT NULL,
-    current_location ENUM('office_vault', 'sold_main_market') NOT NULL DEFAULT 'office_vault',
+    current_location ENUM('office_vault', 'sold_main_market', 'converted') NOT NULL DEFAULT 'office_vault',
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
+    parent_ball_id INT DEFAULT NULL, -- Links refined gold back to original balls
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+    FOREIGN KEY (parent_ball_id) REFERENCES gold_vault(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- loans

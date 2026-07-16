@@ -63,8 +63,26 @@ try {
     $salesStmt->execute([$customerId]);
     $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // 3) Fetch Conversions
+    $convertStmt = $pdo->prepare("
+        SELECT 
+            a.created_at, 
+            'convert' as action, 
+            CAST(JSON_EXTRACT(a.new_data, '$.balls_used') AS DECIMAL(10,4)) as grams, 
+            CAST(JSON_EXTRACT(a.new_data, '$.refined_produced') AS DECIMAL(10,4)) as refined_grams, 
+            'balls to refined' as gold_type,
+            CAST(JSON_EXTRACT(a.new_data, '$.volume') AS DECIMAL(10,4)) as volume,
+            NULL as total_blades,
+            NULL as payout_ghs
+        FROM audit_logs a
+        JOIN gold_vault g ON a.record_id = g.id
+        WHERE a.action = 'CONVERT_BALLS' AND g.customer_id = ?
+    ");
+    $convertStmt->execute([$customerId]);
+    $converts = $convertStmt->fetchAll(PDO::FETCH_ASSOC);
+
     // Combine and sort by created_at DESC
-    $history = array_merge($deposits, $sales);
+    $history = array_merge($deposits, $sales, $converts);
     
     usort($history, function($a, $b) {
         return strtotime($b['created_at']) - strtotime($a['created_at']);

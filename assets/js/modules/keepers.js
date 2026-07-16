@@ -157,16 +157,23 @@ window.viewKeeper = async (keeperId) => {
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
                     
                     <!-- Gold Balls Balance -->
-                    <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 20px;">
-                        <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(255, 215, 0, 0.1); display: flex; align-items: center; justify-content: center;">
-                            <span class="material-symbols-outlined" style="font-size: 28px; color: var(--gold-primary);">trip_origin</span>
-                        </div>
-                        <div>
-                            <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; margin-bottom: 4px;">Gold Balls</div>
-                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1;">
-                                ${ballsGrams} <span style="font-size: 1rem; color: var(--gold-primary); font-weight: 600;">g</span>
+                    <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(255, 215, 0, 0.1); display: flex; align-items: center; justify-content: center;">
+                                <span class="material-symbols-outlined" style="font-size: 28px; color: var(--gold-primary);">trip_origin</span>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500; margin-bottom: 4px;">Gold Balls</div>
+                                <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1;">
+                                    ${ballsGrams} <span style="font-size: 1rem; color: var(--gold-primary); font-weight: 600;">g</span>
+                                </div>
                             </div>
                         </div>
+                        ${parseFloat(ballsGrams) > 0 ? `
+                        <button class="btn" onclick="window.openConvertBallsModal(${parseFloat(ballsGrams)}, 'keeper', ${profile.id}, () => window.viewKeeper(${profile.id}))" style="padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); font-weight: 600; cursor: pointer;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span> Convert
+                        </button>
+                        ` : ''}
                     </div>
 
                     <!-- Refined Gold Balance -->
@@ -205,25 +212,32 @@ window.viewKeeper = async (keeperId) => {
                             <tbody>
                                 ${historyData && historyData.length > 0 ? historyData.map(h => {
             const isDeposit = h.action === 'deposit';
+            const isConvert = h.action === 'convert';
             const badgeStyle = isDeposit
                 ? 'background: rgba(76, 209, 55, 0.1); color: #4cd137; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;'
+                : isConvert
+                ? 'background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;'
                 : 'background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;';
-            const actionIcon = isDeposit ? 'arrow_downward' : 'arrow_upward';
-            const actionLabel = isDeposit ? 'Deposit' : 'Liquidated';
+            const actionIcon = isDeposit ? 'arrow_downward' : isConvert ? 'local_fire_department' : 'arrow_upward';
+            const actionLabel = isDeposit ? 'Deposit' : isConvert ? 'Converted' : 'Liquidated';
 
             const w = parseFloat(h.grams || 0).toFixed(2) + 'g';
             const p = h.payout_ghs ? '₵' + parseFloat(h.payout_ghs).toLocaleString() : '-';
 
             let extraInfo = '';
-            if (isDeposit) {
+            if (isDeposit || isConvert) {
                 if (h.gold_type === 'refined' && h.volume) {
                     extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Vol: ${parseFloat(h.volume).toFixed(4)}</div>`;
                 } else if (h.gold_type === 'balls' && h.total_blades) {
                     extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Blades: ${parseFloat(h.total_blades).toFixed(2)}</div>`;
+                } else if (isConvert && h.volume) {
+                    extraInfo = `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Vol Created: ${parseFloat(h.volume).toFixed(4)}</div>`;
                 }
             }
 
-            const rowAction = !isDeposit ? `onclick='window.openKeeperLiquidationDetailsModal(${JSON.stringify(h).replace(/'/g, "&#39;")})' style="cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"` : `style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"`;
+            const rowAction = (!isDeposit && !isConvert) ? `onclick='window.openKeeperLiquidationDetailsModal(${JSON.stringify(h).replace(/'/g, "&#39;")})' style="cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"` 
+                : isConvert ? `onclick='window.openKeeperConversionDetailsModal(${JSON.stringify(h).replace(/'/g, "&#39;")})' style="cursor: pointer; border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"`
+                : `style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'"`;
 
             return `
                                         <tr ${rowAction}>
@@ -235,12 +249,12 @@ window.viewKeeper = async (keeperId) => {
                                             </td>
                                             <td style="padding: 16px 24px; text-transform: capitalize; font-weight: 500;">
                                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                                    <span class="material-symbols-outlined" style="font-size: 16px; color: var(--gold-primary);">${h.gold_type === 'refined' ? 'diamond' : 'trip_origin'}</span>
+                                                    <span class="material-symbols-outlined" style="font-size: 16px; color: var(--gold-primary);">${(h.gold_type === 'refined' || h.gold_type === 'balls to refined') ? 'diamond' : 'trip_origin'}</span>
                                                     ${h.gold_type}
                                                 </div>
                                             </td>
-                                            <td style="padding: 16px 24px; font-weight: 600; color: ${isDeposit ? '#4cd137' : '#ff6b6b'};">
-                                                ${isDeposit ? '+' : '-'}${w}
+                                            <td style="padding: 16px 24px; font-weight: 600; color: ${isDeposit ? '#4cd137' : isConvert ? '#d97706' : '#ff6b6b'};">
+                                                ${isDeposit ? '+' : isConvert ? '-' : '-'}${w}
                                                 ${extraInfo}
                                             </td>
                                             <td style="padding: 16px 24px; font-weight: 500;">${p}</td>
@@ -1219,4 +1233,82 @@ window.openKeeperLiquidationDetailsModal = (data) => {
     `;
 
     document.getElementById('global-modal').classList.add('active');
-};;
+};
+
+window.openKeeperConversionDetailsModal = (data) => {
+    document.getElementById('modal-title').textContent = 'Conversion Details';
+    const modalBody = document.getElementById('modal-body');
+
+    const dateStr = new Date(data.created_at).toLocaleString();
+    const ballsUsed = parseFloat(data.grams || 0);
+    const volume = parseFloat(data.volume || 0);
+    const refinedGrams = parseFloat(data.refined_grams || 0);
+
+    let density = 0;
+    let karatText = '-';
+    let pounds = 0;
+
+    if (refinedGrams > 0) {
+        pounds = refinedGrams * 0.00220462;
+        if (volume > 0) {
+            density = refinedGrams / volume;
+            if (density >= 19.3) {
+                karatText = '24.0k';
+            } else {
+                const karat = (density - 10.5) / 0.366;
+                karatText = Math.max(0, Math.min(24, karat)).toFixed(1) + 'k';
+            }
+        }
+    }
+
+    modalBody.innerHTML = `
+        <div style="background: var(--bg-surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border);">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="display: inline-flex; background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 16px; border-radius: 50%; margin-bottom: 12px;">
+                    <span class="material-symbols-outlined" style="font-size: 36px;">local_fire_department</span>
+                </div>
+                <h3 style="margin: 0; color: var(--text-main); font-size: 1.4rem;">Smelt & Convert</h3>
+                <div style="color: var(--text-muted); margin-top: 4px;">${dateStr}</div>
+            </div>
+
+            <div style="background: var(--bg-main); padding: 16px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Action</span>
+                    <span style="font-weight: 600; color: #d97706; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem;">Converted to Refined</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Balls Used</span>
+                    <span style="font-weight: 700; color: var(--text-main);">${ballsUsed.toLocaleString('en-US', { minimumFractionDigits: 2 })} g</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Refined Weight Produced</span>
+                    <span style="font-weight: 700; color: #10b981;">${refinedGrams.toLocaleString('en-US', { minimumFractionDigits: 2 })} g</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Refined Volume</span>
+                    <span style="font-weight: 700; color: var(--text-main);">${volume.toFixed(4)}</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Density</span>
+                    <span style="font-weight: 600; color: var(--text-main);">${density.toFixed(4)}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Karat</span>
+                    <span style="font-weight: 600; color: var(--warning);">${karatText}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="color: var(--text-muted);">Pounds (lb)</span>
+                    <span style="font-weight: 600; color: var(--text-main);">${pounds.toFixed(4)}</span>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-block" onclick="window.closeModal()" style="padding: 16px; font-size: 1.1rem; font-weight: 600; border-radius: 12px;">
+                Close
+            </button>
+        </div>
+    `;
+
+    document.getElementById('global-modal').classList.add('active');
+};

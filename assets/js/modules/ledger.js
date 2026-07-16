@@ -328,6 +328,15 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
                 </div>
             </div>
+
+            ${s.goldType === 'balls' && s.balls_grams > 0 ? `
+            <div style="margin-bottom: 24px; text-align: center; background: rgba(245, 158, 11, 0.05); padding: 16px; border-radius: 12px; border: 1px dashed rgba(245, 158, 11, 0.3);">
+                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">Want to refine these balls before selling?</div>
+                <button type="button" class="btn btn-outline" style="border-color: var(--warning); color: var(--warning);" onclick="window.openConvertBallsModal(${s.balls_grams}, 'company_owned', null, () => { window.closeModal(); window.initiateMarketSale(); })">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span> Convert to Refined Gold
+                </button>
+            </div>
+            ` : ''}
             
             <form id="initiate-sale-form" onsubmit="window.confirmInitiateSale(event)">
                 <div style="display: flex; gap: 16px; margin-bottom: 16px;">

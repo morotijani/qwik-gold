@@ -60,7 +60,7 @@ try {
     $goldStmt = $pdo->prepare("
         SELECT gold_type, SUM(weight_grams) as total_grams, SUM(volume) as total_volume, SUM(total_blades) as sum_blades 
         FROM gold_vault 
-        WHERE customer_id = ? AND ownership_status = 'keeper_held'
+        WHERE customer_id = ? AND ownership_status = 'keeper_held' AND current_location = 'office_vault'
         GROUP BY gold_type
     ");
     $goldStmt->execute([$customerId]);

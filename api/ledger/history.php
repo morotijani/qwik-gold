@@ -42,6 +42,7 @@ try {
                      IF(c.transaction_type = 'gold_purchase' AND gp.origin = 'from_keeper', 'from_keeper', c.transaction_type) as transaction_type, 
                      c.amount_ghs, 
                      COALESCE(gp.transaction_ref, c.reference_id) as reference_id, 
+                     c.description,
                      c.created_at 
               FROM capital_ledger c
               LEFT JOIN gold_purchases gp ON c.transaction_type = 'gold_purchase' AND c.reference_id = gp.id ";
@@ -72,6 +73,7 @@ try {
             'type' => $row['transaction_type'],
             'amount_ghs' => (float)$row['amount_ghs'],
             'reference_id' => $row['reference_id'] !== null ? $row['reference_id'] : null,
+            'description' => $row['description'] !== null ? $row['description'] : null,
             'date' => $row['created_at']
         ];
     }

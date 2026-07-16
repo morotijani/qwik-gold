@@ -295,6 +295,13 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
                                     ${parseFloat(data.current_kept_gold.balls_grams + data.current_kept_gold.refined_grams).toFixed(2)} <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">g</span>
                                 </div>
+                                ${parseFloat(data.current_kept_gold.balls_grams) > 0 ? `
+                                <div style="position: relative; z-index: 1; margin-top: 4px;">
+                                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(217,119,6,0.5); color: #d97706; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openConvertBallsModal(${data.current_kept_gold.balls_grams}, 'keeper_held', ${data.profile.id}, () => window.viewCustomer(${data.profile.id}, '${returnRoute}'))">
+                                        <span class="material-symbols-outlined" style="font-size: 14px;">local_fire_department</span> Convert Balls
+                                    </button>
+                                </div>
+                                ` : ''}
                             </div>
                         ` : ''}
 
@@ -894,7 +901,7 @@ window.submitLoanWizard = async () => {
     }
 
     try {
-        await window.api.post('/loans/issue.php', payload);
+        const response = await window.api.post('/loans/issue.php', payload);
         window.showToast('Loan issued successfully!', 'success');
         window.closeModal();
         
@@ -906,6 +913,15 @@ window.submitLoanWizard = async () => {
             if (typeof window.viewCustomer === 'function') {
                 window.viewCustomer(s.customerId); // Refresh profile
             }
+        }
+
+        // Show receipt if available
+        if (response && response.loan_id) {
+            setTimeout(() => {
+                if (typeof window.viewLoanIssueReceipt === 'function') {
+                    window.viewLoanIssueReceipt(response.loan_id);
+                }
+            }, 300);
         }
     } catch (error) {
         window.showToast(error.message, 'error');

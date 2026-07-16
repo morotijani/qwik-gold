@@ -546,9 +546,14 @@ tbody tr:last-child td { border-bottom: none; }
         display: none;
     }
 
+    /* Sidebar Mobile Scroll Fix */
+    .sidebar-nav {
+        padding-bottom: 120px;
+    }
+
     /* View Container */
     .view-container {
-        padding: 24px 16px;
+        padding: 24px 16px 120px 16px;
     }
 
     .page-title {

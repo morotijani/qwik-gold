@@ -26,6 +26,7 @@ try {
               FROM gold_vault 
               WHERE customer_id = :customer_id 
                 AND ownership_status = 'keeper_held' 
+                AND current_location = 'office_vault'
               GROUP BY gold_type";
               
     $stmt = $pdo->prepare($query);

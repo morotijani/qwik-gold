@@ -87,6 +87,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
                                 <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Reference</th>
                                 <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Amount (GHS)</th>
+                                <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: center;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -155,6 +156,29 @@ window.addEventListener('route-changed', async (e) => {
                                     <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${amountColor}; font-size: 1.05rem;">
                                         ${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </td>
+                                    <td style="padding: 16px 24px; text-align: center;">
+                                        ${tx.type === 'external_capital_in' ? `
+                                            <div style="position: relative; display: inline-block;">
+                                                <button class="btn btn-outline" style="padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: none; background: var(--bg-main);" onclick="
+                                                    event.stopPropagation();
+                                                    const menu = this.nextElementSibling;
+                                                    const isVisible = menu.style.display === 'block';
+                                                    document.querySelectorAll('.action-menu-popup').forEach(m => m.style.display = 'none');
+                                                    if (!isVisible) menu.style.display = 'block';
+                                                ">
+                                                    <span class="material-symbols-outlined" style="font-size: 20px;">more_vert</span>
+                                                </button>
+                                                <div class="action-menu-popup" style="display: none; position: absolute; right: 0; top: 100%; min-width: 140px; text-align: left; z-index: 100; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 8px 0; margin-top: 4px;">
+                                                    <div onclick="window.openEditCapitalInjectionModal(${tx.id}, ${tx.amount_ghs}, '${(tx.description || '').replace(/'/g, "\\'")}')" style="display: flex; align-items: center; gap: 8px; color: var(--info); padding: 10px 16px; cursor: pointer; font-size: 0.9rem; font-weight: 500;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                                                        <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit
+                                                    </div>
+                                                    <div onclick="window.confirmDeleteCapitalInjection(${tx.id})" style="display: flex; align-items: center; gap: 8px; color: var(--danger); padding: 10px 16px; cursor: pointer; font-size: 0.9rem; font-weight: 500;" onmouseover="this.style.background='rgba(239, 68, 68, 0.05)'" onmouseout="this.style.background='transparent'">
+                                                        <span class="material-symbols-outlined" style="font-size: 18px;">delete</span> Delete
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ` : '<span style="opacity: 0.3">-</span>'}
+                                    </td>
                                 </tr>
                                 `;
                             }).join('')}
@@ -193,6 +217,85 @@ window.addEventListener('route-changed', async (e) => {
         window._txState.type = type;
         window._txState.page = 1; // reset page to 1 when changing filters
         window.loadTransactionsData();
+    };
+
+    // Global click to close action menus
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.action-menu-popup').forEach(m => m.style.display = 'none');
+    });
+
+    window.openEditCapitalInjectionModal = (id, amount, desc) => {
+        const html = `
+            <div style="padding: 20px;">
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-size: 1.1rem; font-weight: 600; text-align: center; display: block; margin-bottom: 12px;">Amount (₵)</label>
+                    <input type="number" id="edit-cap-amount" class="form-control" step="0.01" min="0" value="${amount}" style="font-size: 2.5rem; font-weight: 800; text-align: center; height: auto; padding: 16px; color: var(--gold-primary); letter-spacing: 1px; border-radius: 12px; background: var(--bg-main); border: 2px solid var(--border);" onkeydown="if(event.key==='-') event.preventDefault()">
+                </div>
+                <div class="form-group">
+                    <label>Source Description</label>
+                    <input type="text" id="edit-cap-desc" class="form-control" value="${desc}">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+                    <button class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="window.submitEditCapitalInjection(${id}, this)">Save Changes</button>
+                </div>
+            </div>
+        `;
+        window.openModal('Edit Capital Injection', html, { maxWidth: '400px' });
+    };
+
+    window.submitEditCapitalInjection = async (id, btn) => {
+        const amount = document.getElementById('edit-cap-amount').value;
+        const desc = document.getElementById('edit-cap-desc').value;
+
+        if (!amount || !desc) return window.showToast('Please fill all fields', 'error');
+
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        try {
+            await window.api.post('/capital/update_injection.php', {
+                ledger_id: id,
+                amount_ghs: amount,
+                source_description: desc
+            });
+            window.showToast('Capital injection updated successfully', 'success');
+            window.closeModal();
+            window.loadTransactionsData();
+        } catch (e) {
+            window.showToast(e.message, 'error');
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        }
+    };
+
+    window.confirmDeleteCapitalInjection = (id) => {
+        const html = `
+            <div style="padding: 20px; text-align: center;">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: var(--danger); margin-bottom: 16px;">warning</span>
+                <h3 style="margin-top: 0;">Delete Injection?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">This will recalculate all running balances after this transaction. This action cannot be undone.</p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <button class="btn btn-primary" style="background: var(--danger); border-color: var(--danger);" onclick="window.submitDeleteCapitalInjection(${id}, this)">Confirm Delete</button>
+                </div>
+            </div>
+        `;
+        window.openModal('Confirm Delete', html, { maxWidth: '400px' });
+    };
+
+    window.submitDeleteCapitalInjection = async (id, btn) => {
+        btn.disabled = true;
+        btn.textContent = 'Deleting...';
+        try {
+            await window.api.post('/capital/delete_injection.php', { ledger_id: id });
+            window.showToast('Capital injection deleted successfully', 'success');
+            window.closeModal();
+            window.loadTransactionsData();
+        } catch (e) {
+            window.showToast(e.message, 'error');
+            btn.disabled = false;
+            btn.textContent = 'Confirm Delete';
+        }
     };
 
     await window.loadTransactionsData();
