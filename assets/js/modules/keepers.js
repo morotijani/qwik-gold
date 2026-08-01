@@ -1248,15 +1248,15 @@ window.openKeeperConversionDetailsModal = (data) => {
     let karatText = '-';
     let pounds = 0;
 
+    const truncate2 = (num) => Math.floor(num * 100) / 100;
+
     if (refinedGrams > 0) {
-        pounds = refinedGrams * 0.00220462;
+        pounds = truncate2(refinedGrams / 7.75);
         if (volume > 0) {
-            density = refinedGrams / volume;
-            if (density >= 19.3) {
-                karatText = '24.0k';
-            } else {
-                const karat = (density - 10.5) / 0.366;
-                karatText = Math.max(0, Math.min(24, karat)).toFixed(1) + 'k';
+            density = truncate2(refinedGrams / volume);
+            if (density > 0) {
+                const karat = truncate2(((density - 10.51) * 52.838) / density);
+                karatText = Math.max(0, karat).toFixed(2) + 'k';
             }
         }
     }

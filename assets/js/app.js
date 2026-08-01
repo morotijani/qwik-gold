@@ -537,22 +537,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateCalcs = () => {
             const g = parseFloat(gInput.value) || 0;
             const v = parseFloat(vInput.value) || 0;
+            const truncate2 = (num) => Math.floor(num * 100) / 100;
 
             if (g > 0) {
-                pSpan.innerText = (g * 0.00220462).toFixed(4);
+                pSpan.innerText = truncate2(g / 7.75).toFixed(2);
             } else {
                 pSpan.innerText = '-';
             }
 
             if (g > 0 && v > 0) {
-                const density = g / v;
-                dSpan.innerText = density.toFixed(4);
-                // Karat Logic matching backend (approx)
-                if (density >= 19.3) {
-                    kSpan.innerText = '24k';
+                const density = truncate2(g / v);
+                dSpan.innerText = density.toFixed(2);
+                
+                // Karat Logic matching purchases.js
+                if (density > 0) {
+                    const karat = truncate2(((density - 10.51) * 52.838) / density);
+                    kSpan.innerText = Math.max(0, karat).toFixed(2) + 'k';
                 } else {
-                    const karat = (density - 10.5) / 0.366;
-                    kSpan.innerText = Math.max(0, Math.min(24, karat)).toFixed(1) + 'k';
+                    kSpan.innerText = '-';
                 }
             } else {
                 dSpan.innerText = '-';
