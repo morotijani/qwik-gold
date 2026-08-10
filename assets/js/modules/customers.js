@@ -297,7 +297,7 @@ window.addEventListener('route-changed', async (e) => {
                                 </div>
                                 ${parseFloat(data.current_kept_gold.balls_grams) > 0 ? `
                                 <div style="position: relative; z-index: 1; margin-top: 4px;">
-                                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(217,119,6,0.5); color: #d97706; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openConvertBallsModal(${data.current_kept_gold.balls_grams}, 'keeper_held', ${data.profile.id}, () => window.viewCustomer(${data.profile.id}, '${returnRoute}'))">
+                                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(217,119,6,0.5); color: #d97706; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openConvertBallsModal(${data.current_kept_gold.balls_grams}, ${data.current_kept_gold.balls_blades || 0}, 'keeper_held', ${data.profile.id}, () => window.viewCustomer(${data.profile.id}, '${returnRoute}'))">
                                         <span class="material-symbols-outlined" style="font-size: 14px;">local_fire_department</span> Convert Balls
                                     </button>
                                 </div>

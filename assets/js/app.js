@@ -46,12 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openModal = (title, htmlContent, options = {}) => {
         if (modalTitle) modalTitle.textContent = title;
         if (modalBody) modalBody.innerHTML = htmlContent;
-        
+
         const modalCard = document.querySelector('.modal-card');
         if (modalCard) {
             modalCard.style.maxWidth = options.maxWidth || '560px';
         }
-        
+
         if (globalModal) globalModal.classList.add('active');
     };
 
@@ -185,21 +185,21 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ${settlements.length === 0 ? `
                                         <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px; font-style: italic;">No settlement records found.</td></tr>
                                     ` : settlements.map(s => {
-                                        let details = '';
-                                        if (s.settlement_type === 'walk_in_gold' || s.settlement_type === 'collateral') {
-                                            details = `<div style="font-size: 0.8rem; color: var(--gold-primary); margin-top: 6px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                let details = '';
+                if (s.settlement_type === 'walk_in_gold' || s.settlement_type === 'collateral') {
+                    details = `<div style="font-size: 0.8rem; color: var(--gold-primary); margin-top: 6px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
                                                 <span class="material-symbols-outlined" style="font-size: 0.9rem;">scale</span>`;
-                                            if (s.gold_type === 'refined') {
-                                                details += `${parseFloat(s.gold_grams_used).toFixed(2)}g <span style="color:var(--text-muted); font-weight:500;">(Vol: ${s.volume || '-'} | Den: ${s.density || '-'})</span>`;
-                                            } else if (s.gold_type === 'balls') {
-                                                details += `${parseFloat(s.gold_grams_used).toFixed(2)}g <span style="color:var(--text-muted); font-weight:500;">(${s.total_blades || '-'} blades)</span>`;
-                                            } else {
-                                                details += `${parseFloat(s.gold_grams_used).toFixed(2)}g <span style="color:var(--text-muted); font-weight:500;">of ${s.gold_type}</span>`;
-                                            }
-                                            details += `</div>`;
-                                        }
+                    if (s.gold_type === 'refined') {
+                        details += `${parseFloat(s.gold_grams_used).toFixed(2)}g <span style="color:var(--text-muted); font-weight:500;">(Vol: ${s.volume || '-'} | Den: ${s.density || '-'})</span>`;
+                    } else if (s.gold_type === 'balls') {
+                        details += `${parseFloat(s.gold_grams_used).toFixed(2)}g <span style="color:var(--text-muted); font-weight:500;">(${s.total_blades || '-'} blades)</span>`;
+                    } else {
+                        details += `${parseFloat(s.gold_grams_used).toFixed(2)}g <span style="color:var(--text-muted); font-weight:500;">of ${s.gold_type}</span>`;
+                    }
+                    details += `</div>`;
+                }
 
-                                        return `
+                return `
                                         <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
                                             <td style="padding: 16px 20px; color: var(--text-muted); font-weight: 600; font-size: 0.9rem;">${new Date(s.created_at).toLocaleDateString()}</td>
                                             <td style="padding: 16px 20px; text-transform: capitalize; color: var(--text-main); font-weight: 700;">
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             <td style="padding: 16px 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">${s.processor_name || 'System'}</td>
                                         </tr>
                                         `;
-                                    }).join('')}
+            }).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="text-align: center; margin-bottom: 15px;">
                 <div style="font-size: 1.2rem; font-weight: bold;">Mukhlis Farhan Trading Limited</div>
                 <div style="font-size: 0.9rem;">AC-0064-9566, Konongo - Odumase</div>
-                <div style="font-size: 0.9rem;">+233 55 400 1608 / +233 55 369 8903</div>
+                <div style="font-size: 0.9rem;">+233 55 400 1608 / +233 25 664 2984</div>
                 <div style="margin-top: 5px; font-weight: bold;">LOAN ISSUE RECEIPT</div>
             </div>
             
@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = await window.api.get(`/loans/details.php?loan_id=${loanId}`);
             const { loan } = data;
-            
+
             document.getElementById('modal-title').textContent = 'Loan Issue Receipt';
             const modalBody = document.getElementById('modal-body');
 
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             <div style="background: rgba(239, 68, 68, 0.05); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border: 1px solid rgba(239, 68, 68, 0.2);">
                                 <span style="font-weight: 600; font-size: 0.9rem; color: var(--danger);">Principal Issued:</span>
-                                <span style="font-size: 1.1rem; font-weight: 800; color: var(--danger);">₵${parseFloat(loan.original_principal).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span style="font-size: 1.1rem; font-weight: 800; color: var(--danger);">₵${parseFloat(loan.original_principal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>
                             
                             <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 ${typeof window.getThermalPrintHTMLLoan === 'function' ? window.getThermalPrintHTMLLoan(loan, dateObj) : ''}
             `;
-            
+
             document.getElementById('global-modal').classList.add('active');
         } catch (err) {
             window.showToast('Failed to load loan receipt: ' + err.message, 'error');
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             backdrop.classList.toggle('active');
         }
     };
-    
+
     window.closeMobileMenu = () => {
         const sidebar = document.getElementById('sidebar');
         const backdrop = document.getElementById('mobile-backdrop');
@@ -470,12 +470,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Global Modal for Converting Gold Balls to Refined
-    window.openConvertBallsModal = (maxGramsAvailable, ownershipStatus, customerId = null, callback = null) => {
+    window.openConvertBallsModal = (maxGramsAvailable, totalBladesAvailable, ownershipStatus, customerId = null, callback = null) => {
+        // Fallback formula if blades wasn't captured in the db
+        const displayBlades = (totalBladesAvailable && parseFloat(totalBladesAvailable) > 0)
+            ? parseFloat(totalBladesAvailable)
+            : (parseFloat(maxGramsAvailable) / 0.8);
+
         const html = `
             <div style="padding: 24px;">
-                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-                    <div style="font-size: 0.85rem; color: var(--warning); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Available Balls to Convert</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">${maxGramsAvailable} <span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--warning); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Available Balls to Convert</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">${maxGramsAvailable} <span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.85rem; color: var(--warning); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">Total Blades</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">${displayBlades.toFixed(4)}</div>
+                    </div>
                 </div>
 
                 <!-- Hidden field for balls used to keep logic intact -->
@@ -503,16 +514,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; text-align: center;">
                     <div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Pounds (lb)</div>
+                        <div id="convert-calc-pounds" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">-</div>
+                    </div>
+                    <div>
                         <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Density</div>
                         <div id="convert-calc-density" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">-</div>
                     </div>
                     <div>
                         <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Karat</div>
                         <div id="convert-calc-karat" style="font-size: 1.1rem; font-weight: 700; color: var(--warning);">-</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Pounds (lb)</div>
-                        <div id="convert-calc-pounds" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">-</div>
                     </div>
                 </div>
 
@@ -548,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (g > 0 && v > 0) {
                 const density = truncate2(g / v);
                 dSpan.innerText = density.toFixed(2);
-                
+
                 // Karat Logic matching purchases.js
                 if (density > 0) {
                     const karat = truncate2(((density - 10.51) * 52.838) / density);

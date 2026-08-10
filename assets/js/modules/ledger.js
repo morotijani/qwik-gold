@@ -329,46 +329,45 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
             </div>
 
-            ${s.goldType === 'balls' && s.balls_grams > 0 ? `
-            <div style="margin-bottom: 24px; text-align: center; background: rgba(245, 158, 11, 0.05); padding: 16px; border-radius: 12px; border: 1px dashed rgba(245, 158, 11, 0.3);">
-                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">Want to refine these balls before selling?</div>
-                <button type="button" class="btn btn-outline" style="border-color: var(--warning); color: var(--warning);" onclick="window.openConvertBallsModal(${s.balls_grams}, 'company_owned', null, () => { window.closeModal(); window.initiateMarketSale(); })">
-                    <span class="material-symbols-outlined" style="font-size: 18px;">local_fire_department</span> Convert to Refined Gold
-                </button>
-            </div>
-            ` : ''}
-            
+            ${s.goldType === 'balls' ? `
+                ${s.balls_grams > 0 ? `
+                <div style="margin-top: 24px; text-align: center; background: rgba(245, 158, 11, 0.05); padding: 32px 16px; border-radius: 12px; border: 1px dashed rgba(245, 158, 11, 0.3);">
+                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">Gold Balls Must Be Refined First</div>
+                    <div style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px;">You need to convert these balls into refined gold before initiating a market sale.</div>
+                    <button type="button" class="btn btn-primary" style="padding: 12px 24px; font-size: 1.05rem;" onclick="window.openConvertBallsModal(${s.balls_grams}, ${s.balls_blades}, 'company_owned', null, () => { window.closeModal(); window.initiateMarketSale(); })">
+                        <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">local_fire_department</span> Convert ${Number(s.balls_grams).toFixed(2)}g to Refined Gold
+                    </button>
+                </div>
+                ` : `
+                <div style="margin-top: 24px; text-align: center; padding: 32px 16px;">
+                    <span class="material-symbols-outlined" style="font-size: 48px; color: var(--text-muted); opacity: 0.5;">inventory_2</span>
+                    <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-top: 16px;">No Gold Balls Available</div>
+                    <div style="font-size: 0.95rem; color: var(--text-muted); margin-top: 8px;">The vault currently has 0.00g of Gold Balls.</div>
+                </div>
+                `}
+            ` : `
             <form id="initiate-sale-form" onsubmit="window.confirmInitiateSale(event)">
                 <div style="display: flex; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label>Est. Grams (Editable) <span style="color: red;">*</span></label>
                         <input type="number" step="0.0001" min="0" value="${s.estimated_grams}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_grams = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
                     </div>
-                    ${s.goldType === 'refined' ? `
                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label>Est. Volume (Editable) <span style="color: red;">*</span></label>
                         <input type="number" step="0.0001" min="0" value="${s.estimated_volume}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_volume = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
                     </div>
-                    ` : `
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label>Est. Total Blades (Editable) <span style="color: red;">*</span></label>
-                        <input type="number" step="0.0001" min="0" value="${s.estimated_blades}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_blades = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
-                    </div>
-                    `}
                 </div>
                 
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label>Estimated Local Price ${s.goldType === 'refined' ? '' : '(Per Blade)'} <span style="color: red;">*</span></label>
+                    <label>Estimated Local Price <span style="color: red;">*</span></label>
                     <input type="number" step="0.01" min="0" value="${s.estimated_local_price}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_local_price = this.value; window.calcInitiateSale();" class="form-control" required placeholder="Enter estimated price">
                 </div>
                 
-                ${s.goldType === 'refined' ? `
                 <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid var(--border);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Pounds:</span> <span id="calc_pounds" style="font-weight: 600;">${s.pounds.toFixed(2)} lbs</span></div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Density:</span> <span id="calc_density" style="font-weight: 600;">${s.density.toFixed(2)}</span></div>
                     <div style="display: flex; justify-content: space-between;"><span>Karat:</span> <span id="calc_karat" style="font-weight: 600;">${s.karat.toFixed(2)}</span></div>
                 </div>
-                ` : ''}
                 
                 <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.3);">
                     <div style="color: var(--success); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Estimated Total Cash</div>
@@ -380,6 +379,7 @@ window.addEventListener('route-changed', async (e) => {
                     <button type="submit" class="btn btn-primary" id="btn-initiate-sale">Initiate Sale <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">arrow_forward</span></button>
                 </div>
             </form>
+            `}
         `;
         window.openModal('Initiate Market Sale', html);
     };
@@ -397,9 +397,27 @@ window.addEventListener('route-changed', async (e) => {
             <div style="text-align: center; padding: 20px 0;">
                 <span class="material-symbols-outlined" style="font-size: 48px; color: var(--warning); margin-bottom: 16px;">warning</span>
                 <h3 style="margin: 0 0 16px 0;">Confirm Market Sale</h3>
-                <p style="color: var(--text-muted); margin-bottom: 24px;">
-                    Are you sure you want to initiate a market sale for <strong>${s.goldType.toUpperCase()}</strong> gold?<br><br>
-                    This will move all current ${s.goldType} company gold from the vault to a "Pending Sale" state, using your edited estimations.
+                
+                <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: left;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px;">Sale Summary</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+                        <div><span style="color: var(--text-muted);">Gold Type:</span> <strong style="color: var(--text-main); text-transform: capitalize;">${s.goldType}</strong></div>
+                        <div><span style="color: var(--text-muted);">Est. Grams:</span> <strong style="color: var(--text-main);">${Number(s.estimated_grams).toFixed(4)}g</strong></div>
+                        ${s.goldType === 'refined' ? `
+                        <div><span style="color: var(--text-muted);">Est. Volume:</span> <strong style="color: var(--text-main);">${Number(s.estimated_volume).toFixed(4)}</strong></div>
+                        ` : `
+                        <div><span style="color: var(--text-muted);">Est. Blades:</span> <strong style="color: var(--text-main);">${Number(s.estimated_blades).toFixed(4)}</strong></div>
+                        `}
+                        <div><span style="color: var(--text-muted);">Local Price:</span> <strong style="color: var(--text-main);">GHS ${Number(s.estimated_local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong></div>
+                    </div>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-muted); font-weight: 600;">Est. Total Cash:</span>
+                        <span style="font-size: 1.2rem; font-weight: 800; color: var(--success);">GHS ${Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    </div>
+                </div>
+
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem;">
+                    Are you sure? This will move all current ${s.goldType} company gold from the vault to a "Pending Sale" state.
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center;">
                     <button type="button" class="btn btn-outline" onclick="window.renderInitiateSaleWizard()">Cancel</button>

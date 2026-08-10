@@ -735,7 +735,7 @@ window.getThermalPrintHTML = (purchaseObj, dateObj, sellerName) => {
         <div style="text-align: center; margin-bottom: 15px;">
             <div style="font-size: 1.2rem; font-weight: bold;">Mukhlis Farhan Trading Limited</div>
             <div style="font-size: 0.9rem;">AC-0064-9566, Konongo - Odumase</div>
-            <div style="font-size: 0.9rem;">+233 55 400 1608 / +233 55 369 8903</div>
+            <div style="font-size: 0.9rem;">+233 55 400 1608 / +233 25 664 2984</div>
             <div style="margin-top: 5px; font-weight: bold;">PURCHASE INVOICE</div>
         </div>
         

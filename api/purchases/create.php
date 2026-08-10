@@ -44,8 +44,8 @@ try {
     $pdo->beginTransaction();
 
     // 1. Insert into gold_vault
-    $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id) VALUES (?, 'company_owned', ?, 'office_vault', ?)");
-    $vaultStmt->execute([$goldType, $weightGrams, $customerId]);
+    $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, total_blades, current_location, customer_id) VALUES (?, 'company_owned', ?, ?, 'office_vault', ?)");
+    $vaultStmt->execute([$goldType, $weightGrams, $totalBlades, $customerId]);
     
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
 

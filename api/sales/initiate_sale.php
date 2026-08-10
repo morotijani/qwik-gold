@@ -66,17 +66,16 @@ try {
 
     $estimatedCash = 0.0;
     if ($goldType === 'balls') {
-        $estimatedCash = $overallBlades * $estimatedPrice;
+        $estimatedCash = floor($overallBlades * $estimatedPrice);
     } else if ($goldType === 'refined') {
         if ($overallVolume > 0) {
-            $density = $overallGrams / $overallVolume;
-            // Prevent division by zero or invalid negative karat
+            $density = floor(($overallGrams / $overallVolume) * 100) / 100;
             $karat = 0;
             if ($density > 0) {
-                $karat = (($density - 10.51) * 52.838) / $density;
+                $karat = floor(((($density - 10.51) * 52.838) / $density) * 100) / 100;
             }
-            $pounds = $overallGrams / 7.75;
-            $estimatedCash = ($karat * $estimatedPrice / 23) * $pounds;
+            $pounds = floor(($overallGrams / 7.75) * 100) / 100;
+            $estimatedCash = floor(($karat * $estimatedPrice / 23) * $pounds);
         }
     }
 
