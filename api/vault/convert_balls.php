@@ -50,12 +50,16 @@ try {
         $totalAvailable += (float)$ball['weight_grams'];
     }
 
-    if ($totalAvailable < $ballsGramsUsed) {
+    // Fix floating point precision issues by rounding to 4 decimal places
+    $totalAvailableRounded = round($totalAvailable, 4);
+    $ballsGramsUsedRounded = round($ballsGramsUsed, 4);
+
+    if ($totalAvailableRounded < $ballsGramsUsedRounded) {
         throw new \Exception("Insufficient gold balls available. Requested: {$ballsGramsUsed}g, Available: {$totalAvailable}g");
     }
 
     // 2. Deduct from oldest balls first
-    $remainingToConvert = $ballsGramsUsed;
+    $remainingToConvert = $ballsGramsUsedRounded;
     $lastBallId = null; 
 
     foreach ($balls as $ball) {
@@ -63,16 +67,16 @@ try {
 
         $ballId = $ball['id'];
         $lastBallId = $ballId;
-        $ballWeight = (float)$ball['weight_grams'];
+        $ballWeight = round((float)$ball['weight_grams'], 4);
 
         if ($ballWeight <= $remainingToConvert) {
             // Entire ball is converted
             $upd = $pdo->prepare("UPDATE gold_vault SET current_location = 'converted' WHERE id = ?");
             $upd->execute([$ballId]);
-            $remainingToConvert -= $ballWeight;
+            $remainingToConvert = round($remainingToConvert - $ballWeight, 4);
         } else {
             // Partial conversion: reduce weight of existing ball
-            $newWeight = $ballWeight - $remainingToConvert;
+            $newWeight = round($ballWeight - $remainingToConvert, 4);
             $upd = $pdo->prepare("UPDATE gold_vault SET weight_grams = ? WHERE id = ?");
             $upd->execute([$newWeight, $ballId]);
 

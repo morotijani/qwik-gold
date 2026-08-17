@@ -334,7 +334,7 @@ window.addEventListener('route-changed', async (e) => {
                 <div style="margin-top: 24px; text-align: center; background: rgba(245, 158, 11, 0.05); padding: 32px 16px; border-radius: 12px; border: 1px dashed rgba(245, 158, 11, 0.3);">
                     <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">Gold Balls Must Be Refined First</div>
                     <div style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px;">You need to convert these balls into refined gold before initiating a market sale.</div>
-                    <button type="button" class="btn btn-primary" style="padding: 12px 24px; font-size: 1.05rem;" onclick="window.openConvertBallsModal(${s.balls_grams}, ${s.balls_blades}, 'company_owned', null, () => { window.closeModal(); window.initiateMarketSale(); })">
+                    <button type="button" class="btn btn-primary" style="padding: 12px 24px; font-size: 1.05rem;" onclick="window.openConvertBallsModal(${s.balls_grams}, ${s.balls_blades}, 'company_owned', null, () => { window.closeModal(); window.loadLedgerDashboard(); window.initiateMarketSale(); })">
                         <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">local_fire_department</span> Convert ${Number(s.balls_grams).toFixed(2)}g to Refined Gold
                     </button>
                 </div>
