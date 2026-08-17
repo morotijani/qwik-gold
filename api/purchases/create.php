@@ -46,6 +46,7 @@ try {
     // 1. Insert into gold_vault
     $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, total_blades, current_location, customer_id) VALUES (?, 'company_owned', ?, ?, 'office_vault', ?)");
     $vaultStmt->execute([$goldType, $weightGrams, $totalBlades, $customerId]);
+    $vaultId = $pdo->lastInsertId();
     
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
 
@@ -53,6 +54,9 @@ try {
     $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, handler_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?, ?)");
     $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $handlerId, $notes]);
     $purchaseId = $pdo->lastInsertId();
+
+    // Link the vault record back to the purchase
+    $pdo->prepare("UPDATE gold_vault SET purchase_id = ? WHERE id = ?")->execute([$purchaseId, $vaultId]);
 
     // 3. Deduct from capital_ledger
     $balanceStmt = $pdo->query("SELECT running_balance FROM capital_ledger ORDER BY id DESC LIMIT 1 FOR UPDATE");

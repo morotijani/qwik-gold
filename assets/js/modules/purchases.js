@@ -70,10 +70,11 @@ window.addEventListener('route-changed', async (e) => {
                                 <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border);">Gold Type</th>
                                 <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border); text-align: right;">Weight</th>
                                 <th style="padding: 16px 24px; font-weight: 700; border-bottom: 1px solid var(--border); text-align: right;">Amount Paid</th>
+                                <th style="padding: 16px; font-weight: 700; border-bottom: 1px solid var(--border); width: 60px;"></th>
                             </tr>
                         </thead>
                         <tbody id="purchases-tbody">
-                            <tr><td colspan="7" style="padding: 48px; text-align: center; color: var(--text-muted); font-size: 1.05rem;">
+                            <tr><td colspan="8" style="padding: 48px; text-align: center; color: var(--text-muted); font-size: 1.05rem;">
                                 <span class="material-symbols-outlined spin" style="font-size: 32px; color: var(--border); margin-bottom: 16px; display: block;">sync</span>
                                 Loading purchases...
                             </td></tr>
@@ -95,7 +96,7 @@ window.addEventListener('route-changed', async (e) => {
 
     } catch (error) {
         document.getElementById('purchases-tbody').innerHTML =
-            `<tr><td colspan="7" style="text-align: center; color: #ff6b6b;">Error loading purchases.</td></tr>`;
+            `<tr><td colspan="8" style="text-align: center; color: #ff6b6b;">Error loading purchases.</td></tr>`;
     }
 });
 
@@ -107,7 +108,7 @@ window.renderPurchasesTable = () => {
     const purchases = window._walkInPurchases;
 
     if (purchases.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No purchases recorded yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No purchases recorded yet.</td></tr>';
         if (paginationContainer) paginationContainer.innerHTML = '';
         return;
     }
@@ -150,6 +151,15 @@ window.renderPurchasesTable = () => {
                 </td>
                 <td style="padding: 16px 24px; color: #ef4444; font-weight: 800; text-align: right; font-size: 1.1rem;">
                     <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-right: 4px;">GHS</span>${parseFloat(p.total_paid_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td style="padding: 16px; text-align: center;">
+                    ${(p.current_location === 'office_vault' || p.current_location === 'on_hold') ? `
+                    <button onclick="window.confirmDeletePurchase(${p.id}, '${p.transaction_ref || ('#TXN-'+p.id)}', ${p.total_paid_ghs})" title="Delete Purchase" style="background: none; border: none; cursor: pointer; color: #ef4444; padding: 8px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.background='none'">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                    </button>
+                    ` : `
+                    <span title="Gold already processed" class="material-symbols-outlined" style="font-size: 20px; color: var(--border); cursor: not-allowed; padding: 8px;">lock</span>
+                    `}
                 </td>
             </tr>
         `;
@@ -856,4 +866,41 @@ window.viewPurchaseReceipt = (purchaseId) => {
     `;
 
     document.getElementById('global-modal').classList.add('active');
+};
+
+window.confirmDeletePurchase = (id, ref, amount) => {
+    const confirmHtml = `
+        <div style="padding: 24px; text-align: center;">
+            <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <span class="material-symbols-outlined" style="font-size: 32px; color: #ef4444;">delete_forever</span>
+            </div>
+            <h3 style="margin: 0 0 12px 0; color: var(--text-main);">Delete Purchase?</h3>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">
+                Are you sure you want to delete purchase <strong>${ref}</strong>? 
+                This will safely remove the gold from the vault and refund <strong style="color:var(--text-main)">GHS ${parseFloat(amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</strong> back to your capital balance.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" style="background: #ef4444; border-color: #ef4444;" onclick="window.submitDeletePurchase(${id})">Yes, Delete</button>
+            </div>
+        </div>
+    `;
+    window.openModal('Delete Purchase', confirmHtml, { maxWidth: '400px' });
+};
+
+window.submitDeletePurchase = async (id) => {
+    document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span><div style="margin-top:16px;">Deleting...</div></div>';
+    try {
+        await window.api.post('/purchases/delete.php', { id });
+        window.closeModal();
+        window.showToast('Purchase deleted and capital refunded', 'success');
+        
+        // Refresh purchases list silently
+        const purchases = await window.api.get('/purchases/list.php');
+        window._walkInPurchases = purchases;
+        window.renderPurchasesTable();
+    } catch (e) {
+        window.showToast(e.message || 'Failed to delete purchase', 'error');
+        window.closeModal();
+    }
 };

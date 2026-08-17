@@ -25,7 +25,14 @@ try {
             u2.name as handled_by,
             p.notes, 
             p.created_at,
-            c.name as customer_name
+            c.name as customer_name,
+            (
+                SELECT current_location 
+                FROM gold_vault v 
+                WHERE v.purchase_id = p.id 
+                   OR (v.purchase_id IS NULL AND v.gold_type = p.gold_type AND v.weight_grams = p.weight_grams AND v.created_at BETWEEN p.created_at - INTERVAL 2 SECOND AND p.created_at + INTERVAL 2 SECOND)
+                LIMIT 1
+            ) as current_location
         FROM gold_purchases p
         LEFT JOIN customers c ON p.customer_id = c.id
         LEFT JOIN users u2 ON p.handler_id = u2.id

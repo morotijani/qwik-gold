@@ -18,7 +18,7 @@ CREATE TABLE customers (
 -- capital_ledger (The Single Source of Truth for Cash)
 CREATE TABLE capital_ledger (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_type ENUM('loan_issued', 'loan_repaid', 'gold_purchase', 'expense', 'out_sale_revenue', 'external_capital_in', 'expense_refunded') NOT NULL,
+    transaction_type ENUM('loan_issued', 'loan_repaid', 'gold_purchase', 'expense', 'out_sale_revenue', 'external_capital_in', 'expense_refunded', 'purchase_reversal') NOT NULL,
     amount_ghs DECIMAL(15, 2) NOT NULL,
     running_balance DECIMAL(15, 2) NOT NULL,
     reference_id INT DEFAULT NULL, -- Links to specific loan, purchase, or expense ID
@@ -38,6 +38,7 @@ CREATE TABLE gold_vault (
     volume DECIMAL(10, 4) DEFAULT NULL,
     total_blades DECIMAL(10, 2) DEFAULT NULL,
     current_location ENUM('office_vault', 'sold_main_market', 'converted', 'on_hold') NOT NULL DEFAULT 'office_vault',
+    purchase_id INT DEFAULT NULL, -- Links vault record back to its origin purchase (if bought)
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
     parent_ball_id INT DEFAULT NULL, -- Links refined gold back to original balls
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
