@@ -19,6 +19,7 @@ if (!isset($data['gold_type']) || !isset($data['estimated_local_price'])) {
 
 $goldType = $data['gold_type']; // 'refined' or 'balls'
 $estimatedPrice = (float)$data['estimated_local_price'];
+$sourceLocation = isset($data['source_location']) && $data['source_location'] === 'on_hold' ? 'on_hold' : 'office_vault';
 
 if ($estimatedPrice <= 0) {
     sendResponse('error', 'Estimated price must be greater than zero', [], 400);
@@ -30,7 +31,7 @@ if (!in_array($goldType, ['refined', 'balls'])) {
 try {
     $pdo->beginTransaction();
 
-    // 1. Fetch all company_owned gold in office_vault for the chosen type
+    // 1. Fetch all company_owned gold in chosen location for the chosen type
     $sumStmt = $pdo->prepare("
         SELECT 
             SUM(weight_grams) as total_grams,
@@ -38,11 +39,11 @@ try {
             SUM(total_blades) as total_blades
         FROM gold_vault 
         WHERE ownership_status = 'company_owned' 
-        AND current_location = 'office_vault' 
+        AND current_location = ? 
         AND gold_type = ?
         FOR UPDATE
     ");
-    $sumStmt->execute([$goldType]);
+    $sumStmt->execute([$sourceLocation, $goldType]);
     $item = $sumStmt->fetch();
 
     $overallGrams = (float)$item['total_grams'];
@@ -50,7 +51,7 @@ try {
     $overallBlades = (float)$item['total_blades'];
 
     if ($overallGrams <= 0 && $overallBlades <= 0) {
-        throw new Exception("No company_owned $goldType gold found in the office vault to sell.");
+        throw new Exception("No company_owned $goldType gold found in the $sourceLocation to sell.");
     }
     
     // Override with user-provided estimates if present
@@ -105,10 +106,10 @@ try {
         UPDATE gold_vault 
         SET current_location = 'sold_main_market', sale_id = ? 
         WHERE ownership_status = 'company_owned' 
-        AND current_location = 'office_vault'
+        AND current_location = ?
         AND gold_type = ?
     ");
-    $updateStmt->execute([$marketSaleId, $goldType]);
+    $updateStmt->execute([$marketSaleId, $sourceLocation, $goldType]);
 
     log_activity($pdo, $current_user_id ?? null, 'INITIATE_SALE', 'market_sales', $marketSaleId, null, ['gold_type' => $goldType, 'estimated_cash' => $estimatedCash]);
 

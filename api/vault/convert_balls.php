@@ -22,6 +22,7 @@ if (!isset($data['balls_grams_used']) || !isset($data['refined_grams_produced'])
 
 $ownershipStatus = $data['ownership_status']; // 'company_owned' or 'keeper_held'
 $customerId = isset($data['customer_id']) && $data['customer_id'] !== '' && $data['customer_id'] !== null ? (int)$data['customer_id'] : null;
+$sourceLocation = isset($data['source_location']) && $data['source_location'] === 'on_hold' ? 'on_hold' : 'office_vault';
 
 $ballsGramsUsed = (float)$data['balls_grams_used'];
 $refinedGrams = (float)$data['refined_grams_produced'];
@@ -36,8 +37,8 @@ try {
 
     // 1. Fetch available balls for this owner
     if ($ownershipStatus === 'company_owned') {
-        $stmt = $pdo->prepare("SELECT id, weight_grams FROM gold_vault WHERE ownership_status = 'company_owned' AND gold_type = 'balls' AND current_location = 'office_vault' ORDER BY id ASC FOR UPDATE");
-        $stmt->execute();
+        $stmt = $pdo->prepare("SELECT id, weight_grams FROM gold_vault WHERE ownership_status = 'company_owned' AND gold_type = 'balls' AND current_location = ? ORDER BY id ASC FOR UPDATE");
+        $stmt->execute([$sourceLocation]);
     } else {
         $stmt = $pdo->prepare("SELECT id, weight_grams FROM gold_vault WHERE ownership_status = 'keeper_held' AND customer_id = ? AND gold_type = 'balls' AND current_location = 'office_vault' ORDER BY id ASC FOR UPDATE");
         $stmt->execute([$customerId]);
@@ -90,8 +91,8 @@ try {
     }
 
     // 3. Create Refined Gold Record
-    $insRefined = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id, parent_ball_id) VALUES ('refined', ?, ?, ?, 'office_vault', ?, ?)");
-    $insRefined->execute([$ownershipStatus, $refinedGrams, $refinedVolume, $customerId, $lastBallId]);
+    $insRefined = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id, parent_ball_id) VALUES ('refined', ?, ?, ?, ?, ?, ?)");
+    $insRefined->execute([$ownershipStatus, $refinedGrams, $refinedVolume, $sourceLocation, $customerId, $lastBallId]);
     $newRefinedId = $pdo->lastInsertId();
     
     // 4. Update Collateral on Loan (if applicable)

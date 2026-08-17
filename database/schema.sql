@@ -37,7 +37,7 @@ CREATE TABLE gold_vault (
     weight_grams DECIMAL(10, 4) NOT NULL,
     volume DECIMAL(10, 4) DEFAULT NULL,
     total_blades DECIMAL(10, 2) DEFAULT NULL,
-    current_location ENUM('office_vault', 'sold_main_market', 'converted') NOT NULL DEFAULT 'office_vault',
+    current_location ENUM('office_vault', 'sold_main_market', 'converted', 'on_hold') NOT NULL DEFAULT 'office_vault',
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
     parent_ball_id INT DEFAULT NULL, -- Links refined gold back to original balls
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -470,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Global Modal for Converting Gold Balls to Refined
-    window.openConvertBallsModal = (maxGramsAvailable, totalBladesAvailable, ownershipStatus, customerId = null, callback = null) => {
+    window.openConvertBallsModal = (maxGramsAvailable, totalBladesAvailable, ownershipStatus, customerId = null, callback = null, sourceLocation = 'office_vault') => {
         // Fallback formula if blades wasn't captured in the db
         const displayBlades = (totalBladesAvailable && parseFloat(totalBladesAvailable) > 0)
             ? parseFloat(totalBladesAvailable)
@@ -529,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
                     <button class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="window.submitConvertBalls('${ownershipStatus}', ${customerId})" style="background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    <button class="btn btn-primary" onclick="window.submitConvertBalls('${ownershipStatus}', ${customerId}, '${sourceLocation}')" style="background: var(--warning); color: #fff; border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
                         <span class="material-symbols-outlined">local_fire_department</span> Smelt & Convert
                     </button>
                 </div>
@@ -576,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gInput.addEventListener('input', updateCalcs);
         vInput.addEventListener('input', updateCalcs);
 
-        window.submitConvertBalls = async (status, custId) => {
+        window.submitConvertBalls = async (status, custId, sourceLocation = 'office_vault') => {
             const btn = event.currentTarget;
             const used = parseFloat(uInput.value);
             const refG = parseFloat(gInput.value);
@@ -595,7 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     customer_id: custId,
                     balls_grams_used: used,
                     refined_grams_produced: refG,
-                    refined_volume: refV
+                    refined_volume: refV,
+                    source_location: sourceLocation
                 });
                 window.showToast('Gold successfully converted!', 'success');
                 window.closeModal();

@@ -28,9 +28,16 @@ window.addEventListener('route-changed', async (e) => {
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                         <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 700; color: var(--text-main);">Company Ledger & Vault</h2>
-                        <button class="btn btn-primary" onclick="window.initiateMarketSale()">
-                            <span class="material-symbols-outlined">outbound</span> Initiate Market Sale
-                        </button>
+                        <div style="display: flex; gap: 12px;">
+                            ${(stats.gold_balls.grams > 0 || stats.refined_gold.grams > 0) ? `
+                            <button class="btn btn-outline" style="color: var(--text-main);" onclick="window.moveVaultToHold()">
+                                <span class="material-symbols-outlined">inventory_2</span> Move to Hold
+                            </button>
+                            ` : ''}
+                            <button class="btn btn-primary" onclick="window.initiateMarketSale('office_vault')">
+                                <span class="material-symbols-outlined">outbound</span> Initiate Market Sale
+                            </button>
+                        </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
@@ -93,6 +100,46 @@ window.addEventListener('route-changed', async (e) => {
                         </div>
 
                     </div>
+                    
+                    ${(stats.hold_gold_balls.grams > 0 || stats.hold_refined_gold.grams > 0) ? `
+                    <div style="margin-bottom: 32px; padding: 24px; background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="material-symbols-outlined" style="color: #3b82f6; font-size: 28px;">inventory_2</span>
+                                <div>
+                                    <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-main); font-weight: 700;">Gold on Hold (Overnight Drafts)</h3>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">This gold is safely segregated from the active vault.</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button class="btn btn-outline" style="background: white; border-color: var(--border);" onclick="window.returnVaultFromHold()">
+                                    <span class="material-symbols-outlined">unarchive</span> Return to Active Vault
+                                </button>
+                                <button class="btn btn-primary" style="background: #3b82f6; border-color: #3b82f6;" onclick="window.initiateMarketSale('on_hold')">
+                                    <span class="material-symbols-outlined">outbound</span> Initiate Sale from Hold
+                                </button>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                            <!-- Hold Balls -->
+                            <div style="background: white; border: 1px solid var(--border); border-radius: 16px; padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Held: Gold Balls</div>
+                                    <span class="material-symbols-outlined" style="color: #94a3b8;">scatter_plot</span>
+                                </div>
+                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">${Number(stats.hold_gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                            </div>
+                            <!-- Hold Refined -->
+                            <div style="background: white; border: 1px solid var(--border); border-radius: 16px; padding: 20px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                    <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Held: Refined Gold</div>
+                                    <span class="material-symbols-outlined" style="color: #94a3b8;">diamond</span>
+                                </div>
+                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">${Number(stats.hold_refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
                     
                     <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid var(--border);">
                         <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
@@ -211,21 +258,92 @@ window.addEventListener('route-changed', async (e) => {
 
     window._initiateSaleState = {};
 
-    window.initiateMarketSale = async () => {
+    window.moveVaultToHold = () => {
+        const confirmHtml = `
+            <div style="padding: 24px; text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: #3b82f6;">inventory_2</span>
+                </div>
+                <h3 style="margin: 0 0 12px 0; color: var(--text-main);">Draft Vault to Hold?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">
+                    This will securely move all active company-owned gold into a draft state, keeping it separated from tomorrow's new purchases.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="window.submitMoveVaultToHold()">Yes, Move to Hold</button>
+                </div>
+            </div>
+        `;
+        window.openModal('Confirm Action', confirmHtml, { maxWidth: '400px' });
+    };
+
+    window.submitMoveVaultToHold = async () => {
+        document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span><div style="margin-top:16px;">Moving...</div></div>';
+        try {
+            await window.api.post('/vault/move_to_hold.php', {});
+            window.closeModal();
+            window.showToast('Vault successfully moved to Hold', 'success');
+            window.loadLedgerDashboard();
+        } catch (e) {
+            window.showToast(e.message || 'Failed to move vault', 'error');
+            window.closeModal();
+        }
+    };
+
+    window.returnVaultFromHold = () => {
+        const confirmHtml = `
+            <div style="padding: 24px; text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: #10b981;">unarchive</span>
+                </div>
+                <h3 style="margin: 0 0 12px 0; color: var(--text-main);">Return Gold to Vault?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">
+                    This will merge all Held gold back into the active vault rotation.
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="window.submitReturnVaultFromHold()">Yes, Return to Vault</button>
+                </div>
+            </div>
+        `;
+        window.openModal('Confirm Action', confirmHtml, { maxWidth: '400px' });
+    };
+
+    window.submitReturnVaultFromHold = async () => {
+        document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span><div style="margin-top:16px;">Returning...</div></div>';
+        try {
+            await window.api.post('/vault/return_to_vault.php', {});
+            window.closeModal();
+            window.showToast('Held gold returned to active vault', 'success');
+            window.loadLedgerDashboard();
+        } catch (e) {
+            window.showToast(e.message || 'Failed to return held gold', 'error');
+            window.closeModal();
+        }
+    };
+
+    window.initiateMarketSale = async (sourceLocation = 'office_vault') => {
         document.getElementById('global-modal').classList.add('active');
-        document.getElementById('modal-title').textContent = 'Loading Vault...';
+        document.getElementById('modal-title').textContent = sourceLocation === 'on_hold' ? 'Initiating Sale from Hold...' : 'Loading Vault...';
         document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span></div>';
         try {
             const stats = await window.api.get('/ledger/vault_stats.php');
-            window._initiateSaleState = {
-                goldType: 'refined',
-                refined_grams: stats.refined_gold.grams || 0,
-                refined_volume: stats.refined_gold.volume || 0,
-                balls_grams: stats.gold_balls.grams || 0,
-                balls_blades: stats.gold_balls.total_balls_blades || 0,
+            
+            const ballsGrams = sourceLocation === 'on_hold' ? stats.hold_gold_balls.grams : stats.gold_balls.grams;
+            const ballsBlades = sourceLocation === 'on_hold' ? stats.hold_gold_balls.total_balls_blades : stats.gold_balls.total_balls_blades;
+            const refGrams = sourceLocation === 'on_hold' ? stats.hold_refined_gold.grams : stats.refined_gold.grams;
+            const refVol = sourceLocation === 'on_hold' ? stats.hold_refined_gold.volume : stats.refined_gold.volume;
 
-                estimated_grams: stats.refined_gold.grams || 0,
-                estimated_volume: stats.refined_gold.volume || 0,
+            window._initiateSaleState = {
+                source_location: sourceLocation,
+                goldType: 'refined',
+                refined_grams: refGrams || 0,
+                refined_volume: refVol || 0,
+                balls_grams: ballsGrams || 0,
+                balls_blades: ballsBlades || 0,
+
+                estimated_grams: refGrams || 0,
+                estimated_volume: refVol || 0,
                 estimated_blades: 0,
 
                 estimated_local_price: '',
@@ -334,7 +452,7 @@ window.addEventListener('route-changed', async (e) => {
                 <div style="margin-top: 24px; text-align: center; background: rgba(245, 158, 11, 0.05); padding: 32px 16px; border-radius: 12px; border: 1px dashed rgba(245, 158, 11, 0.3);">
                     <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 8px;">Gold Balls Must Be Refined First</div>
                     <div style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px;">You need to convert these balls into refined gold before initiating a market sale.</div>
-                    <button type="button" class="btn btn-primary" style="padding: 12px 24px; font-size: 1.05rem;" onclick="window.openConvertBallsModal(${s.balls_grams}, ${s.balls_blades}, 'company_owned', null, () => { window.closeModal(); window.loadLedgerDashboard(); window.initiateMarketSale(); })">
+                    <button type="button" class="btn btn-primary" style="padding: 12px 24px; font-size: 1.05rem;" onclick="window.openConvertBallsModal(${s.balls_grams}, ${s.balls_blades}, 'company_owned', null, () => { window.closeModal(); window.loadLedgerDashboard(); window.initiateMarketSale('${s.source_location}'); }, '${s.source_location}')">
                         <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">local_fire_department</span> Convert ${Number(s.balls_grams).toFixed(2)}g to Refined Gold
                     </button>
                 </div>
@@ -436,7 +554,8 @@ window.addEventListener('route-changed', async (e) => {
             const payload = {
                 gold_type: s.goldType,
                 estimated_local_price: s.estimated_local_price,
-                total_grams: s.estimated_grams
+                total_grams: s.estimated_grams,
+                source_location: s.source_location || 'office_vault'
             };
             if (s.goldType === 'refined') {
                 payload.total_volume = s.estimated_volume;
