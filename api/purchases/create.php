@@ -24,6 +24,7 @@ $customerId = !empty($input['customer_id']) ? (int)$input['customer_id'] : null;
 $handlerId = $current_user_id ?? null;
 
 $localPrice = isset($input['local_price']) ? (float)$input['local_price'] : null;
+$volume = isset($input['volume']) ? (float)$input['volume'] : null;
 $density = isset($input['density']) ? (float)$input['density'] : null;
 $karat = isset($input['karat']) ? (float)$input['karat'] : null;
 $pounds = isset($input['pounds']) ? (float)$input['pounds'] : null;
@@ -43,9 +44,19 @@ if ($totalPaid <= 0) {
 try {
     $pdo->beginTransaction();
 
-    // 1. Insert into gold_vault
-    $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, total_blades, current_location, customer_id) VALUES (?, 'company_owned', ?, ?, 'office_vault', ?)");
-    $vaultStmt->execute([$goldType, $weightGrams, $totalBlades, $customerId]);
+    // Calculate the System Guessed Value based on the formula
+    $guessedValue = 0.0;
+    if ($localPrice > 0) {
+        if ($goldType === 'balls' && $totalBlades > 0) {
+            $guessedValue = floor($totalBlades * $localPrice);
+        } else if ($goldType === 'refined' && $karat > 0 && $pounds > 0) {
+            $guessedValue = floor(($karat * $localPrice / 23) * $pounds);
+        }
+    }
+
+    // 1. Insert into gold_vault with financial tracking
+    $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, total_blades, current_location, customer_id, cost_basis_ghs, guessed_value_ghs) VALUES (?, 'company_owned', ?, ?, ?, 'office_vault', ?, ?, ?)");
+    $vaultStmt->execute([$goldType, $weightGrams, $volume, $totalBlades, $customerId, $totalPaid, $guessedValue]);
     $vaultId = $pdo->lastInsertId();
     
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);

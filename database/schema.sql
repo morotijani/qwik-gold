@@ -38,6 +38,8 @@ CREATE TABLE gold_vault (
     volume DECIMAL(10, 4) DEFAULT NULL,
     total_blades DECIMAL(10, 2) DEFAULT NULL,
     current_location ENUM('office_vault', 'sold_main_market', 'converted', 'on_hold') NOT NULL DEFAULT 'office_vault',
+    cost_basis_ghs DECIMAL(15, 2) DEFAULT 0, -- Actual cash out-of-pocket spent for this gold
+    guessed_value_ghs DECIMAL(15, 2) DEFAULT 0, -- Calculated formula value at the exact time of purchase
     purchase_id INT DEFAULT NULL, -- Links vault record back to its origin purchase (if bought)
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
     parent_ball_id INT DEFAULT NULL, -- Links refined gold back to original balls
@@ -89,6 +91,23 @@ CREATE TABLE loan_settlements (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (loan_id) REFERENCES loans(id) ON DELETE CASCADE,
     FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- market_sales
+CREATE TABLE market_sales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    gold_type ENUM('balls', 'refined') NOT NULL,
+    total_grams DECIMAL(10,4) NOT NULL,
+    total_blades DECIMAL(10,4) DEFAULT 0,
+    total_volume DECIMAL(10,4) DEFAULT 0,
+    estimated_cash DECIMAL(15,2) NOT NULL,
+    estimated_local_price DECIMAL(15,2),
+    actual_cash_brought_in DECIMAL(15,2),
+    cost_basis_ghs DECIMAL(15,2) DEFAULT 0,
+    net_profit_ghs DECIMAL(15,2) DEFAULT 0,
+    status ENUM('pending', 'completed') DEFAULT 'pending',
+    handled_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- gold_purchases (The Sales Desk)

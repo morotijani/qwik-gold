@@ -56,6 +56,8 @@ try {
     }
 
     // 1. Update market_sales
+    $netProfit = $actualCash - (float)$sale['cost_basis_ghs'];
+
     $updateSale = $pdo->prepare("
         UPDATE market_sales 
         SET status = 'completed', 
@@ -63,10 +65,11 @@ try {
             actual_grams_market = ?, 
             actual_volume_market = ?, 
             actual_blades_market = ?, 
-            actual_cash = ? 
+            actual_cash = ?,
+            net_profit_ghs = ?
         WHERE id = ?
     ");
-    $updateSale->execute([$actualPrice, $actualGrams, $actualVolume, $actualBlades, $actualCash, $saleId]);
+    $updateSale->execute([$actualPrice, $actualGrams, $actualVolume, $actualBlades, $actualCash, $netProfit, $saleId]);
 
     // 2. Inject into capital_ledger
     $balanceStmt = $pdo->query("SELECT running_balance FROM capital_ledger ORDER BY id DESC LIMIT 1 FOR UPDATE");

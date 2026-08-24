@@ -711,6 +711,7 @@ window.submitWizardPurchase = async () => {
     const payload = {
         gold_type: state.goldType,
         weight_grams: state.grams,
+        volume: state.volume || null,
         total_paid_ghs: state.totalPayout,
         local_price: state.goldType === 'refined' ? state.pricePerPound : state.pricePerBlade,
         density: state.calculatedDensity || null,
