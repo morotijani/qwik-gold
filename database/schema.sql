@@ -105,6 +105,8 @@ CREATE TABLE market_sales (
     actual_cash_brought_in DECIMAL(15,2),
     cost_basis_ghs DECIMAL(15,2) DEFAULT 0,
     net_profit_ghs DECIMAL(15,2) DEFAULT 0,
+    is_merged BOOLEAN DEFAULT FALSE,
+    merged_into_id INT DEFAULT NULL,
     status ENUM('pending', 'completed') DEFAULT 'pending',
     handled_by INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -117,6 +119,7 @@ CREATE TABLE gold_purchases (
     customer_id INT DEFAULT NULL,
     gold_type ENUM('refined', 'balls') NOT NULL,
     weight_grams DECIMAL(10, 4) NOT NULL,
+    volume DECIMAL(10, 4) DEFAULT NULL,
     total_paid_ghs DECIMAL(15, 2) NOT NULL,
     local_price DECIMAL(15, 2) DEFAULT NULL,
     density DECIMAL(10, 2) DEFAULT NULL,

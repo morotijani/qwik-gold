@@ -62,52 +62,7 @@ window.addEventListener('route-changed', async (e) => {
     const route = e.detail.route;
     const container = e.detail.container;
 
-    if (route === 'ledger') {
-        container.innerHTML = `
-            <div style="max-width: 1100px; margin: 0 auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-                    <h2 style="margin: 0; font-size: initial; font-weight: 600; color: var(--text-main);">Capital Ledger (Cash Flow)</h2>
-                    <div id="ledger-balance" style="font-size: 1.25rem; font-weight: 700; color: var(--gold-primary); background: rgba(212,175,55,0.1); padding: 8px 16px; border-radius: 8px;">...</div>
-                </div>
-                
-                <div class="table-container" style="overflow: visible;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Date</th>
-                                <th>Tx ID</th>
-                                <th>Type</th>
-                                <th>Ref ID</th>
-                                <th>Amount (GHS)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ledger-tbody">
-                            <tr><td colspan="6" style="text-align: center;">Loading...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div id="ledger-pagination"></div>
-            </div>
-        `;
-
-        try {
-            const data = await window.api.get('/ledger/history.php?limit=1000');
-
-            const balFmt = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(data.current_running_balance_ghs);
-            document.getElementById('ledger-balance').textContent = `Total Balance: ${balFmt}`;
-
-            window._ledgerTransactions = data.transactions || [];
-            window._ledgerCurrentPage = 1;
-            window._ledgerItemsPerPage = 10;
-
-            window.renderLedgerTable();
-
-        } catch (error) {
-            document.getElementById('ledger-tbody').innerHTML = `<tr><td colspan="6" class="danger-text" style="text-align: center;">Error loading ledger</td></tr>`;
-        }
-    }
-    else if (route === 'audit') {
+    if (route === 'audit') {
         container.innerHTML = `
             <div style="width: 100%; padding-bottom: 60px;">
                 <!-- Hero Banner -->

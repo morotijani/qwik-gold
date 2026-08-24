@@ -1,6 +1,6 @@
 // assets/js/modules/ledger.js
 
-window._ledgerState = { page: 1, limit: 15 };
+window._ledgerState = { page: 1, limit: 15, selectedPendingSales: [] };
 
 window.addEventListener('route-changed', async (e) => {
     if (e.detail.route !== 'ledger') return;
@@ -23,6 +23,7 @@ window.addEventListener('route-changed', async (e) => {
             const sales = salesData.sales || [];
             const totalCount = salesData.total_count || 0;
             const totalPages = Math.ceil(totalCount / window._ledgerState.limit);
+            window._ledgerState.selectedPendingSales = [];
 
             container.innerHTML = `
                 <div>
@@ -157,10 +158,17 @@ window.addEventListener('route-changed', async (e) => {
                                 <span class="material-symbols-outlined" style="color: var(--text-muted);">sell</span>
                                 <h3 style="font-size: 1.1rem; margin: 0; color: var(--text-main); font-weight: 700;">Sold Out Gold History</h3>
                             </div>
+                            <div id="merge-sales-action" style="display: none; align-items: center; gap: 12px;">
+                                <span style="font-size: 0.9rem; font-weight: 600; color: var(--primary);" id="merge-sales-count">0 selected</span>
+                                <button class="btn btn-primary" onclick="window.openMergeSalesModal()" style="padding: 8px 16px; border-radius: 8px; font-weight: 600;">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">call_merge</span> Merge & Complete
+                                </button>
+                            </div>
                         </div>
                         <table style="width: 100%; border-collapse: collapse; min-width: 1000px;">
                             <thead>
                                 <tr style="background: var(--bg-main); color: var(--text-muted); font-size: 0.85rem; text-align: left; text-transform: uppercase;">
+                                    <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); width: 40px; text-align: center;"></th>
                                     <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border);">Status</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Date Sold</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
@@ -173,7 +181,7 @@ window.addEventListener('route-changed', async (e) => {
                             <tbody>
                                 ${sales.length === 0 ? `
                                 <tr>
-                                    <td colspan="6" style="text-align:center; padding: 60px 20px;">
+                                    <td colspan="8" style="text-align:center; padding: 60px 20px;">
                                         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
                                             <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                                                 <span class="material-symbols-outlined" style="font-size: 32px; opacity: 0.5;">history</span>
@@ -191,13 +199,24 @@ window.addEventListener('route-changed', async (e) => {
                 });
 
                 const isPending = s.status === 'pending';
-                const statusBadge = isPending
-                    ? `<span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                const isMerged = s.is_merged === 1;
+
+                let statusBadge = '';
+                if (isMerged) {
+                    statusBadge = `<span style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                          <span class="material-symbols-outlined" style="font-size: 14px;">call_merge</span> MERGED
+                       </span>`;
+                } else if (isPending) {
+                    statusBadge = `<span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
                           <span class="material-symbols-outlined" style="font-size: 14px;">pending</span> PENDING
-                       </span>`
-                    : `<span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                       </span>`;
+                } else {
+                    statusBadge = `<span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
                           <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> COMPLETED
                        </span>`;
+                }
+                
+                const checkboxHtml = isPending ? `<input type="checkbox" class="pending-sale-checkbox" value="${s.id}" data-sale='${JSON.stringify(s).replace(/'/g, "&#39;")}' onchange="window.togglePendingSaleSelection(this)" style="width: 18px; height: 18px; cursor: pointer;" onclick="event.stopPropagation()">` : '';
 
                 const clickHandler = isPending
                     ? `window.openCompleteSaleModal('${encodeURIComponent(JSON.stringify(s))}')`
@@ -210,6 +229,7 @@ window.addEventListener('route-changed', async (e) => {
                                     <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s; cursor: pointer;" 
                                         onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'"
                                         onclick="${clickHandler}">
+                                        <td style="padding: 16px; text-align: center;" onclick="event.stopPropagation();">${checkboxHtml}</td>
                                         <td style="padding: 16px 24px;">${statusBadge}</td>
                                         <td style="padding: 16px; color: var(--text-main); font-weight: 500;">${dateStr}</td>
                                         <td style="padding: 16px;">
@@ -656,106 +676,130 @@ window.addEventListener('route-changed', async (e) => {
 
     window.openCompleteSaleModal = (dataStr) => {
         const s = JSON.parse(decodeURIComponent(dataStr));
-        const estCashFormatted = Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const estCash = Number(s.estimated_cash);
+        const capitalSpent = Number(s.cost_basis_ghs || 0);
+        const estProfit = estCash - capitalSpent;
+
+        const estCashFormatted = estCash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const capitalFormatted = capitalSpent.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const profitFormatted = estProfit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        
         const estGramsFormatted = Number(s.total_grams).toFixed(4);
         const estVolBladesFormatted = Number(s.gold_type === 'balls' ? s.total_blades : s.total_volume).toFixed(4);
         const estPriceFormatted = Number(s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
+        const profitColor = estProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+
         const formHtml = `
-            <input type="hidden" id="cs_gold_type" value="${s.gold_type}">
-            <input type="hidden" id="cs_est_cash" value="${s.estimated_cash}">
-            
-            <form id="complete-sale-form" onsubmit="window.submitCompleteSale(event, ${s.id})">
-                
-                <!-- System Estimation Summary -->
-                <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #f59e0b; color: white; display: flex; align-items: center; justify-content: center;">
-                            <span class="material-symbols-outlined">${s.gold_type === 'refined' ? 'diamond' : 'scatter_plot'}</span>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Pending Sale: ${s.gold_type === 'refined' ? 'Refined Gold' : 'Gold Balls'}</h4>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">System Estimation</div>
-                        </div>
+            <!-- Pending Sale Detailed Summary -->
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #f59e0b; color: white; display: flex; align-items: center; justify-content: center;">
+                        <span class="material-symbols-outlined">${s.gold_type === 'refined' ? 'diamond' : 'scatter_plot'}</span>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Est. Weight</div>
-                            <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estGramsFormatted}g</div>
-                        </div>
-                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Est. ${s.gold_type === 'refined' ? 'Volume' : 'Blades'}</div>
-                            <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estVolBladesFormatted}</div>
-                        </div>
-                        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Est. Price</div>
-                            <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${estPriceFormatted}</div>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(245, 158, 11, 0.2); padding-top: 12px;">
-                        <span style="font-weight: 600; color: var(--warning);">Total Estimated Cash</span>
-                        <span style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">GHS ${estCashFormatted}</span>
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Pending Sale: ${s.gold_type === 'refined' ? 'Refined Gold' : 'Gold Balls'}</h4>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Sale Breakdown</div>
                     </div>
                 </div>
-
-                <!-- Input Fields for Market Actuals -->
-                <h4 style="margin: 0 0 16px 0; font-size: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                    <span class="material-symbols-outlined" style="color: var(--primary);">storefront</span>
-                    Enter Market Actuals
-                </h4>
                 
-                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label class="form-label">Actual Market Grams <span style="color: red;">*</span></label>
-                        <input type="number" step="0.0001" min="0" name="actual_grams" id="cs_grams" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Grams</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estGramsFormatted}g</div>
                     </div>
+                    <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">${s.gold_type === 'refined' ? 'Total Volume' : 'Total Balls'}</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estVolBladesFormatted}</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Total Capital Spent</span>
+                        <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${capitalFormatted}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Est. Total Cash (at GHS ${estPriceFormatted})</span>
+                        <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${estCashFormatted}</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(245, 158, 11, 0.2); padding-top: 12px;">
+                    <span style="font-weight: 600; color: var(--text-main);">Estimated Profit</span>
+                    <span style="font-size: 1.2rem; font-weight: 800; color: ${profitColor};">GHS ${profitFormatted}</span>
+                </div>
+            </div>
+
+            <!-- Initial Action Buttons -->
+            <div id="cs_initial_actions" style="display: flex; gap: 12px; justify-content: space-between;">
+                <button type="button" class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" onclick="window.reverseSale(${s.id})">Reverse to Vault</button>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('cs_form_container').style.display='block'; this.parentNode.parentNode.style.display='none';">Enter Market Actuals</button>
+                </div>
+            </div>
+
+            <!-- Market Actuals Form (Hidden Initially) -->
+            <div id="cs_form_container" style="display: none;">
+                <input type="hidden" id="cs_gold_type" value="${s.gold_type}">
+                <input type="hidden" id="cs_est_cash" value="${s.estimated_cash}">
+                
+                <form id="complete-sale-form" onsubmit="window.submitCompleteSale(event, ${s.id})">
+                    
+                    <h4 style="margin: 0 0 16px 0; font-size: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="color: var(--primary);">storefront</span>
+                        Enter Market Actuals
+                    </h4>
+                    
+                    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label">Actual Market Grams <span style="color: red;">*</span></label>
+                            <input type="number" step="0.0001" min="0" name="actual_grams" id="cs_grams" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                        </div>
+                        ${s.gold_type === 'refined' ? `
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label">Actual Market Volume <span style="color: red;">*</span></label>
+                            <input type="number" step="0.0001" min="0" name="actual_volume" id="cs_volume" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                        </div>
+                        ` : `
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="form-label">Actual Total Blades <span style="color: red;">*</span></label>
+                            <input type="number" step="0.0001" min="0" name="actual_blades" id="cs_blades" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                        </div>
+                        `}
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label class="form-label">Actual Market Local Price ${s.gold_type === 'refined' ? '' : '(Per Blade)'} <span style="color: red;">*</span></label>
+                        <input type="number" step="0.01" min="0" name="actual_local_price" id="cs_price" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                    </div>
+
+                    <!-- Live Calculation Output -->
                     ${s.gold_type === 'refined' ? `
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label class="form-label">Actual Market Volume <span style="color: red;">*</span></label>
-                        <input type="number" step="0.0001" min="0" name="actual_volume" id="cs_volume" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                    <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Pounds:</span> <span id="cs_calc_pounds" style="font-weight: 600;">0.00 lbs</span></div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Density:</span> <span id="cs_calc_density" style="font-weight: 600;">0.00</span></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Karat:</span> <span id="cs_calc_karat" style="font-weight: 600;">0.00</span></div>
                     </div>
-                    ` : `
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label class="form-label">Actual Total Blades <span style="color: red;">*</span></label>
-                        <input type="number" step="0.0001" min="0" name="actual_blades" id="cs_blades" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
-                    </div>
-                    `}
-                </div>
-                
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label class="form-label">Actual Market Local Price ${s.gold_type === 'refined' ? '' : '(Per Blade)'} <span style="color: red;">*</span></label>
-                    <input type="number" step="0.01" min="0" name="actual_local_price" id="cs_price" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
-                </div>
+                    ` : ''}
 
-                <!-- Live Calculation Output -->
-                ${s.gold_type === 'refined' ? `
-                <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid var(--border);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Pounds:</span> <span id="cs_calc_pounds" style="font-weight: 600;">0.00 lbs</span></div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Density:</span> <span id="cs_calc_density" style="font-weight: 600;">0.00</span></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Karat:</span> <span id="cs_calc_karat" style="font-weight: 600;">0.00</span></div>
-                </div>
-                ` : ''}
-
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.3);">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                        <div>
-                            <div style="color: var(--success); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Actual Cash Brought In</div>
-                            <div id="cs_calc_variance"></div>
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div>
+                                <div style="color: var(--success); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Actual Cash Brought In</div>
+                                <div id="cs_calc_variance"></div>
+                            </div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="cs_calc_cash">GHS 0.00</span></div>
                         </div>
-                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="cs_calc_cash">GHS 0.00</span></div>
                     </div>
-                </div>
 
-                <div style="display: flex; gap: 12px; justify-content: space-between;">
-                    <button type="button" class="btn btn-outline" style="color: var(--danger); border-color: var(--danger);" onclick="window.reverseSale(${s.id})">Reverse to Vault</button>
-                    <div style="display: flex; gap: 12px;">
-                        <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('cs_form_container').style.display='none'; document.getElementById('cs_initial_actions').style.display='flex';">Cancel</button>
                         <button type="submit" class="btn btn-primary">Complete Sale</button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         `;
         window.openModal('Complete Market Sale', formHtml);
     };
@@ -845,6 +889,29 @@ window.addEventListener('route-changed', async (e) => {
                 `;
             }
 
+            if (res.merged_sales && res.merged_sales.length > 0) {
+                sourceBreakdownHtml += `
+                    <div style="background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                        <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; color: #8b5cf6; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 16px;">call_merge</span> Merged From (${res.merged_sales.length} Sales)
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${res.merged_sales.map(ms => `
+                                <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${ms.gold_type} Sale</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g &bull; Cap: GHS ${Number(ms.cost_basis_ghs).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 600; color: var(--text-main);">Est: GHS ${Number(ms.estimated_cash).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             const html = `
                 <div style="font-family: var(--font-main);">
                     
@@ -853,7 +920,7 @@ window.addEventListener('route-changed', async (e) => {
                         <div>
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                                 <span class="material-symbols-outlined" style="color: var(--primary);">receipt_long</span>
-                                <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">${s.sale_uid}</div>
+                                <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">${s.transaction_ref || s.sale_uid || 'N/A'}</div>
                             </div>
                             <div style="font-size: 0.85rem; color: var(--text-muted);">${dateStr} &bull; <span style="text-transform: capitalize; font-weight: 600;">${s.gold_type}</span></div>
                         </div>
@@ -864,25 +931,30 @@ window.addEventListener('route-changed', async (e) => {
 
                     ${sourceBreakdownHtml}
 
-                    <!-- Comparison Grid -->
+                    <!-- Financial Summary Cards -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                         
-                        <!-- Capital Spent -->
-                        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.01) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 12px; padding: 16px;">
-                            <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--warning); display: flex; align-items: center; gap: 6px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">account_balance_wallet</span> Total Capital Spent
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+                            <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="color: var(--warning); font-size: 18px;">account_balance_wallet</span> 
+                                Initial Capital Spent
                             </h4>
                             
-                            <div style="border-top: 1px dashed rgba(245, 158, 11, 0.3); padding-top: 12px; margin-top: auto;">
-                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Cost Basis</div>
+                            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Total Direct Capital</div>
                                 <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">GHS ${costBasisFmt}</div>
                             </div>
+                            
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Estimated Return</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);">GHS ${Number(s.estimated_cash || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                            </div>
                         </div>
-                        
-                        <!-- Market Actuals -->
-                        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.01) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 16px;">
-                            <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--success); display: flex; align-items: center; gap: 6px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">storefront</span> Market Actuals
+
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+                            <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">storefront</span> 
+                                Market Final Actuals
                             </h4>
                             
                             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
@@ -924,9 +996,176 @@ window.addEventListener('route-changed', async (e) => {
             
             document.getElementById('modal-title').textContent = 'Sold Gold Details';
             document.getElementById('modal-body').innerHTML = html;
+            document.getElementById('modal-backdrop').style.display = 'flex';
         } catch (e) {
             window.showToast('Failed to load sale details', 'error');
             window.closeModal();
+        }
+    };
+    window.togglePendingSaleSelection = (checkbox) => {
+        const saleData = JSON.parse(checkbox.dataset.sale);
+        if (checkbox.checked) {
+            window._ledgerState.selectedPendingSales.push(saleData);
+        } else {
+            window._ledgerState.selectedPendingSales = window._ledgerState.selectedPendingSales.filter(s => s.id !== saleData.id);
+        }
+
+        const actionDiv = document.getElementById('merge-sales-action');
+        const countSpan = document.getElementById('merge-sales-count');
+        const count = window._ledgerState.selectedPendingSales.length;
+
+        if (count >= 2) {
+            actionDiv.style.display = 'flex';
+            countSpan.textContent = `${count} selected`;
+        } else {
+            actionDiv.style.display = 'none';
+        }
+    };
+
+    window.openMergeSalesModal = () => {
+        const selected = window._ledgerState.selectedPendingSales;
+        if (selected.length < 2) return;
+
+        let totalGrams = 0;
+        let totalCapital = 0;
+        let totalEstCash = 0;
+        const saleIds = [];
+
+        selected.forEach(s => {
+            totalGrams += Number(s.total_grams);
+            totalCapital += Number(s.cost_basis_ghs || 0);
+            totalEstCash += Number(s.estimated_cash);
+            saleIds.push(s.id);
+        });
+
+        const estProfit = totalEstCash - totalCapital;
+
+        const estCashFormatted = totalEstCash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const capitalFormatted = totalCapital.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const profitFormatted = estProfit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const estGramsFormatted = totalGrams.toFixed(4);
+        
+        const profitColor = estProfit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+        const formHtml = `
+            <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.02) 100%); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center;">
+                        <span class="material-symbols-outlined">call_merge</span>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Merged Sale Breakdown</h4>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${selected.length} sales combined</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Combined Est. Weight</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">${estGramsFormatted}g</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Total Combined Capital Spent</span>
+                        <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${capitalFormatted}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Combined Est. Cash</span>
+                        <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${estCashFormatted}</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(139, 92, 246, 0.2); padding-top: 12px;">
+                    <span style="font-weight: 600; color: var(--text-main);">Combined Est. Profit</span>
+                    <span style="font-size: 1.2rem; font-weight: 800; color: ${profitColor};">GHS ${profitFormatted}</span>
+                </div>
+            </div>
+
+            <!-- Market Actuals Form -->
+            <form id="merge-sale-form" onsubmit="window.submitMergeSales(event)">
+                <input type="hidden" id="merge_sale_ids" value="${saleIds.join(',')}">
+                <input type="hidden" id="cs_gold_type" value="refined">
+                <input type="hidden" id="cs_est_cash" value="${totalEstCash}">
+                <input type="hidden" id="merge_capital" value="${totalCapital}">
+                
+                <h4 style="margin: 0 0 16px 0; font-size: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: var(--primary);">storefront</span>
+                    Enter Market Actuals (As Refined Gold)
+                </h4>
+                
+                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label">Actual Merged Grams <span style="color: red;">*</span></label>
+                        <input type="number" step="0.0001" min="0" name="actual_grams" id="cs_grams" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label class="form-label">Actual Merged Volume <span style="color: red;">*</span></label>
+                        <input type="number" step="0.0001" min="0" name="actual_volume" id="cs_volume" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label class="form-label">Actual Market Local Price (Per Pound) <span style="color: red;">*</span></label>
+                    <input type="number" step="0.01" min="0" name="actual_local_price" id="cs_price" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window.calcCompleteSale();" class="form-control" required placeholder="0.00">
+                </div>
+
+                <!-- Live Calculation Output -->
+                <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Pounds:</span> <span id="cs_calc_pounds" style="font-weight: 600;">0.00 lbs</span></div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Density:</span> <span id="cs_calc_density" style="font-weight: 600;">0.00</span></div>
+                    <div style="display: flex; justify-content: space-between;"><span>Karat:</span> <span id="cs_calc_karat" style="font-weight: 600;">0.00</span></div>
+                </div>
+
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 16px; border-radius: 8px; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <div style="color: var(--success); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; margin-bottom: 4px;">Actual Cash Brought In</div>
+                            <div id="cs_calc_variance"></div>
+                        </div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="cs_calc_cash">GHS 0.00</span></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="background: var(--primary); border-color: var(--primary);">
+                        <span class="material-symbols-outlined" style="font-size: 18px; color: white;">call_merge</span> Finalize Merge & Complete
+                    </button>
+                </div>
+            </form>
+        `;
+        window.openModal('Merge & Complete Sales', formHtml);
+    };
+
+    window.submitMergeSales = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+
+        try {
+            submitBtn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
+            submitBtn.disabled = true;
+
+            const saleIds = document.getElementById('merge_sale_ids').value.split(',').map(id => parseInt(id, 10));
+
+            const payload = {
+                sale_ids: saleIds,
+                actual_grams: parseFloat(form.actual_grams.value),
+                actual_volume: parseFloat(form.actual_volume.value),
+                actual_local_price: parseFloat(form.actual_local_price.value)
+            };
+
+            const res = await window.api.post('/sales/merge_complete_sale.php', payload);
+            window.showSuccess(`Merged ${saleIds.length} sales successfully! +GHS ${res.data.actual_cash.toLocaleString(undefined, {minimumFractionDigits:2})}`);
+            window.closeModal();
+            window.loadLedgerDashboard();
+        } catch (error) {
+            window.showToast(error.message, 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     };
 

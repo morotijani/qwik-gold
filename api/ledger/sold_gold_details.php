@@ -45,8 +45,17 @@ try {
         }
     }
 
+    // 3. If merged, fetch the original sales
+    $mergedSales = [];
+    if (!empty($sale['is_merged'])) {
+        $mergeStmt = $pdo->prepare("SELECT * FROM market_sales WHERE merged_into_id = ?");
+        $mergeStmt->execute([$saleId]);
+        $mergedSales = $mergeStmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     sendResponse('success', 'Sale details retrieved', [
         'sale' => $sale,
+        'merged_sales' => $mergedSales,
         'constituents' => [
             'smelted' => [
                 'count' => $smeltedCount,

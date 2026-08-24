@@ -17,7 +17,7 @@ if ($offset < 0) $offset = 0;
 
 try {
     // Total count for pagination
-    $countStmt = $pdo->query("SELECT COUNT(*) FROM market_sales");
+    $countStmt = $pdo->query("SELECT COUNT(*) FROM market_sales WHERE merged_into_id IS NULL");
     $totalCount = (int)$countStmt->fetchColumn();
 
     // Query sales
@@ -25,6 +25,7 @@ try {
         SELECT ms.*, u.username as handler_name 
         FROM market_sales ms
         LEFT JOIN users u ON ms.handler_id = u.id
+        WHERE ms.merged_into_id IS NULL
         ORDER BY ms.created_at DESC 
         LIMIT :limit OFFSET :offset
     ");

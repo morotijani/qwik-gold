@@ -62,8 +62,8 @@ try {
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
 
     // 2. Insert into gold_purchases
-    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, handler_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?, ?)");
-    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $handlerId, $notes]);
+    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, volume, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, handler_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?, ?)");
+    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $volume, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $handlerId, $notes]);
     $purchaseId = $pdo->lastInsertId();
 
     // Link the vault record back to the purchase
