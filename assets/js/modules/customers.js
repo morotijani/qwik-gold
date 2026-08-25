@@ -217,6 +217,11 @@ window.addEventListener('route-changed', async (e) => {
                             <span class="material-symbols-outlined">arrow_back</span> Back
                         </button>
                         <div style="display: flex; gap: clamp(8px, 2vw, 12px); flex-wrap: wrap;">
+                            ${parseFloat(data.active_debt.total_amount_ghs) === 0 ? `
+                            <button class="btn btn-outline" onclick="window.confirmClearHistory(${data.profile.id}, '${returnRoute}')" style="background: white; border-color: rgba(239, 68, 68, 0.3); color: var(--danger); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">delete_sweep</span> Clear History
+                            </button>
+                            ` : ''}
                             <button class="btn btn-outline" onclick='window.openEditCustomerModal(${JSON.stringify(data.profile).replace(/'/g, "&#39;")})' style="background: white; border-color: var(--border); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit Profile
                             </button>
@@ -1461,4 +1466,44 @@ window.submitSettleLoanWizard = async () => {
     }
 };
 
+window.confirmClearHistory = (customerId, returnRoute) => {
+    const html = `
+        <div style="text-align: center; padding: 20px 10px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                <span class="material-symbols-outlined" style="font-size: 32px;">delete_sweep</span>
+            </div>
+            <h3 style="margin: 0 0 12px 0; font-size: 1.2rem; color: var(--text-main);">Clear Customer History?</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
+                This will soft-delete and hide all of the customer's <strong>Settled Loans</strong> and <strong>Past Purchases</strong> from their profile and recalculate their stats, giving them a clean slate. Active unpaid loans and vault balances will not be affected. 
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="flex: 1;">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="window.submitClearHistory(${customerId}, '${returnRoute}', this)" style="flex: 1; background: var(--danger); border-color: var(--danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                    Clear History
+                </button>
+            </div>
+        </div>
+    `;
+    window.openModal('Confirm Action', html);
+};
 
+window.submitClearHistory = async (customerId, returnRoute, btnElement) => {
+    const originalText = btnElement.innerHTML;
+    try {
+        btnElement.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Working...';
+        btnElement.disabled = true;
+
+        const res = await window.api.post('/customers/clear_history.php', { customer_id: customerId });
+        window.showToast(res.message || 'History cleared successfully', 'success');
+        window.closeModal();
+        
+        // Refresh the current customer view
+        if (window.viewCustomer) {
+            window.viewCustomer(customerId, returnRoute);
+        }
+    } catch (e) {
+        window.showToast(e.message, 'error');
+        btnElement.innerHTML = originalText;
+        btnElement.disabled = false;
+    }
+};

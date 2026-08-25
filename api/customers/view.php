@@ -38,8 +38,8 @@ try {
         sendResponse('error', 'Customer not found', [], 404);
     }
 
-    // 2) SELECT all loans (active and settled)
-    $loansStmt = $pdo->prepare("SELECT id, customer_id, loan_uid, principal_amount, type, status, created_at FROM loans WHERE customer_id = ? ORDER BY created_at DESC");
+    // 2) SELECT all loans (active and settled) that are not cleared
+    $loansStmt = $pdo->prepare("SELECT id, customer_id, loan_uid, principal_amount, original_principal, type, status, created_at FROM loans WHERE customer_id = ? AND is_cleared_from_profile = FALSE ORDER BY created_at DESC");
     $loansStmt->execute([$customerId]);
     $allLoans = $loansStmt->fetchAll(PDO::FETCH_ASSOC);
     
@@ -48,11 +48,14 @@ try {
     $activeLoans = [];
 
     foreach ($allLoans as $loan) {
+        $original = (float)$loan['original_principal'];
+        $current = (float)$loan['principal_amount'];
+        
+        $totalSettled += ($original - $current);
+
         if ($loan['status'] === 'active') {
-            $totalActiveDebt += (float)$loan['principal_amount'];
+            $totalActiveDebt += $current;
             $activeLoans[] = $loan;
-        } else {
-            $totalSettled += (float)$loan['principal_amount'];
         }
     }
 
@@ -82,8 +85,8 @@ try {
             $vaultTotals['refined_volume'] = (float)$row['total_volume'];
         }
     }
-    // 4) SELECT all gold purchases (walk-in sales from this customer)
-    $purchasesStmt = $pdo->prepare("SELECT id, transaction_ref, gold_type, weight_grams, total_paid_ghs, created_at FROM gold_purchases WHERE customer_id = ? ORDER BY created_at DESC");
+    // 4) SELECT all gold purchases (walk-in sales from this customer) that are not cleared
+    $purchasesStmt = $pdo->prepare("SELECT id, transaction_ref, gold_type, weight_grams, total_paid_ghs, created_at FROM gold_purchases WHERE customer_id = ? AND is_cleared_from_profile = FALSE ORDER BY created_at DESC");
     $purchasesStmt->execute([$customerId]);
     $allPurchases = $purchasesStmt->fetchAll(PDO::FETCH_ASSOC);
 
