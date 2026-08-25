@@ -87,7 +87,8 @@ try {
     $currentBalance = $lastLedger ? (float)$lastLedger['running_balance'] : 0.0;
     
     if ($currentBalance < $principalAmount) {
-        throw new \Exception("Insufficient Office Capital to issue loan. Current available capital is ₵ " . number_format($currentBalance, 2));
+        $pdo->rollBack();
+        sendResponse('error', "Insufficient Office Capital to issue loan. Current available capital is ₵ " . number_format($currentBalance, 2), [], 400);
     }
     
     // Calculate the deduction
