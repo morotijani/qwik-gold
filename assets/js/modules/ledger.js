@@ -35,9 +35,9 @@ window.addEventListener('route-changed', async (e) => {
                                 <span class="material-symbols-outlined">inventory_2</span> Move to Hold
                             </button>
                             ` : ''}
-                            <button class="btn btn-primary" onclick="window.initiateMarketSale('office_vault')">
+                            <!-- <button class="btn btn-primary" onclick="window.initiateMarketSale('office_vault')">
                                 <span class="material-symbols-outlined">outbound</span> Initiate Market Sale
-                            </button>
+                            </button> -->
                         </div>
                     </div>
                     
@@ -215,13 +215,13 @@ window.addEventListener('route-changed', async (e) => {
                           <span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> COMPLETED
                        </span>`;
                 }
-                
+
                 const checkboxHtml = isPending ? `<input type="checkbox" class="pending-sale-checkbox" value="${s.id}" data-sale='${JSON.stringify(s).replace(/'/g, "&#39;")}' onchange="window.togglePendingSaleSelection(this)" style="width: 18px; height: 18px; cursor: pointer;" onclick="event.stopPropagation()">` : '';
 
                 const clickHandler = isPending
                     ? `window.openCompleteSaleModal('${encodeURIComponent(JSON.stringify(s))}')`
                     : `window.viewSoldGoldDetails(${s.id})`;
-                
+
                 const typeIcon = s.gold_type === 'refined' ? 'diamond' : 'scatter_plot';
                 const typeColor = s.gold_type === 'refined' ? '#f59e0b' : '#64748b';
 
@@ -358,7 +358,7 @@ window.addEventListener('route-changed', async (e) => {
         document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span></div>';
         try {
             const stats = await window.api.get('/ledger/vault_stats.php');
-            
+
             const ballsGrams = sourceLocation === 'on_hold' ? stats.hold_gold_balls.grams : stats.gold_balls.grams;
             const ballsBlades = sourceLocation === 'on_hold' ? stats.hold_gold_balls.total_balls_blades : stats.gold_balls.total_balls_blades;
             const refGrams = sourceLocation === 'on_hold' ? stats.hold_refined_gold.grams : stats.refined_gold.grams;
@@ -404,7 +404,7 @@ window.addEventListener('route-changed', async (e) => {
         if (s.goldType === 'balls') {
             const blades = parseFloat(s.estimated_blades) || 0;
             s.estimated_cash = Math.floor(blades * clp);
-            
+
             if (document.getElementById('calc_est_cash_text')) {
                 document.getElementById('calc_est_cash_text').innerText = 'GHS ' + s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             }
@@ -414,7 +414,7 @@ window.addEventListener('route-changed', async (e) => {
             s.density = vol > 0 ? truncate2(grams / vol) : 0;
             s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
             s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
-            
+
             if (document.getElementById('calc_pounds')) document.getElementById('calc_pounds').innerText = s.pounds.toFixed(2) + ' lbs';
             if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
             if (document.getElementById('calc_karat')) document.getElementById('calc_karat').innerText = s.karat.toFixed(2);
@@ -635,40 +635,40 @@ window.addEventListener('route-changed', async (e) => {
         const type = document.getElementById('cs_gold_type').value;
         const price = parseFloat(document.getElementById('cs_price').value) || 0;
         const grams = parseFloat(document.getElementById('cs_grams').value) || 0;
-        
+
         let cash = 0;
-        
+
         if (type === 'balls') {
             const blades = parseFloat(document.getElementById('cs_blades').value) || 0;
             cash = blades * price;
         } else {
             const vol = parseFloat(document.getElementById('cs_volume').value) || 0;
             const truncate2 = (num) => Math.floor(num * 100) / 100;
-            
+
             const pounds = truncate2(grams / 7.75);
             const density = vol > 0 ? truncate2(grams / vol) : 0;
             const karat = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
-            
+
             cash = (karat * price / 23) * pounds;
-            
+
             if (document.getElementById('cs_calc_pounds')) document.getElementById('cs_calc_pounds').innerText = pounds.toFixed(2) + ' lbs';
             if (document.getElementById('cs_calc_density')) document.getElementById('cs_calc_density').innerText = density.toFixed(2);
             if (document.getElementById('cs_calc_karat')) document.getElementById('cs_calc_karat').innerText = karat.toFixed(2);
         }
-        
+
         if (document.getElementById('cs_calc_cash')) {
-            document.getElementById('cs_calc_cash').innerText = 'GHS ' + cash.toLocaleString(undefined, {minimumFractionDigits: 2});
-            
+            document.getElementById('cs_calc_cash').innerText = 'GHS ' + cash.toLocaleString(undefined, { minimumFractionDigits: 2 });
+
             const estCash = parseFloat(document.getElementById('cs_est_cash').value);
             const diff = cash - estCash;
             const diffEl = document.getElementById('cs_calc_variance');
             if (diffEl) {
                 if (cash === 0) {
-                     diffEl.innerHTML = '';
+                    diffEl.innerHTML = '';
                 } else if (diff >= 0) {
-                     diffEl.innerHTML = `<span style="color: var(--success); font-size: 0.9rem; font-weight: 600;">Profit: +GHS ${diff.toLocaleString(undefined, {minimumFractionDigits:2})}</span>`;
+                    diffEl.innerHTML = `<span style="color: var(--success); font-size: 0.9rem; font-weight: 600;">Profit: +GHS ${diff.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>`;
                 } else {
-                     diffEl.innerHTML = `<span style="color: var(--danger); font-size: 0.9rem; font-weight: 600;">Loss: -GHS ${Math.abs(diff).toLocaleString(undefined, {minimumFractionDigits:2})}</span>`;
+                    diffEl.innerHTML = `<span style="color: var(--danger); font-size: 0.9rem; font-weight: 600;">Loss: -GHS ${Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>`;
                 }
             }
         }
@@ -683,7 +683,7 @@ window.addEventListener('route-changed', async (e) => {
         const estCashFormatted = estCash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const capitalFormatted = capitalSpent.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const profitFormatted = estProfit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-        
+
         const estGramsFormatted = Number(s.total_grams).toFixed(4);
         const estVolBladesFormatted = Number(s.gold_type === 'balls' ? s.total_blades : s.total_volume).toFixed(4);
         const estPriceFormatted = Number(s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
@@ -846,26 +846,26 @@ window.addEventListener('route-changed', async (e) => {
             const res = await window.api.get(`/ledger/sold_gold_details.php?sale_id=${saleId}`);
             const s = res.sale;
             const consts = res.constituents;
-            
+
             const costBasis = parseFloat(s.cost_basis_ghs) || 0;
             const actualCash = parseFloat(s.actual_cash) || 0;
-            
+
             const diff = s.net_profit_ghs !== null ? parseFloat(s.net_profit_ghs) : (actualCash - costBasis);
             const diffColor = diff >= 0 ? 'var(--success)' : 'var(--danger)';
             const diffBg = diff >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
             const diffBorder = diff >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)';
             const diffLabel = diff >= 0 ? 'True Net Profit' : 'Net Loss';
-            
+
             const costBasisFmt = costBasis.toLocaleString(undefined, { minimumFractionDigits: 2 });
             const actCashFmt = actualCash.toLocaleString(undefined, { minimumFractionDigits: 2 });
             const diffCashFmt = Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 });
-            
+
             const actGramsFmt = Number(s.actual_grams_market || s.total_grams).toFixed(4) + 'g';
             const actVolBladesFmt = Number(s.gold_type === 'balls' ? (s.actual_blades_market || s.total_blades) : (s.actual_volume_market || s.total_volume)).toFixed(4);
             const actPriceFmt = 'GHS ' + Number(s.actual_local_price || s.estimated_local_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 });
 
             const dateStr = new Date(s.created_at).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            
+
             let sourceBreakdownHtml = '';
             if (consts.total_items > 0) {
                 sourceBreakdownHtml = `
@@ -900,10 +900,10 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
                                     <div>
                                         <div style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${ms.gold_type} Sale</div>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g &bull; Cap: GHS ${Number(ms.cost_basis_ghs).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g &bull; Cap: GHS ${Number(ms.cost_basis_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                     </div>
                                     <div style="text-align: right;">
-                                        <div style="font-weight: 600; color: var(--text-main);">Est: GHS ${Number(ms.estimated_cash).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                        <div style="font-weight: 600; color: var(--text-main);">Est: GHS ${Number(ms.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                     </div>
                                 </div>
                             `).join('')}
@@ -947,7 +947,7 @@ window.addEventListener('route-changed', async (e) => {
                             
                             <div>
                                 <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Estimated Return</div>
-                                <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);">GHS ${Number(s.estimated_cash || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                                <div style="font-size: 1rem; font-weight: 600; color: var(--text-main);">GHS ${Number(s.estimated_cash || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                             </div>
                         </div>
 
@@ -993,11 +993,11 @@ window.addEventListener('route-changed', async (e) => {
                     <button type="button" class="btn btn-outline" onclick="window.closeModal()">Close Details</button>
                 </div>
             `;
-            
+
             document.getElementById('modal-title').textContent = 'Sold Gold Details';
             document.getElementById('modal-body').innerHTML = html;
-            document.getElementById('modal-backdrop').style.display = 'flex';
         } catch (e) {
+            console.error(e);
             window.showToast('Failed to load sale details', 'error');
             window.closeModal();
         }
@@ -1044,7 +1044,7 @@ window.addEventListener('route-changed', async (e) => {
         const capitalFormatted = totalCapital.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const profitFormatted = estProfit.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const estGramsFormatted = totalGrams.toFixed(4);
-        
+
         const profitColor = estProfit >= 0 ? 'var(--success)' : 'var(--danger)';
 
         const formHtml = `
@@ -1091,7 +1091,7 @@ window.addEventListener('route-changed', async (e) => {
                 <input type="hidden" id="merge_capital" value="${totalCapital}">
                 
                 <h4 style="margin: 0 0 16px 0; font-size: 1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
-                    <span class="material-symbols-outlined" style="color: var(--primary);">storefront</span>
+                    <span class="material-symbols-outlined" style="color: var(--gold-primary);">storefront</span>
                     Enter Market Actuals (As Refined Gold)
                 </h4>
                 
@@ -1130,7 +1130,7 @@ window.addEventListener('route-changed', async (e) => {
 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
                     <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="background: var(--primary); border-color: var(--primary);">
+                    <button type="submit" class="btn btn-primary">
                         <span class="material-symbols-outlined" style="font-size: 18px; color: white;">call_merge</span> Finalize Merge & Complete
                     </button>
                 </div>
@@ -1159,7 +1159,7 @@ window.addEventListener('route-changed', async (e) => {
             };
 
             const res = await window.api.post('/sales/merge_complete_sale.php', payload);
-            window.showSuccess(`Merged ${saleIds.length} sales successfully! +GHS ${res.data.actual_cash.toLocaleString(undefined, {minimumFractionDigits:2})}`);
+            window.showToast(`Merged ${saleIds.length} sales successfully! +GHS ${res.actual_cash.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 'success');
             window.closeModal();
             window.loadLedgerDashboard();
         } catch (error) {
