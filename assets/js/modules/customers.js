@@ -296,7 +296,7 @@ window.addEventListener('route-changed', async (e) => {
                         
                         ${hasKeptGold ? `
                             <!-- Kept Gold -->
-                            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px;">
+                            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick='window.openVaultBreakdownModal(${JSON.stringify(data).replace(/'/g, "&#39;")})' onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(245, 158, 11, 0.05)';">
                                 <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(20px);"></div>
                                 <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;">
                                     <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
@@ -307,13 +307,11 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
                                     ${parseFloat(data.current_kept_gold.balls_grams + data.current_kept_gold.refined_grams).toFixed(2)} <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">g</span>
                                 </div>
-                                ${parseFloat(data.current_kept_gold.balls_grams) > 0 ? `
                                 <div style="position: relative; z-index: 1; margin-top: 4px;">
-                                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(217,119,6,0.5); color: #d97706; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" onclick="window.openConvertBallsModal(${data.current_kept_gold.balls_grams}, ${data.current_kept_gold.balls_blades || 0}, 'keeper_held', ${data.profile.id}, () => window.viewCustomer(${data.profile.id}, '${returnRoute}'))">
-                                        <span class="material-symbols-outlined" style="font-size: 14px;">local_fire_department</span> Convert Balls
+                                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(217,119,6,0.5); color: #d97706; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span> View Breakdown
                                     </button>
                                 </div>
-                                ` : ''}
                             </div>
                         ` : ''}
 
@@ -1541,49 +1539,112 @@ window.submitClearHistory = async (customerId, returnRoute, btnElement) => {
     }
 };
 
+window._safeKeepState = {
+    customerId: null,
+    goldType: 'balls',
+    grams: '',
+    volume: '',
+    blades: ''
+};
+
+window.setSafeKeepGoldType = (type) => {
+    window._safeKeepState.goldType = type;
+    window.renderSafeKeepModal();
+};
+
 window.openCustomerSafeKeepModal = (customerId) => {
+    window._safeKeepState = {
+        customerId: customerId,
+        goldType: 'balls',
+        grams: '',
+        volume: '',
+        blades: ''
+    };
+    window.renderSafeKeepModal();
+};
+
+window.renderSafeKeepModal = () => {
+    const s = window._safeKeepState;
     const html = `
         <div style="padding: 12px 24px;">
-            <p style="color: var(--text-muted); margin-bottom: 24px;">Deposit collateral into the vault for safekeeping without issuing a cash loan.</p>
+            <p style="color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; font-size: 0.95rem;">Deposit collateral into the vault for safekeeping without issuing a cash loan.</p>
             
-            <form id="safeKeepForm" onsubmit="window.submitSafeKeepForm(event, ${customerId})">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Gold Type</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: white;">
-                            <input type="radio" name="gold_type" value="refined" checked onchange="document.getElementById('safeKeepVolumeGroup').style.display='block'; document.getElementById('safeKeepBladesGroup').style.display='none';"> Refined Gold
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: white;">
-                            <input type="radio" name="gold_type" value="balls" onchange="document.getElementById('safeKeepVolumeGroup').style.display='none'; document.getElementById('safeKeepBladesGroup').style.display='block';"> Sponge / Balls
-                        </label>
+            <form id="safeKeepForm" onsubmit="window.submitSafeKeepForm(event, ${s.customerId})">
+                <input type="hidden" name="gold_type" value="${s.goldType}">
+                
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label style="font-size: 0.85rem; margin-bottom: 12px; display: block; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Gold Type</label>
+                    
+                    <div style="display: flex; gap: 12px;">
+                        <!-- Gold Balls Card -->
+                        <div style="flex: 1; border: 2px solid ${s.goldType === 'balls' ? 'var(--warning)' : 'var(--border)'}; background: ${s.goldType === 'balls' ? 'var(--warning-bg)' : 'white'}; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;" 
+                             onclick="window.setSafeKeepGoldType('balls')">
+                            ${s.goldType === 'balls' ? '<div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--warning);"></div>' : ''}
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <div style="background: ${s.goldType === 'balls' ? 'var(--warning)' : 'var(--bg-hover)'}; color: ${s.goldType === 'balls' ? 'white' : 'var(--text-muted)'}; height: 40px; width: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                                    <span class="material-symbols-outlined">scatter_plot</span>
+                                </div>
+                                <div style="height: 20px; width: 20px; border-radius: 50%; border: 2px solid ${s.goldType === 'balls' ? 'var(--warning)' : '#cbd5e1'}; background: ${s.goldType === 'balls' ? 'var(--warning)' : 'transparent'}; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                                    ${s.goldType === 'balls' ? '<div style="height: 8px; width: 8px; background: white; border-radius: 50%;"></div>' : ''}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Gold Balls</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Unrefined / Sponge</div>
+                        </div>
+                        
+                        <!-- Refined Gold Card -->
+                        <div style="flex: 1; border: 2px solid ${s.goldType === 'refined' ? 'var(--warning)' : 'var(--border)'}; background: ${s.goldType === 'refined' ? 'var(--warning-bg)' : 'white'}; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;" 
+                             onclick="window.setSafeKeepGoldType('refined')">
+                            ${s.goldType === 'refined' ? '<div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--warning);"></div>' : ''}
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <div style="background: ${s.goldType === 'refined' ? 'var(--warning)' : 'var(--bg-hover)'}; color: ${s.goldType === 'refined' ? 'white' : 'var(--text-muted)'}; height: 40px; width: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                                    <span class="material-symbols-outlined">diamond</span>
+                                </div>
+                                <div style="height: 20px; width: 20px; border-radius: 50%; border: 2px solid ${s.goldType === 'refined' ? 'var(--warning)' : '#cbd5e1'}; background: ${s.goldType === 'refined' ? 'var(--warning)' : 'transparent'}; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                                    ${s.goldType === 'refined' ? '<div style="height: 8px; width: 8px; background: white; border-radius: 50%;"></div>' : ''}
+                                </div>
+                            </div>
+                            <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">Refined Gold</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Processed Bars</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Weight (Grams) <span style="color:red;">*</span></label>
-                    <input type="number" step="0.01" id="safeKeepWeight" name="weight_grams" class="form-control" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" placeholder="Enter weight in grams">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem;">Weight (Grams) <span style="color:var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <input type="number" step="0.01" min="0" id="safeKeepWeight" name="weight_grams" class="form-control" required style="width: 100%; padding: 14px 16px; padding-right: 40px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1.05rem;" placeholder="0.00" value="${s.grams}" oninput="window._safeKeepState.grams = this.value">
+                        <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; font-weight: 700;">g</span>
+                    </div>
                 </div>
 
-                <div class="form-group" id="safeKeepVolumeGroup" style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Volume</label>
-                    <input type="number" step="0.01" id="safeKeepVolume" name="volume" class="form-control" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" placeholder="Enter volume">
+                ${s.goldType === 'refined' ? `
+                <div class="form-group" style="margin-bottom: 16px; animation: slideDown 0.2s ease-out forwards;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem;">Volume <span style="color:var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <input type="number" step="0.01" min="0" id="safeKeepVolume" name="volume" class="form-control" required style="width: 100%; padding: 14px 16px; padding-right: 40px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1.05rem;" placeholder="0.00" value="${s.volume}" oninput="window._safeKeepState.volume = this.value">
+                        <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; font-weight: 700;">v</span>
+                    </div>
                 </div>
-
-                <div class="form-group" id="safeKeepBladesGroup" style="margin-bottom: 24px; display: none;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Total Blades</label>
-                    <input type="number" step="0.01" id="safeKeepBlades" name="total_blades" class="form-control" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" placeholder="Enter blades">
+                ` : `
+                <div class="form-group" style="margin-bottom: 24px; animation: slideDown 0.2s ease-out forwards;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem;">Total Blades <span style="color:var(--danger);">*</span></label>
+                    <div style="position: relative;">
+                        <input type="number" step="0.01" min="0" id="safeKeepBlades" name="total_blades" class="form-control" required style="width: 100%; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1.05rem;" placeholder="0.00" value="${s.blades}" oninput="window._safeKeepState.blades = this.value">
+                    </div>
                 </div>
+                `}
 
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
-                    <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="padding: 12px 24px; border-radius: 8px;">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitSafeKeep" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--border);">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="padding: 12px 24px; border-radius: 12px; font-weight: 600;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitSafeKeep" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 12px 28px; border-radius: 12px; color: white; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
                         <span class="material-symbols-outlined" style="font-size: 18px;">lock</span> Save in Vault
                     </button>
                 </div>
             </form>
         </div>
     `;
-    window.openModal('Safe Keep Gold', html);
+    window.openModal('Safe Keep Gold', html, { maxWidth: '540px' });
 };
 
 window.submitSafeKeepForm = async (e, customerId) => {
@@ -1611,6 +1672,182 @@ window.submitSafeKeepForm = async (e, customerId) => {
         window.closeModal();
         
         // Refresh customer view (pass current hash as return route if available)
+        const hash = window.location.hash.replace('#', '');
+        if (window.viewCustomer) {
+            window.viewCustomer(customerId, hash.includes('view-customer') ? 'customers' : hash);
+        }
+    } catch (err) {
+        window.showToast(err.message, 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
+window.openVaultBreakdownModal = (data) => {
+    const collateral = data.collateral_gold || {balls_grams:0, refined_grams:0};
+    const safeKeep = data.safe_keep_gold || {balls_grams:0, refined_grams:0};
+    const customerId = data.profile.id;
+    const returnRoute = window.location.hash.replace('#', '');
+    
+    // Calculate values safely
+    const cBalls = parseFloat(collateral.balls_grams) || 0;
+    const cRefined = parseFloat(collateral.refined_grams) || 0;
+    
+    const skBalls = parseFloat(safeKeep.balls_grams) || 0;
+    const skBallsBlades = parseFloat(safeKeep.balls_blades) || 0;
+    const skRefined = parseFloat(safeKeep.refined_grams) || 0;
+    
+    const html = `
+        <div style="display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; padding: 10px;">
+            <div style="background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
+                <h3 style="margin-top: 0; color: #334155; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: #64748b;">lock</span> Collateral Gold (Locked)
+                </h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">This gold is actively securing outstanding loans and cannot be sold or withdrawn.</p>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <div style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Balls</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 5px;">${cBalls.toFixed(2)}g</div>
+                    </div>
+                    <div style="flex: 1; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <div style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Refined</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 5px;">${cRefined.toFixed(2)}g</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%); border: 1px solid #fed7aa; border-radius: 16px; padding: 20px;">
+                <h3 style="margin-top: 0; color: #c2410c; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: #f97316;">inventory_2</span> Safe Keep Gold (Available)
+                </h3>
+                <p style="font-size: 0.85rem; color: #9a3412; margin-bottom: 15px;">This gold is purely deposited and is available to be liquidated to the company.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #fdba74; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="color: #c2410c; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Balls</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #9a3412; margin-top: 5px;">${skBalls.toFixed(2)}g</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            ${skBalls > 0 ? `
+                                <button class="btn btn-outline" style="border-color: #f97316; color: #ea580c; padding: 6px 12px; font-size: 0.8rem;" onclick="window.closeModal(); window.openConvertBallsModal(${skBalls}, ${skBallsBlades}, 'keeper_held', ${customerId}, () => window.viewCustomer(${customerId}, '${returnRoute}'))">Convert</button>
+                                <button class="btn btn-primary" style="background: #f97316; border: none; padding: 6px 12px; font-size: 0.8rem;" onclick="window.closeModal(); window.openSellSafeKeepModal(${customerId}, 'balls', ${skBalls}, ${skBallsBlades})">Sell</button>
+                            ` : '<span style="color: #fdba74; font-size: 0.85rem;">None</span>'}
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #fdba74; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="color: #c2410c; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Refined</div>
+                            <div style="font-size: 1.5rem; font-weight: 800; color: #9a3412; margin-top: 5px;">${skRefined.toFixed(2)}g</div>
+                        </div>
+                        <div>
+                            ${skRefined > 0 ? `
+                                <button class="btn btn-primary" style="background: #f97316; border: none; padding: 6px 12px; font-size: 0.8rem;" onclick="window.closeModal(); window.openSellSafeKeepModal(${customerId}, 'refined', ${skRefined}, 0)">Sell</button>
+                            ` : '<span style="color: #fdba74; font-size: 0.85rem;">None</span>'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    window.openModal('Vault Breakdown', html, {width: '600px'});
+};
+
+window.openSellSafeKeepModal = (customerId, goldType, maxGrams, totalBlades) => {
+    const formId = `form-sell-safekeep-${Date.now()}`;
+    const html = `
+        <form id="${formId}" onsubmit="window.submitSellSafeKeep(event, ${customerId}, '${goldType}', ${maxGrams})" style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">Selling</div>
+                <div style="font-size: 1.2rem; font-weight: 700; color: #0f172a;">${goldType === 'balls' ? 'Gold Balls' : 'Refined Gold'}</div>
+                <div style="font-size: 0.85rem; color: #3b82f6; margin-top: 5px;">Available to sell: ${maxGrams.toFixed(2)}g</div>
+            </div>
+
+            <div class="form-group">
+                <label>Grams to Sell (Max ${maxGrams.toFixed(2)}g)</label>
+                <input type="number" step="0.01" min="0.01" max="${maxGrams}" name="total_grams_sold" class="form-control form-control-lg" required placeholder="0.00" oninput="if(this.value > ${maxGrams}) this.value = ${maxGrams};">
+            </div>
+
+            ${goldType === 'balls' ? `
+            <div class="form-group">
+                <label>Total Blades Represented</label>
+                <input type="number" step="0.01" min="0" max="${totalBlades || ''}" name="total_blades" class="form-control" placeholder="0.00">
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Optional. Note: Max available blades is ${totalBlades}</div>
+            </div>
+            ` : ''}
+
+            <div class="form-group">
+                <label>Local Price (₵)</label>
+                <input type="number" step="0.01" name="local_price" class="form-control" placeholder="0.00">
+            </div>
+            
+            ${goldType === 'refined' ? `
+            <div style="display: flex; gap: 15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Density</label>
+                    <input type="number" step="0.01" name="density" class="form-control">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Karat</label>
+                    <input type="number" step="0.01" name="karat" class="form-control">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Pounds (£)</label>
+                    <input type="number" step="0.01" name="pounds" class="form-control">
+                </div>
+            </div>
+            ` : ''}
+
+            <div class="form-group">
+                <label>Total Payout to Customer (₵) *</label>
+                <input type="number" step="0.01" min="0.01" name="total_payout_ghs" class="form-control form-control-lg" required placeholder="0.00" style="font-size: 1.25rem; font-weight: bold; color: #16a34a;">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btnSellSafeKeep" style="flex: 2;">Confirm Sale</button>
+            </div>
+        </form>
+    `;
+    window.openModal(`Liquidate ${goldType === 'balls' ? 'Balls' : 'Refined'}`, html, {width: '500px'});
+};
+
+window.submitSellSafeKeep = async (e, customerId, goldType, maxGrams) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnSellSafeKeep');
+    const originalText = btn.innerHTML;
+    try {
+        const formData = new FormData(e.target);
+        const soldGrams = parseFloat(formData.get('total_grams_sold'));
+        
+        if (soldGrams > maxGrams) {
+            throw new Error(`Cannot sell more than available (${maxGrams}g)`);
+        }
+
+        btn.innerHTML = '<span class="material-symbols-outlined spin" style="font-size:18px;">sync</span> Processing...';
+        btn.disabled = true;
+
+        const data = {
+            customer_id: customerId,
+            gold_type: goldType,
+            total_grams_sold: soldGrams,
+            total_payout_ghs: formData.get('total_payout_ghs'),
+            local_price: formData.get('local_price')
+        };
+        
+        if (goldType === 'balls') {
+            data.total_blades = formData.get('total_blades');
+        } else {
+            data.density = formData.get('density');
+            data.karat = formData.get('karat');
+            data.pounds = formData.get('pounds');
+        }
+
+        const res = await window.api.post('/keepers/liquidate.php', data);
+        window.showToast(res.message || 'Sale successful', 'success');
+        window.closeModal();
+        
         const hash = window.location.hash.replace('#', '');
         if (window.viewCustomer) {
             window.viewCustomer(customerId, hash.includes('view-customer') ? 'customers' : hash);

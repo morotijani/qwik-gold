@@ -39,13 +39,21 @@ try {
     }
 
     // 2) SELECT all loans (active and settled) that are not cleared
-    $loansStmt = $pdo->prepare("SELECT id, customer_id, loan_uid, principal_amount, original_principal, type, status, created_at FROM loans WHERE customer_id = ? AND is_cleared_from_profile = FALSE ORDER BY created_at DESC");
+    $loansStmt = $pdo->prepare("SELECT id, customer_id, loan_uid, principal_amount, original_principal, type, status, collateral_gold_type, collateral_weight, collateral_volume, collateral_blades, created_at FROM loans WHERE customer_id = ? AND is_cleared_from_profile = FALSE ORDER BY created_at DESC");
     $loansStmt->execute([$customerId]);
     $allLoans = $loansStmt->fetchAll(PDO::FETCH_ASSOC);
     
     $totalActiveDebt = 0.0;
     $totalSettled = 0.0;
     $activeLoans = [];
+    
+    // Track Collateral
+    $collateralGold = [
+        'balls_grams' => 0.0,
+        'balls_blades' => 0.0,
+        'refined_grams' => 0.0,
+        'refined_volume' => 0.0
+    ];
 
     foreach ($allLoans as $loan) {
         $original = (float)$loan['original_principal'];
@@ -56,6 +64,17 @@ try {
         if ($loan['status'] === 'active') {
             $totalActiveDebt += $current;
             $activeLoans[] = $loan;
+            
+            // Sum up collateral for active loans
+            if ($loan['type'] === 'collateral' && !empty($loan['collateral_gold_type'])) {
+                if ($loan['collateral_gold_type'] === 'balls') {
+                    $collateralGold['balls_grams'] += (float)$loan['collateral_weight'];
+                    $collateralGold['balls_blades'] += (float)$loan['collateral_blades'];
+                } else if ($loan['collateral_gold_type'] === 'refined') {
+                    $collateralGold['refined_grams'] += (float)$loan['collateral_weight'];
+                    $collateralGold['refined_volume'] += (float)$loan['collateral_volume'];
+                }
+            }
         }
     }
 
@@ -85,6 +104,15 @@ try {
             $vaultTotals['refined_volume'] = (float)$row['total_volume'];
         }
     }
+    
+    // Calculate Pure Safe Keep Gold (Vault Totals - Collateral)
+    $safeKeepGold = [
+        'balls_grams' => max(0, $vaultTotals['balls_grams'] - $collateralGold['balls_grams']),
+        'balls_blades' => max(0, $vaultTotals['balls_blades'] - $collateralGold['balls_blades']),
+        'refined_grams' => max(0, $vaultTotals['refined_grams'] - $collateralGold['refined_grams']),
+        'refined_volume' => max(0, $vaultTotals['refined_volume'] - $collateralGold['refined_volume'])
+    ];
+
     // 4) SELECT all gold purchases (walk-in sales from this customer) that are not cleared
     $purchasesStmt = $pdo->prepare("SELECT id, transaction_ref, gold_type, weight_grams, total_paid_ghs, created_at FROM gold_purchases WHERE customer_id = ? AND is_cleared_from_profile = FALSE ORDER BY created_at DESC");
     $purchasesStmt->execute([$customerId]);
@@ -106,7 +134,9 @@ try {
         'all_purchases' => $allPurchases,
         'all_safe_keeps' => $allSafeKeeps,
         'total_settled_ghs' => $totalSettled,
-        'current_kept_gold' => $vaultTotals
+        'current_kept_gold' => $vaultTotals,
+        'collateral_gold' => $collateralGold,
+        'safe_keep_gold' => $safeKeepGold
     ], 200);
 
 } catch (\PDOException $e) {

@@ -48,6 +48,23 @@ try {
     // 0. Begin the database transaction
     $pdo->beginTransaction();
 
+    // 0.5 Check active collateral to ensure they are only selling pure Safe Keep gold
+    $collateralStmt = $pdo->prepare("SELECT SUM(collateral_weight) as total_collateral FROM loans WHERE customer_id = ? AND collateral_gold_type = ? AND status = 'active'");
+    $collateralStmt->execute([$customerId, $goldType]);
+    $collateralRow = $collateralStmt->fetch();
+    $activeCollateral = $collateralRow ? (float)$collateralRow['total_collateral'] : 0.0;
+
+    $totalKeeperStmt = $pdo->prepare("SELECT SUM(weight_grams) as total_keeper FROM gold_vault WHERE customer_id = ? AND gold_type = ? AND ownership_status = 'keeper_held' AND current_location = 'office_vault'");
+    $totalKeeperStmt->execute([$customerId, $goldType]);
+    $totalKeeperRow = $totalKeeperStmt->fetch();
+    $totalKeeper = $totalKeeperRow ? (float)$totalKeeperRow['total_keeper'] : 0.0;
+
+    $availableSafeKeep = max(0, $totalKeeper - $activeCollateral);
+
+    if ($totalGramsSold > $availableSafeKeep + 0.0001) { // Adding small epsilon for float precision
+        throw new Exception("Insufficient Safe Keep balance. You requested to sell {$totalGramsSold}g, but only {$availableSafeKeep}g is available (the rest is locked as collateral).");
+    }
+
     // 1. UPDATE gold_vault records
     // Fetch keeper's current hold records in FIFO order and lock them for update
     $stmt = $pdo->prepare("SELECT id, weight_grams FROM gold_vault WHERE customer_id = ? AND gold_type = ? AND ownership_status = 'keeper_held' ORDER BY id ASC FOR UPDATE");
