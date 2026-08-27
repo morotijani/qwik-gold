@@ -178,6 +178,7 @@ window.addEventListener('route-changed', async (e) => {
                 <span class="material-symbols-outlined spin" style="font-size: 2rem; color: var(--gold-primary);">sync</span>
             </div>
         `;
+
         try {
             const data = await window.api.get(`/customers/view.php?customer_id=${id}`);
 
@@ -190,6 +191,9 @@ window.addEventListener('route-changed', async (e) => {
             }
             if (data.all_purchases) {
                 data.all_purchases.forEach(sale => journeyNodes.push({ ...sale, _type: 'sale', _date: sale.created_at }));
+            }
+            if (data.all_safe_keeps) {
+                data.all_safe_keeps.forEach(keep => journeyNodes.push({ ...keep, _type: 'safe_keep', _date: keep.created_at }));
             }
 
             // Sort by most recent
@@ -216,7 +220,7 @@ window.addEventListener('route-changed', async (e) => {
                         <button class="btn btn-text" onclick="window.location.hash = '#${returnRoute}'; window.dispatchEvent(new CustomEvent('route-changed', {detail:{route:'${returnRoute}', container: document.getElementById('view-container')}}))" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; padding: 8px 16px; border-radius: 12px; transition: background 0.2s; white-space: nowrap; font-size: clamp(0.85rem, 2vw, 1rem);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
                             <span class="material-symbols-outlined">arrow_back</span> Back
                         </button>
-                        <div style="display: flex; gap: clamp(8px, 2vw, 12px); flex-wrap: wrap;">
+<div style="display: flex; gap: clamp(8px, 2vw, 12px); flex-wrap: wrap;">
                             ${parseFloat(data.active_debt.total_amount_ghs) === 0 ? `
                             <button class="btn btn-outline" onclick="window.confirmClearHistory(${data.profile.id}, '${returnRoute}')" style="background: white; border-color: rgba(239, 68, 68, 0.3); color: var(--danger); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">delete_sweep</span> Clear History
@@ -224,6 +228,9 @@ window.addEventListener('route-changed', async (e) => {
                             ` : ''}
                             <button class="btn btn-outline" onclick='window.openEditCustomerModal(${JSON.stringify(data.profile).replace(/'/g, "&#39;")})' style="background: white; border-color: var(--border); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit Profile
+                            </button>
+                            <button class="btn btn-primary" onclick="window.openCustomerSafeKeepModal(${data.profile.id})" style="background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem); color: white;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">security</span> Safe Keep Gold
                             </button>
                             <button class="btn btn-primary" onclick="window.openCustomerIssueLoanModal(${data.profile.id})" style="background: linear-gradient(135deg, var(--warning), #d97706); border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">payments</span> Issue New Loan
@@ -430,8 +437,34 @@ window.addEventListener('route-changed', async (e) => {
                                                 <td style="padding: 20px 16px; font-weight: 800; color: var(--text-main); text-align: right; font-size: 1.1rem;">
                                                     GHS ${parseFloat(node.total_paid_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </td>
-                                                <td style="padding: 20px 24px; color: var(--text-muted); font-size: 1rem; font-weight: 700; text-align: right;">
+                                                <td style="padding: 20px 24px; text-align: right;">
+                                                    <span style="padding: 6px 12px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Completed</span>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    } else if (node._type === 'safe_keep') {
+                                        return `
+                                            <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
+                                                <td style="padding: 20px 24px; color: var(--text-main); font-weight: 600;">
+                                                    ${new Date(node.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })} 
+                                                    <div style="color: var(--text-muted); font-size: 0.85rem; font-weight: 500; margin-top: 4px;">${new Date(node.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
+                                                </td>
+                                                <td style="padding: 20px 16px;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-size: 0.85rem; font-weight: 700; box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);">
+                                                        <span class="material-symbols-outlined" style="font-size: 16px;">lock</span> Safe Kept
+                                                    </span>
+                                                </td>
+                                                <td style="padding: 20px 16px; font-weight: 700; color: var(--text-main); font-size: 0.9rem; text-transform: capitalize;">
+                                                    ${node.gold_type || 'N/A'}
+                                                </td>
+                                                <td style="padding: 20px 16px; font-weight: 600; color: var(--text-muted);">
+                                                    <span style="background: var(--bg-main); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem;">SK-${String(node.id).padStart(6, '0')}</span>
+                                                </td>
+                                                <td style="padding: 20px 16px; font-weight: 800; color: var(--text-main); text-align: right; font-size: 1.1rem;">
                                                     ${parseFloat(node.weight_grams).toFixed(2)}g
+                                                </td>
+                                                <td style="padding: 20px 24px; text-align: right;">
+                                                    <span style="padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">In Vault</span>
                                                 </td>
                                             </tr>
                                         `;
@@ -1505,5 +1538,86 @@ window.submitClearHistory = async (customerId, returnRoute, btnElement) => {
         window.showToast(e.message, 'error');
         btnElement.innerHTML = originalText;
         btnElement.disabled = false;
+    }
+};
+
+window.openCustomerSafeKeepModal = (customerId) => {
+    const html = `
+        <div style="padding: 12px 24px;">
+            <p style="color: var(--text-muted); margin-bottom: 24px;">Deposit collateral into the vault for safekeeping without issuing a cash loan.</p>
+            
+            <form id="safeKeepForm" onsubmit="window.submitSafeKeepForm(event, ${customerId})">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Gold Type</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: white;">
+                            <input type="radio" name="gold_type" value="refined" checked onchange="document.getElementById('safeKeepVolumeGroup').style.display='block'; document.getElementById('safeKeepBladesGroup').style.display='none';"> Refined Gold
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: white;">
+                            <input type="radio" name="gold_type" value="balls" onchange="document.getElementById('safeKeepVolumeGroup').style.display='none'; document.getElementById('safeKeepBladesGroup').style.display='block';"> Sponge / Balls
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Weight (Grams) <span style="color:red;">*</span></label>
+                    <input type="number" step="0.01" id="safeKeepWeight" name="weight_grams" class="form-control" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" placeholder="Enter weight in grams">
+                </div>
+
+                <div class="form-group" id="safeKeepVolumeGroup" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Volume</label>
+                    <input type="number" step="0.01" id="safeKeepVolume" name="volume" class="form-control" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" placeholder="Enter volume">
+                </div>
+
+                <div class="form-group" id="safeKeepBladesGroup" style="margin-bottom: 24px; display: none;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">Total Blades</label>
+                    <input type="number" step="0.01" id="safeKeepBlades" name="total_blades" class="form-control" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;" placeholder="Enter blades">
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px;">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="padding: 12px 24px; border-radius: 8px;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitSafeKeep" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 12px 24px; border-radius: 8px; color: white; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">lock</span> Save in Vault
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+    window.openModal('Safe Keep Gold', html);
+};
+
+window.submitSafeKeepForm = async (e, customerId) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitSafeKeep');
+    const originalText = btn.innerHTML;
+    try {
+        btn.innerHTML = '<span class="material-symbols-outlined spin" style="font-size:18px;">sync</span> Working...';
+        btn.disabled = true;
+
+        const formData = new FormData(e.target);
+        const data = {
+            customer_id: customerId,
+            gold_type: formData.get('gold_type'),
+            weight_grams: formData.get('weight_grams')
+        };
+        if (data.gold_type === 'refined') {
+            data.volume = formData.get('volume');
+        } else {
+            data.total_blades = formData.get('total_blades');
+        }
+
+        const res = await window.api.post('/keepers/deposit.php', data);
+        window.showToast(res.message || 'Gold safely kept in vault', 'success');
+        window.closeModal();
+        
+        // Refresh customer view (pass current hash as return route if available)
+        const hash = window.location.hash.replace('#', '');
+        if (window.viewCustomer) {
+            window.viewCustomer(customerId, hash.includes('view-customer') ? 'customers' : hash);
+        }
+    } catch (err) {
+        window.showToast(err.message, 'error');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 };

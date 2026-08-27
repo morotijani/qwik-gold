@@ -90,6 +90,11 @@ try {
     $purchasesStmt->execute([$customerId]);
     $allPurchases = $purchasesStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // 5) SELECT all safe keep deposits
+    $safeKeepStmt = $pdo->prepare("SELECT id, gold_type, weight_grams, volume, total_blades, created_at FROM gold_vault WHERE customer_id = ? AND ownership_status = 'keeper_held' AND current_location = 'office_vault' ORDER BY created_at DESC");
+    $safeKeepStmt->execute([$customerId]);
+    $allSafeKeeps = $safeKeepStmt->fetchAll(PDO::FETCH_ASSOC);
+
     // Return the perfectly combined JSON response
     sendResponse('success', 'Customer profile retrieved', [
         'profile' => $customer,
@@ -99,6 +104,7 @@ try {
         ],
         'all_loans' => $allLoans,
         'all_purchases' => $allPurchases,
+        'all_safe_keeps' => $allSafeKeeps,
         'total_settled_ghs' => $totalSettled,
         'current_kept_gold' => $vaultTotals
     ], 200);
