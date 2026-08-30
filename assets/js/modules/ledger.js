@@ -77,6 +77,10 @@ window.addEventListener('route-changed', async (e) => {
                                     <span class="material-symbols-outlined" style="font-size: 16px;">view_agenda</span>
                                     ${Number(stats.gold_balls.total_balls_blades || 0).toFixed(2)} Total Blades
                                 </div>
+                                <div style="margin-top: 10px; font-size: 0.95rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">payments</span>
+                                    GHS ${Number(stats.gold_balls.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} System Value
+                                </div>
                                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(16, 185, 129, 0.2);">
                                     <button class="btn btn-primary" style="width: 100%; background: #10b981; border-color: #10b981; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; border-radius: 12px;" onclick="window.initiateMarketSale('office_vault', 'balls')">
                                         <span class="material-symbols-outlined">query_stats</span> Simulate & Sell
@@ -101,6 +105,10 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="margin-top: 10px; font-size: 0.95rem; color: #d97706; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">water_drop</span>
                                     ${Number(stats.refined_gold.volume || 0).toFixed(4)} Total Volume
+                                </div>
+                                <div style="margin-top: 10px; font-size: 0.95rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">payments</span>
+                                    GHS ${Number(stats.refined_gold.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} System Value
                                 </div>
                                 <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(245, 158, 11, 0.2);">
                                     <button class="btn btn-primary" style="width: 100%; background: #f59e0b; border-color: #f59e0b; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; border-radius: 12px;" onclick="window.initiateMarketSale('office_vault', 'refined')">
@@ -139,6 +147,10 @@ window.addEventListener('route-changed', async (e) => {
                                     <span class="material-symbols-outlined" style="color: #94a3b8;">scatter_plot</span>
                                 </div>
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">${Number(stats.hold_gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                                <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">payments</span>
+                                    GHS ${Number(stats.hold_gold_balls.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </div>
                             </div>
                             <!-- Hold Refined -->
                             <div style="background: white; border: 1px solid var(--border); border-radius: 16px; padding: 20px;">
@@ -147,6 +159,10 @@ window.addEventListener('route-changed', async (e) => {
                                     <span class="material-symbols-outlined" style="color: #94a3b8;">diamond</span>
                                 </div>
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main);">${Number(stats.hold_refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1rem; color: var(--text-muted);">g</span></div>
+                                <div style="margin-top: 8px; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 14px;">payments</span>
+                                    GHS ${Number(stats.hold_refined_gold.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -364,8 +380,8 @@ window.addEventListener('route-changed', async (e) => {
             const refGrams = sourceLocation === 'on_hold' ? stats.hold_refined_gold.grams : stats.refined_gold.grams;
             const refVol = sourceLocation === 'on_hold' ? stats.hold_refined_gold.volume : stats.refined_gold.volume;
 
-            const bCost = sourceLocation === 'on_hold' ? (stats.hold_gold_balls.cost_basis || 0) : (stats.gold_balls.cost_basis || 0);
-            const rCost = sourceLocation === 'on_hold' ? (stats.hold_refined_gold.cost_basis || 0) : (stats.refined_gold.cost_basis || 0);
+            const bCost = sourceLocation === 'on_hold' ? (stats.hold_gold_balls.guessed_value || 0) : (stats.gold_balls.guessed_value || 0);
+            const rCost = sourceLocation === 'on_hold' ? (stats.hold_refined_gold.guessed_value || 0) : (stats.refined_gold.guessed_value || 0);
 
             window._initiateSaleState = {
                 source_location: sourceLocation,
@@ -676,8 +692,9 @@ window.addEventListener('route-changed', async (e) => {
 
     window.openCompleteSaleModal = (dataStr) => {
         const s = JSON.parse(decodeURIComponent(dataStr));
+        const profit = s.status === 'completed' ? Number(s.net_profit_ghs) : 0;
+        const capitalSpent = Number(s.total_cost || 0);
         const estCash = Number(s.estimated_cash);
-        const capitalSpent = Number(s.cost_basis_ghs || 0);
         const estProfit = estCash - capitalSpent;
 
         const estCashFormatted = estCash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -847,7 +864,7 @@ window.addEventListener('route-changed', async (e) => {
             const s = res.sale;
             const consts = res.constituents;
 
-            const costBasis = parseFloat(s.cost_basis_ghs) || 0;
+            const costBasis = parseFloat(s.total_cost) || 0;
             const actualCash = parseFloat(s.actual_cash) || 0;
 
             const diff = s.net_profit_ghs !== null ? parseFloat(s.net_profit_ghs) : (actualCash - costBasis);
@@ -900,7 +917,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
                                     <div>
                                         <div style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${ms.gold_type} Sale</div>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g &bull; Cap: GHS ${Number(ms.cost_basis_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g &bull; Cap: GHS ${Number(ms.total_cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                                     </div>
                                     <div style="text-align: right;">
                                         <div style="font-weight: 600; color: var(--text-main);">Est: GHS ${Number(ms.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
@@ -1033,7 +1050,7 @@ window.addEventListener('route-changed', async (e) => {
 
         selected.forEach(s => {
             totalGrams += Number(s.total_grams);
-            totalCapital += Number(s.cost_basis_ghs || 0);
+            totalCapital += Number(s.total_cost || 0);
             totalEstCash += Number(s.estimated_cash);
             saleIds.push(s.id);
         });

@@ -37,10 +37,10 @@ try {
 
     // 1. Fetch available balls for this owner
     if ($ownershipStatus === 'company_owned') {
-        $stmt = $pdo->prepare("SELECT id, weight_grams, cost_basis_ghs, guessed_value_ghs FROM gold_vault WHERE ownership_status = 'company_owned' AND gold_type = 'balls' AND current_location = ? ORDER BY id ASC FOR UPDATE");
+        $stmt = $pdo->prepare("SELECT id, weight_grams, guessed_value_ghs FROM gold_vault WHERE ownership_status = 'company_owned' AND gold_type = 'balls' AND current_location = ? ORDER BY id ASC FOR UPDATE");
         $stmt->execute([$sourceLocation]);
     } else {
-        $stmt = $pdo->prepare("SELECT id, weight_grams, cost_basis_ghs, guessed_value_ghs FROM gold_vault WHERE ownership_status = 'keeper_held' AND customer_id = ? AND gold_type = 'balls' AND current_location = 'office_vault' ORDER BY id ASC FOR UPDATE");
+        $stmt = $pdo->prepare("SELECT id, weight_grams, guessed_value_ghs FROM gold_vault WHERE ownership_status = 'keeper_held' AND customer_id = ? AND gold_type = 'balls' AND current_location = 'office_vault' ORDER BY id ASC FOR UPDATE");
         $stmt->execute([$customerId]);
     }
     
@@ -72,12 +72,10 @@ try {
         $ballId = $ball['id'];
         $lastBallId = $ballId;
         $ballWeight = round((float)$ball['weight_grams'], 4);
-        $ballCostBasis = (float)($ball['cost_basis_ghs'] ?? 0);
         $ballGuessedValue = (float)($ball['guessed_value_ghs'] ?? 0);
 
         if ($ballWeight <= $remainingToConvert) {
             // Entire ball is converted
-            $totalCostBasisUsed += $ballCostBasis;
             $totalGuessedValueUsed += $ballGuessedValue;
 
             $upd = $pdo->prepare("UPDATE gold_vault SET current_location = 'converted' WHERE id = ?");
@@ -86,22 +84,19 @@ try {
         } else {
             // Partial conversion: reduce weight of existing ball
             $fraction = $remainingToConvert / $ballWeight;
-            $costUsed = $ballCostBasis * $fraction;
             $guessedUsed = $ballGuessedValue * $fraction;
 
-            $totalCostBasisUsed += $costUsed;
             $totalGuessedValueUsed += $guessedUsed;
 
             $newWeight = round($ballWeight - $remainingToConvert, 4);
-            $newCost = $ballCostBasis - $costUsed;
             $newGuessed = $ballGuessedValue - $guessedUsed;
 
-            $upd = $pdo->prepare("UPDATE gold_vault SET weight_grams = ?, cost_basis_ghs = ?, guessed_value_ghs = ? WHERE id = ?");
-            $upd->execute([$newWeight, $newCost, $newGuessed, $ballId]);
+            $upd = $pdo->prepare("UPDATE gold_vault SET weight_grams = ?, guessed_value_ghs = ? WHERE id = ?");
+            $upd->execute([$newWeight, $newGuessed, $ballId]);
 
             // Create a historical "converted" record for the portion we used
-            $ins = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id, cost_basis_ghs, guessed_value_ghs) VALUES ('balls', ?, ?, 'converted', ?, ?, ?)");
-            $ins->execute([$ownershipStatus, $remainingToConvert, $customerId, $costUsed, $guessedUsed]);
+            $ins = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id, guessed_value_ghs) VALUES ('balls', ?, ?, 'converted', ?, ?)");
+            $ins->execute([$ownershipStatus, $remainingToConvert, $customerId, $guessedUsed]);
             $lastBallId = $pdo->lastInsertId();
 
             $remainingToConvert = 0;
@@ -109,8 +104,8 @@ try {
     }
 
     // 3. Create Refined Gold Record
-    $insRefined = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id, parent_ball_id, cost_basis_ghs, guessed_value_ghs) VALUES ('refined', ?, ?, ?, ?, ?, ?, ?, ?)");
-    $insRefined->execute([$ownershipStatus, $refinedGrams, $refinedVolume, $sourceLocation, $customerId, $lastBallId, $totalCostBasisUsed, $totalGuessedValueUsed]);
+    $insRefined = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id, parent_ball_id, guessed_value_ghs) VALUES ('refined', ?, ?, ?, ?, ?, ?, ?)");
+    $insRefined->execute([$ownershipStatus, $refinedGrams, $refinedVolume, $sourceLocation, $customerId, $lastBallId, $totalGuessedValueUsed]);
     $newRefinedId = $pdo->lastInsertId();
     
     // 4. Update Collateral on Loan (if applicable)

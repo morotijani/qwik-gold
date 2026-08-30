@@ -34,6 +34,13 @@ try {
     $stmt->execute();
     
     $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Compute total cost for each sale
+    foreach ($sales as &$s) {
+        $costStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE sale_id = ?");
+        $costStmt->execute([$s['id']]);
+        $s['total_cost'] = (float)$costStmt->fetchColumn();
+    }
 
     sendResponse('success', 'Sold gold retrieved', [
         'total_count' => $totalCount,

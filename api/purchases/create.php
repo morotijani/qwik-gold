@@ -55,8 +55,8 @@ try {
     }
 
     // 1. Insert into gold_vault with financial tracking
-    $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, total_blades, current_location, customer_id, cost_basis_ghs, guessed_value_ghs) VALUES (?, 'company_owned', ?, ?, ?, 'office_vault', ?, ?, ?)");
-    $vaultStmt->execute([$goldType, $weightGrams, $volume, $totalBlades, $customerId, $totalPaid, $guessedValue]);
+    $vaultStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, total_blades, current_location, customer_id, guessed_value_ghs) VALUES (?, 'company_owned', ?, ?, ?, 'office_vault', ?, ?)");
+    $vaultStmt->execute([$goldType, $weightGrams, $volume, $totalBlades, $customerId, $guessedValue]);
     $vaultId = $pdo->lastInsertId();
     
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);

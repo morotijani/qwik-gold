@@ -38,7 +38,6 @@ CREATE TABLE gold_vault (
     volume DECIMAL(10, 4) DEFAULT NULL,
     total_blades DECIMAL(10, 2) DEFAULT NULL,
     current_location ENUM('office_vault', 'sold_main_market', 'converted', 'on_hold') NOT NULL DEFAULT 'office_vault',
-    cost_basis_ghs DECIMAL(15, 2) DEFAULT 0, -- Actual cash out-of-pocket spent for this gold
     guessed_value_ghs DECIMAL(15, 2) DEFAULT 0, -- Calculated formula value at the exact time of purchase
     purchase_id INT DEFAULT NULL, -- Links vault record back to its origin purchase (if bought)
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
@@ -103,7 +102,6 @@ CREATE TABLE market_sales (
     estimated_cash DECIMAL(15,2) NOT NULL,
     estimated_local_price DECIMAL(15,2),
     actual_cash_brought_in DECIMAL(15,2),
-    cost_basis_ghs DECIMAL(15,2) DEFAULT 0,
     net_profit_ghs DECIMAL(15,2) DEFAULT 0,
     is_merged BOOLEAN DEFAULT FALSE,
     merged_into_id INT DEFAULT NULL,

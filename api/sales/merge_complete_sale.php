@@ -39,12 +39,14 @@ try {
         throw new Exception("One or more selected sales could not be found or are not pending.");
     }
 
-    $totalCostBasis = 0.0;
+    $sumStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE sale_id IN ($inClause)");
+    $sumStmt->execute($saleIds);
+    $totalCostBasis = (float)$sumStmt->fetchColumn();
+
     $totalOriginalGrams = 0.0;
     $totalEstCash = 0.0;
 
     foreach ($sales as $sale) {
-        $totalCostBasis += (float)$sale['cost_basis_ghs'];
         $totalOriginalGrams += (float)$sale['total_grams'];
         $totalEstCash += (float)$sale['estimated_cash'];
     }
@@ -64,22 +66,23 @@ try {
     $insertMaster = $pdo->prepare("
         INSERT INTO market_sales (
             sale_uid, gold_type, status, total_grams, total_volume, 
-            estimated_cash, cost_basis_ghs, net_profit_ghs, actual_local_price, 
+            estimated_cash, net_profit_ghs, actual_local_price, 
             actual_grams_market, actual_volume_market, actual_cash, handler_id, is_merged
         ) VALUES (
             ?, 'refined', 'completed', ?, ?, 
-            ?, ?, ?, ?, 
+            ?, ?, ?, 
             ?, ?, ?, ?, 1
         )
     ");
     
-    $saleUid = 'MRG-' . time() . '-' . rand(100, 999);
-    $handlerId = $current_user_id ?? 1;
+    $newSaleUid = 'MRG-' . time() . '-' . rand(100, 999);
+    $current_user_id = $current_user_id ?? 1;
 
     $insertMaster->execute([
-        $saleUid, $totalOriginalGrams, $actualVolume, 
-        $totalEstCash, $totalCostBasis, $netProfit, $actualPrice, 
-        $actualGrams, $actualVolume, $actualCash, $handlerId
+        $newSaleUid, 
+        $totalOriginalGrams, $actualVolume, 
+        $totalEstCash, $netProfit, $actualPrice,
+        $actualGrams, $actualVolume, $actualCash, $current_user_id
     ]);
     
     $newMasterId = $pdo->lastInsertId();

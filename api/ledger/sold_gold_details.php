@@ -29,6 +29,12 @@ try {
     $vaultStmt = $pdo->prepare("SELECT * FROM gold_vault WHERE sale_id = ?");
     $vaultStmt->execute([$saleId]);
     $constituents = $vaultStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $totalCost = 0.0;
+    foreach ($constituents as $item) {
+        $totalCost += (float)$item['guessed_value_ghs'];
+    }
+    $sale['total_cost'] = $totalCost;
 
     $smeltedCount = 0;
     $smeltedGrams = 0;
@@ -51,6 +57,28 @@ try {
         $mergeStmt = $pdo->prepare("SELECT * FROM market_sales WHERE merged_into_id = ?");
         $mergeStmt->execute([$saleId]);
         $mergedSales = $mergeStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $mergedTotalCost = 0.0;
+        foreach ($mergedSales as &$ms) {
+            $msCostStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE sale_id = ?");
+            $msCostStmt->execute([$ms['id']]);
+            $ms['total_cost'] = (float)$msCostStmt->fetchColumn();
+            $mergedTotalCost += $ms['total_cost'];
+        }
+        
+        // If it's a merged sale and vault items were migrated to the master sale (legacy behavior), 
+        // the sub-sales will have 0 direct cost. In this case, prorate the master sale's total cost.
+        if ($mergedTotalCost == 0 && $totalCost > 0) {
+            foreach ($mergedSales as &$ms) {
+                if ($sale['total_grams'] > 0) {
+                    $ms['total_cost'] = $totalCost * ($ms['total_grams'] / $sale['total_grams']);
+                }
+                $mergedTotalCost += $ms['total_cost'];
+            }
+        }
+        
+        // Ensure the master sale's total cost is accurate
+        $sale['total_cost'] = max($totalCost, $mergedTotalCost);
     }
 
     sendResponse('success', 'Sale details retrieved', [

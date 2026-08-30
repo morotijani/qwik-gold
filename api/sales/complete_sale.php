@@ -55,8 +55,12 @@ try {
         }
     }
 
-    // 1. Update market_sales
-    $netProfit = $actualCash - (float)$sale['cost_basis_ghs'];
+    // 1. Calculate base cost from gold vault
+    $sumStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE sale_id = ?");
+    $sumStmt->execute([$saleId]);
+    $totalCost = (float)$sumStmt->fetchColumn();
+
+    $netProfit = $actualCash - $totalCost;
 
     $updateSale = $pdo->prepare("
         UPDATE market_sales 

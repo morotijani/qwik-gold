@@ -36,8 +36,7 @@ try {
         SELECT 
             SUM(weight_grams) as total_grams,
             SUM(volume) as total_volume,
-            SUM(total_blades) as total_blades,
-            SUM(cost_basis_ghs) as total_cost_basis
+            SUM(total_blades) as total_blades
         FROM gold_vault 
         WHERE ownership_status = 'company_owned' 
         AND current_location = ? 
@@ -81,15 +80,13 @@ try {
         }
     }
 
-    $overallCostBasis = (float)$item['total_cost_basis'];
-
     $saleUid = 'SALE-' . strtoupper(uniqid());
 
     // 2. Insert into market_sales as pending
     $insertSaleStmt = $pdo->prepare("
         INSERT INTO market_sales 
-        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_local_price, estimated_cash, cost_basis_ghs, status, notes, handler_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_local_price, estimated_cash, status, notes, handler_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
     ");
     $insertSaleStmt->execute([
         $saleUid, 
@@ -99,7 +96,6 @@ try {
         $overallBlades, 
         $estimatedPrice,
         $estimatedCash, 
-        $overallCostBasis,
         $data['notes'] ?? '',
         $current_user_id ?? null
     ]);

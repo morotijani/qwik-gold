@@ -275,7 +275,7 @@ window.addEventListener('route-changed', async (e) => {
                                     <div style="color: #dc2626; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Active Debt</div>
                                 </div>
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${parseFloat(data.active_debt.total_amount_ghs).toLocaleString(undefined, {minimumFractionDigits:2})}
+                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${parseFloat(data.active_debt.total_amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                             
@@ -289,7 +289,7 @@ window.addEventListener('route-changed', async (e) => {
                                     <div style="color: #059669; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Total Settled</div>
                                 </div>
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${parseFloat(data.total_settled_ghs).toLocaleString(undefined, {minimumFractionDigits:2})}
+                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${parseFloat(data.total_settled_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         ` : ''}
@@ -340,7 +340,7 @@ window.addEventListener('route-changed', async (e) => {
                                     <div style="color: #ca8a04; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Total Revenue</div>
                                 </div>
                                 <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${totalRevenuePaid.toLocaleString(undefined, {minimumFractionDigits:2})}
+                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${totalRevenuePaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         ` : ''}
@@ -384,8 +384,8 @@ window.addEventListener('route-changed', async (e) => {
                                         </td>
                                     </tr>
                                 ` : journeyNodes.map(node => {
-                                    if (node._type === 'loan') {
-                                        return `
+                if (node._type === 'loan') {
+                    return `
                                             <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
                                                 <td style="padding: 20px 24px; color: var(--text-main); font-weight: 600;">
                                                     ${new Date(node.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })} 
@@ -406,16 +406,16 @@ window.addEventListener('route-changed', async (e) => {
                                                     GHS ${parseFloat(node.principal_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </td>
                                                 <td style="padding: 20px 24px; text-align: right;">
-                                                    ${node.status === 'active' 
-                                                        ? `<span style="padding: 6px 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Unpaid</span>
-                                                           <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px; box-shadow: 0 4px 10px rgba(245,158,11,0.2); border: none;" onclick="window.openSettleLoanWizard(${node.id}, ${id}, '${node.type}', ${node.principal_amount})">Settle</button>` 
-                                                        : `<span style="padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Settled</span>`}
+                                                    ${node.status === 'active'
+                            ? `<span style="padding: 6px 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Unpaid</span>
+                                                           <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px; box-shadow: 0 4px 10px rgba(245,158,11,0.2); border: none;" onclick="window.openSettleLoanWizard(${node.id}, ${id}, '${node.type}', ${node.principal_amount})">Settle</button>`
+                            : `<span style="padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Settled</span>`}
                                                     <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px;" onclick="window.openLoanDetailsModal(${node.id})">Details</button>
                                                 </td>
                                             </tr>
                                         `;
-                                    } else if (node._type === 'sale') {
-                                        return `
+                } else if (node._type === 'sale') {
+                    return `
                                             <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
                                                 <td style="padding: 20px 24px; color: var(--text-main); font-weight: 600;">
                                                     ${new Date(node.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })} 
@@ -440,8 +440,8 @@ window.addEventListener('route-changed', async (e) => {
                                                 </td>
                                             </tr>
                                         `;
-                                    } else if (node._type === 'safe_keep') {
-                                        return `
+                } else if (node._type === 'safe_keep') {
+                    return `
                                             <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
                                                 <td style="padding: 20px 24px; color: var(--text-main); font-weight: 600;">
                                                     ${new Date(node.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })} 
@@ -466,8 +466,8 @@ window.addEventListener('route-changed', async (e) => {
                                                 </td>
                                             </tr>
                                         `;
-                                    }
-                                }).join('')}
+                }
+            }).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -606,7 +606,7 @@ window.openCustomerIssueLoanModal = async (customerId = null) => {
         karat: 0,
         notes: ''
     };
-    
+
     if (!customerId) {
         try {
             const res = await window.api.get('/customers/list.php');
@@ -615,7 +615,7 @@ window.openCustomerIssueLoanModal = async (customerId = null) => {
             console.error('Failed to load customers for loan modal', e);
         }
     }
-    
+
     window.renderLoanWizard();
 };
 
@@ -633,7 +633,7 @@ window.calculateLoanCollateral = () => {
     const s = window._loanWizardState;
     const grams = parseFloat(s.grams) || 0;
     const volume = parseFloat(s.volume) || 0;
-    
+
     if (s.goldType === 'balls') {
         s.blades = grams / 0.8;
         const domBlades = document.getElementById('calc-loan-blades');
@@ -643,7 +643,7 @@ window.calculateLoanCollateral = () => {
         s.pounds = truncate2(grams / 7.75);
         s.density = volume > 0 ? truncate2(grams / volume) : 0;
         s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
-        
+
         const domDensity = document.getElementById('calc-loan-density');
         const domKarat = document.getElementById('calc-loan-karat');
         const domPounds = document.getElementById('calc-loan-pounds');
@@ -656,7 +656,7 @@ window.calculateLoanCollateral = () => {
 window.renderLoanWizard = () => {
     const s = window._loanWizardState;
     let html = '';
-    
+
     if (s.step === 1) {
         html = `
             <div style="display: flex; flex-direction: column; gap: 24px;">
@@ -841,7 +841,7 @@ window.renderLoanWizard = () => {
                 <div style="background: white; border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border);">
                         <span style="color: #64748b; font-weight: 500;">Principal Amount</span>
-                        <span style="font-weight: 800; font-size: 1.2rem; color: #d97706;">GHS ${parseFloat(s.principal).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <span style="font-weight: 800; font-size: 1.2rem; color: #d97706;">GHS ${parseFloat(s.principal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
                     
                     ${s.hasCollateral ? `
@@ -901,7 +901,7 @@ window.renderLoanWizard = () => {
             </div>
         `;
     }
-    
+
     // Only open modal if it isn't already (or update contents if it is)
     const existingBody = document.getElementById('modal-body');
     if (existingBody && document.getElementById('global-modal').classList.contains('active')) {
@@ -914,11 +914,11 @@ window.renderLoanWizard = () => {
 window.submitLoanWizard = async () => {
     const s = window._loanWizardState;
     const btn = document.getElementById('btn-submit-loan');
-    if(btn) {
+    if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
     }
-    
+
     const payload = {
         customer_id: s.customerId,
         principal_amount: s.principal,
@@ -929,7 +929,7 @@ window.submitLoanWizard = async () => {
     if (s.hasCollateral) {
         payload.gold_type = s.goldType;
         payload.weight_grams = s.grams;
-        if(s.goldType === 'refined') {
+        if (s.goldType === 'refined') {
             payload.volume = s.volume;
         } else {
             payload.total_blades = s.blades;
@@ -940,7 +940,7 @@ window.submitLoanWizard = async () => {
         const response = await window.api.post('/loans/issue.php', payload);
         window.showToast('Loan issued successfully!', 'success');
         window.closeModal();
-        
+
         if (window.location.hash === '#loans') {
             if (typeof window.loadLoansData === 'function') {
                 window.loadLoansData();
@@ -961,7 +961,7 @@ window.submitLoanWizard = async () => {
         }
     } catch (error) {
         window.showToast(error.message, 'error');
-        if(btn) {
+        if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Confirm Issue';
         }
@@ -978,10 +978,10 @@ window.openSettleLoanWizard = async (loanId, customerId, loanType, principalAmou
         principal: parseFloat(principalAmount),
         settleMethod: null, // 'cash', 'gold', 'collateral'
         notes: '',
-        
+
         // Cash specific
         amountPaid: '',
-        
+
         // Gold specific
         goldType: 'refined', // 'refined' or 'balls'
         grams: '',
@@ -993,26 +993,26 @@ window.openSettleLoanWizard = async (loanId, customerId, loanType, principalAmou
         karat: 0,
         pounds: 0,
         agreedValue: 0,
-        
+
         // Collateral specific
         collateralData: null // Will be populated from API
     };
-    
+
     if (loanType === 'collateral') {
         document.getElementById('global-modal').classList.add('active');
         document.getElementById('modal-title').textContent = 'Loading...';
         document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span></div>';
-        
+
         try {
             const data = await window.api.get(`/customers/view.php?customer_id=${customerId}`);
             window._settleWizardState.collateralData = data.current_kept_gold;
-        } catch(e) {
+        } catch (e) {
             window.showToast('Failed to fetch customer vault details', 'error');
             window.closeModal();
             return;
         }
     }
-    
+
     window.renderSettleLoanWizard();
 };
 
@@ -1024,19 +1024,19 @@ window.calculateSettleGold = () => {
 
     if (s.goldType === 'balls') {
         const ppb = parseFloat(s.pricePerBlade) || 0;
-        
+
         // If it's collateral, we already have totalBlades, don't recalculate it from grams
         if (s.settleMethod !== 'collateral' || !s.totalBlades) {
             s.totalBlades = grams / 0.8;
         }
-        
+
         s.agreedValue = Math.floor(s.totalBlades * ppb);
-        
+
         if (document.getElementById('calc_blades')) document.getElementById('calc_blades').innerText = s.totalBlades.toFixed(4);
     } else {
         const vol = parseFloat(s.volume) || 0;
         const clp = parseFloat(s.currentLocalPrice) || 0;
-        
+
         s.pounds = truncate2(grams / 7.75);
         s.density = vol > 0 ? truncate2(grams / vol) : 0;
         if (s.density > 0) {
@@ -1045,16 +1045,16 @@ window.calculateSettleGold = () => {
             s.karat = 0;
         }
         s.agreedValue = Math.floor((s.karat * clp / 23) * s.pounds);
-        
+
         if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
         if (document.getElementById('calc_karat')) document.getElementById('calc_karat').innerText = s.karat.toFixed(2);
         if (document.getElementById('calc_pounds')) document.getElementById('calc_pounds').innerText = s.pounds.toFixed(2) + ' lbs';
     }
-    
+
     if (document.getElementById('calc_agreed_value_text')) {
-        document.getElementById('calc_agreed_value_text').innerText = 'GHS ' + s.agreedValue.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        document.getElementById('calc_agreed_value_text').innerText = 'GHS ' + s.agreedValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
-    
+
     if (document.getElementById('calc_agreed_value_input')) {
         document.getElementById('calc_agreed_value_input').value = s.agreedValue;
     }
@@ -1067,12 +1067,12 @@ window.renderSettleLoanWizard = () => {
     if (s.step === 1) {
         // Selection Phase
         const isCollateral = s.loanType === 'collateral';
-        
+
         html = `
             <div style="display: flex; flex-direction: column; gap: 24px;">
                 <div style="text-align: center;">
                     <div style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; font-weight: 600;">Outstanding Balance</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">GHS ${s.principal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--warning);">GHS ${s.principal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                 </div>
                 
                 <h3 style="margin: 0; color: var(--text-main); font-size: 1.1rem; text-align: center;">Select Settlement Method</h3>
@@ -1103,12 +1103,12 @@ window.renderSettleLoanWizard = () => {
                 </div>
             </div>
         `;
-    } 
+    }
     else if (s.step === 2) {
         // Details Phase
-        
+
         let detailsHtml = '';
-        
+
         if (s.settleMethod === 'cash') {
             detailsHtml = `
                 <div class="form-group" style="margin-bottom: 24px;">
@@ -1120,10 +1120,10 @@ window.renderSettleLoanWizard = () => {
                            window._settleWizardState.amountPaid = this.value;
                            " 
                            placeholder="Enter amount" style="font-size: 1.2rem; padding: 12px;">
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">Max allowable: GHS ${s.principal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 6px;">Max allowable: GHS ${s.principal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
                 </div>
             `;
-        } 
+        }
         else if (s.settleMethod === 'gold') {
             detailsHtml = `
                 <div style="display: flex; gap: 16px; margin-bottom: 16px;">
@@ -1185,16 +1185,16 @@ window.renderSettleLoanWizard = () => {
                 
                 <div style="background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 24px; border: 1px solid rgba(245, 158, 11, 0.3);">
                     <div style="color: var(--warning); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Calculated Value</div>
-                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="calc_agreed_value_text">GHS ${s.agreedValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="calc_agreed_value_text">GHS ${s.agreedValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span></div>
                 </div>
             `;
         }
         else if (s.settleMethod === 'collateral') {
             const c = s.collateralData;
-            
+
             const hasRefined = c && parseFloat(c.refined_grams) > 0;
             const hasBalls = c && parseFloat(c.balls_grams) > 0;
-            
+
             if (!hasRefined && !hasBalls) {
                 detailsHtml = `
                     <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 24px; border-radius: 8px; text-align: center; margin-bottom: 24px;">
@@ -1240,7 +1240,7 @@ window.renderSettleLoanWizard = () => {
                         ` : ''}
                     </div>
                 `;
-                
+
                 // Show inputs based on selection
                 if (s.goldType === 'refined' && hasRefined) {
                     detailsHtml += `
@@ -1285,16 +1285,16 @@ window.renderSettleLoanWizard = () => {
                         </div>
                     `;
                 }
-                
+
                 detailsHtml += `
                     <div style="background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 24px; border: 1px solid rgba(245, 158, 11, 0.3);">
                         <div style="color: var(--warning); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Calculated Value</div>
-                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="calc_agreed_value_text">GHS ${s.agreedValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-main);"><span id="calc_agreed_value_text">GHS ${s.agreedValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span></div>
                     </div>
                 `;
             }
         }
-        
+
         html = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <h3 style="margin: 0; color: var(--text-main); font-size: 1.1rem;">Provide Details (${s.settleMethod === 'cash' ? 'Cash' : s.settleMethod === 'gold' ? 'Walk-in Gold' : 'Collateral'})</h3>
@@ -1322,17 +1322,17 @@ window.renderSettleLoanWizard = () => {
     }
     else if (s.step === 3) {
         // Summary & Confirmation Phase
-        
+
         let displayAmount = 0;
         let diff = 0;
-        if(s.settleMethod === 'cash') {
+        if (s.settleMethod === 'cash') {
             displayAmount = parseFloat(s.amountPaid);
             diff = s.principal - displayAmount;
         } else {
             displayAmount = parseFloat(s.agreedValue);
             diff = s.principal - displayAmount; // if < 0, customer gets change
         }
-        
+
         html = `
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <h3 style="margin: 0; text-align: center; color: var(--text-main); font-size: 1.1rem;">Confirm Settlement</h3>
@@ -1345,12 +1345,12 @@ window.renderSettleLoanWizard = () => {
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                         <span style="color: var(--text-muted); font-weight: 500;">Original Balance</span>
-                        <span style="font-weight: 600;">GHS ${s.principal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <span style="font-weight: 600;">GHS ${s.principal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                         <span style="color: var(--text-muted); font-weight: 500;">Value Provided</span>
-                        <span style="font-weight: 700; color: var(--success);">GHS ${displayAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                        <span style="font-weight: 700; color: var(--success);">GHS ${displayAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
                     
                     ${(s.settleMethod === 'gold' || s.settleMethod === 'collateral') ? `
@@ -1365,7 +1365,7 @@ window.renderSettleLoanWizard = () => {
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <span style="color: var(--text-muted); font-weight: 500;">Current Local Price</span>
-                                <span style="font-weight: 600;">GHS ${parseFloat(s.currentLocalPrice).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span style="font-weight: 600;">GHS ${parseFloat(s.currentLocalPrice).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <span style="color: var(--text-muted); font-weight: 500;">Pounds (Lbs)</span>
@@ -1387,7 +1387,7 @@ window.renderSettleLoanWizard = () => {
                             </div>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <span style="color: var(--text-muted); font-weight: 500;">Price per Blade</span>
-                                <span style="font-weight: 600;">GHS ${parseFloat(s.pricePerBlade).toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                                <span style="font-weight: 600;">GHS ${parseFloat(s.pricePerBlade).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                             </div>
                         ` : ''}
                     ` : ''}
@@ -1395,7 +1395,7 @@ window.renderSettleLoanWizard = () => {
                     <div style="display: flex; justify-content: space-between; margin-top: 16px; border-top: 2px solid var(--border); padding-top: 16px;">
                         <span style="color: var(--text-main); font-weight: 600;">${diff < 0 ? 'Change Due to Customer' : 'Remaining Balance'}</span>
                         <span style="font-weight: 700; font-size: 1.1rem; color: ${diff < 0 ? 'var(--info)' : 'var(--warning)'};">
-                            GHS ${Math.abs(diff).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                            GHS ${Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
                     </div>
                     
@@ -1428,14 +1428,14 @@ window.renderSettleLoanWizard = () => {
 window.submitSettleLoanWizard = async () => {
     const s = window._settleWizardState;
     const btn = document.getElementById('btn-submit-settle');
-    if(btn) {
+    if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
     }
-    
+
     let endpoint = '';
     let payload = {};
-    
+
     if (s.settleMethod === 'cash') {
         endpoint = '/loans/repay_cash.php';
         payload = {
@@ -1453,7 +1453,7 @@ window.submitSettleLoanWizard = async () => {
             weight_grams: parseFloat(s.grams),
             gold_value_ghs: parseFloat(s.agreedValue),
             comment: s.notes,
-            
+
             current_local_price: parseFloat(s.currentLocalPrice) || null,
             volume: parseFloat(s.volume) || null,
             pounds: s.pounds,
@@ -1471,7 +1471,7 @@ window.submitSettleLoanWizard = async () => {
             grams_to_use: parseFloat(s.grams),
             agreed_value_ghs: parseFloat(s.agreedValue),
             comment: s.notes,
-            
+
             // Re-submit collateral details for record keeping
             current_local_price: parseFloat(s.currentLocalPrice) || null,
             volume: parseFloat(s.volume) || null,
@@ -1490,7 +1490,7 @@ window.submitSettleLoanWizard = async () => {
         window.viewCustomer(s.customerId); // Refresh profile
     } catch (error) {
         window.showToast(error.message, 'error');
-        if(btn) {
+        if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Process Settlement';
         }
@@ -1505,7 +1505,7 @@ window.confirmClearHistory = (customerId, returnRoute) => {
             </div>
             <h3 style="margin: 0 0 12px 0; font-size: 1.2rem; color: var(--text-main);">Clear Customer History?</h3>
             <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
-                This will soft-delete and hide all of the customer's <strong>Settled Loans</strong> and <strong>Past Purchases</strong> from their profile and recalculate their stats, giving them a clean slate. Active unpaid loans and vault balances will not be affected. 
+                This will soft-delete and hide all of the customer's <strong>Settled Loans</strong> and <strong>Past Purchases</strong> from their profile and recalculate their stats, giving them a clean slate. Active unpaid loans and <strong>Safe Keep gold</strong> will remain completely intact. 
             </p>
             <div style="display: flex; gap: 12px; justify-content: center;">
                 <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="flex: 1;">Cancel</button>
@@ -1527,7 +1527,7 @@ window.submitClearHistory = async (customerId, returnRoute, btnElement) => {
         const res = await window.api.post('/customers/clear_history.php', { customer_id: customerId });
         window.showToast(res.message || 'History cleared successfully', 'success');
         window.closeModal();
-        
+
         // Refresh the current customer view
         if (window.viewCustomer) {
             window.viewCustomer(customerId, returnRoute);
@@ -1548,8 +1548,23 @@ window._safeKeepState = {
 };
 
 window.setSafeKeepGoldType = (type) => {
-    window._safeKeepState.goldType = type;
-    window.renderSafeKeepModal();
+    if (window._safeKeepState.goldType !== type) {
+        window._safeKeepState.goldType = type;
+        window._safeKeepState.grams = '';
+        window._safeKeepState.volume = '';
+        window._safeKeepState.blades = '';
+        window.renderSafeKeepModal();
+    }
+};
+
+window.calculateSafeKeepValues = () => {
+    const s = window._safeKeepState;
+    const grams = parseFloat(s.grams) || 0;
+    if (s.goldType === 'balls') {
+        s.blades = grams / 0.8;
+        const domBlades = document.getElementById('safeKeepBlades');
+        if (domBlades) domBlades.value = s.blades.toFixed(4);
+    }
 };
 
 window.openCustomerSafeKeepModal = (customerId) => {
@@ -1613,7 +1628,7 @@ window.renderSafeKeepModal = () => {
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.85rem;">Weight (Grams) <span style="color:var(--danger);">*</span></label>
                     <div style="position: relative;">
-                        <input type="number" step="0.01" min="0" id="safeKeepWeight" name="weight_grams" class="form-control" required style="width: 100%; padding: 14px 16px; padding-right: 40px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1.05rem;" placeholder="0.00" value="${s.grams}" oninput="window._safeKeepState.grams = this.value">
+                        <input type="number" step="0.01" min="0" id="safeKeepWeight" name="weight_grams" class="form-control" required style="width: 100%; padding: 14px 16px; padding-right: 40px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1.05rem;" placeholder="0.00" value="${s.grams}" oninput="window._safeKeepState.grams = this.value; window.calculateSafeKeepValues()">
                         <span style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1rem; font-weight: 700;">g</span>
                     </div>
                 </div>
@@ -1670,7 +1685,7 @@ window.submitSafeKeepForm = async (e, customerId) => {
         const res = await window.api.post('/keepers/deposit.php', data);
         window.showToast(res.message || 'Gold safely kept in vault', 'success');
         window.closeModal();
-        
+
         // Refresh customer view (pass current hash as return route if available)
         const hash = window.location.hash.replace('#', '');
         if (window.viewCustomer) {
@@ -1684,19 +1699,20 @@ window.submitSafeKeepForm = async (e, customerId) => {
 };
 
 window.openVaultBreakdownModal = (data) => {
-    const collateral = data.collateral_gold || {balls_grams:0, refined_grams:0};
-    const safeKeep = data.safe_keep_gold || {balls_grams:0, refined_grams:0};
+    const collateral = data.collateral_gold || { balls_grams: 0, refined_grams: 0 };
+    const safeKeep = data.safe_keep_gold || { balls_grams: 0, refined_grams: 0 };
     const customerId = data.profile.id;
     const returnRoute = window.location.hash.replace('#', '');
-    
+
     // Calculate values safely
     const cBalls = parseFloat(collateral.balls_grams) || 0;
     const cRefined = parseFloat(collateral.refined_grams) || 0;
-    
+
     const skBalls = parseFloat(safeKeep.balls_grams) || 0;
     const skBallsBlades = parseFloat(safeKeep.balls_blades) || 0;
     const skRefined = parseFloat(safeKeep.refined_grams) || 0;
-    
+    const skRefinedVolume = parseFloat(safeKeep.refined_volume) || 0;
+
     const html = `
         <div style="display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; padding: 10px;">
             <div style="background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
@@ -1743,7 +1759,7 @@ window.openVaultBreakdownModal = (data) => {
                         </div>
                         <div>
                             ${skRefined > 0 ? `
-                                <button class="btn btn-primary" style="background: #f97316; border: none; padding: 6px 12px; font-size: 0.8rem;" onclick="window.closeModal(); window.openSellSafeKeepModal(${customerId}, 'refined', ${skRefined}, 0)">Sell</button>
+                                <button class="btn btn-primary" style="background: #f97316; border: none; padding: 6px 12px; font-size: 0.8rem;" onclick="window.closeModal(); window.openSellSafeKeepModal(${customerId}, 'refined', ${skRefined}, ${skRefinedVolume})">Sell</button>
                             ` : '<span style="color: #fdba74; font-size: 0.85rem;">None</span>'}
                         </div>
                     </div>
@@ -1751,10 +1767,61 @@ window.openVaultBreakdownModal = (data) => {
             </div>
         </div>
     `;
-    window.openModal('Vault Breakdown', html, {width: '600px'});
+    window.openModal('Vault Breakdown', html, { width: '600px' });
 };
 
-window.openSellSafeKeepModal = (customerId, goldType, maxGrams, totalBlades) => {
+window.calcSellSafeKeepPayout = (formId, goldType) => {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    const localPrice = parseFloat(form.querySelector('[name="local_price"]').value) || 0;
+    const grams = parseFloat(form.querySelector('[name="total_grams_sold"]').value) || 0;
+    let payout = 0;
+
+    if (goldType === 'balls') {
+        const blades = parseFloat(form.querySelector('[name="total_blades"]').value) || 0;
+        payout = Math.floor(blades * localPrice);
+    } else {
+        const volume = parseFloat(form.querySelector('[name="volume"]').value) || 0;
+
+        let density = 0, karat = 0, pounds = 0;
+        const truncate2 = (num) => Math.floor(num * 100) / 100;
+
+        if (grams > 0) {
+            pounds = truncate2(grams / 7.75);
+            form.querySelector('[name="pounds"]').value = pounds.toFixed(2);
+        } else {
+            form.querySelector('[name="pounds"]').value = '';
+        }
+
+        if (grams > 0 && volume > 0) {
+            density = truncate2(grams / volume);
+            form.querySelector('[name="density"]').value = density.toFixed(2);
+
+            if (density > 0) {
+                karat = truncate2(((density - 10.51) * 52.838) / density);
+                form.querySelector('[name="karat"]').value = karat.toFixed(2);
+            } else {
+                form.querySelector('[name="karat"]').value = '';
+            }
+        } else {
+            form.querySelector('[name="density"]').value = '';
+            form.querySelector('[name="karat"]').value = '';
+        }
+
+        if (karat > 0 && pounds > 0 && localPrice > 0) {
+            payout = Math.floor(pounds * (karat / 23) * localPrice);
+        }
+    }
+
+    if (payout > 0) {
+        form.querySelector('[name="total_payout_ghs"]').value = payout.toFixed(2);
+    } else {
+        form.querySelector('[name="total_payout_ghs"]').value = '';
+    }
+};
+
+window.openSellSafeKeepModal = (customerId, goldType, maxGrams, maxSecondaryUnit) => {
     const formId = `form-sell-safekeep-${Date.now()}`;
     const html = `
         <form id="${formId}" onsubmit="window.submitSellSafeKeep(event, ${customerId}, '${goldType}', ${maxGrams})" style="display: flex; flex-direction: column; gap: 20px;">
@@ -1766,35 +1833,41 @@ window.openSellSafeKeepModal = (customerId, goldType, maxGrams, totalBlades) => 
 
             <div class="form-group">
                 <label>Grams to Sell (Max ${maxGrams.toFixed(2)}g)</label>
-                <input type="number" step="0.01" min="0.01" max="${maxGrams}" name="total_grams_sold" class="form-control form-control-lg" required placeholder="0.00" oninput="if(this.value > ${maxGrams}) this.value = ${maxGrams};">
+                <input type="number" step="0.01" min="0.01" max="${maxGrams}" name="total_grams_sold" class="form-control form-control-lg" required placeholder="0.00" oninput="if(this.value > ${maxGrams}) this.value = ${maxGrams}; window.calcSellSafeKeepPayout('${formId}', '${goldType}')">
             </div>
 
             ${goldType === 'balls' ? `
             <div class="form-group">
                 <label>Total Blades Represented</label>
-                <input type="number" step="0.01" min="0" max="${totalBlades || ''}" name="total_blades" class="form-control" placeholder="0.00">
+                <input type="number" step="0.01" min="0" max="${totalBlades || ''}" name="total_blades" class="form-control" placeholder="0.00" oninput="window.calcSellSafeKeepPayout('${formId}', '${goldType}')">
                 <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Optional. Note: Max available blades is ${totalBlades}</div>
             </div>
-            ` : ''}
+            ` :
+            `<div class="form-group">
+                    <label>Volume</label>
+                    <input type="number" step="0.01" min="0" max="${maxSecondaryUnit || ''}" name="volume" class="form-control" placeholder="0.00" required oninput="window.calcSellSafeKeepPayout('${formId}', '${goldType}')">
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Optional. Note: Max available volume is ${maxSecondaryUnit}</div>
+                </div>
+            `}
 
             <div class="form-group">
                 <label>Local Price (₵)</label>
-                <input type="number" step="0.01" name="local_price" class="form-control" placeholder="0.00">
+                <input type="number" step="0.01" name="local_price" class="form-control" placeholder="0.00" oninput="window.calcSellSafeKeepPayout('${formId}', '${goldType}')">
             </div>
             
             ${goldType === 'refined' ? `
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex:1;">
                     <label>Density</label>
-                    <input type="number" step="0.01" name="density" class="form-control">
+                    <input type="number" step="0.01" name="density" class="form-control" readonly style="background: #f1f5f9; cursor: not-allowed;">
                 </div>
                 <div class="form-group" style="flex:1;">
                     <label>Karat</label>
-                    <input type="number" step="0.01" name="karat" class="form-control">
+                    <input type="number" step="0.01" name="karat" class="form-control" readonly style="background: #f1f5f9; cursor: not-allowed;">
                 </div>
                 <div class="form-group" style="flex:1;">
                     <label>Pounds (£)</label>
-                    <input type="number" step="0.01" name="pounds" class="form-control">
+                    <input type="number" step="0.01" name="pounds" class="form-control" readonly style="background: #f1f5f9; cursor: not-allowed;">
                 </div>
             </div>
             ` : ''}
@@ -1810,7 +1883,7 @@ window.openSellSafeKeepModal = (customerId, goldType, maxGrams, totalBlades) => 
             </div>
         </form>
     `;
-    window.openModal(`Liquidate ${goldType === 'balls' ? 'Balls' : 'Refined'}`, html, {width: '500px'});
+    window.openModal(`Liquidate ${goldType === 'balls' ? 'Balls' : 'Refined'}`, html, { width: '500px' });
 };
 
 window.submitSellSafeKeep = async (e, customerId, goldType, maxGrams) => {
@@ -1820,7 +1893,7 @@ window.submitSellSafeKeep = async (e, customerId, goldType, maxGrams) => {
     try {
         const formData = new FormData(e.target);
         const soldGrams = parseFloat(formData.get('total_grams_sold'));
-        
+
         if (soldGrams > maxGrams) {
             throw new Error(`Cannot sell more than available (${maxGrams}g)`);
         }
@@ -1835,7 +1908,7 @@ window.submitSellSafeKeep = async (e, customerId, goldType, maxGrams) => {
             total_payout_ghs: formData.get('total_payout_ghs'),
             local_price: formData.get('local_price')
         };
-        
+
         if (goldType === 'balls') {
             data.total_blades = formData.get('total_blades');
         } else {
@@ -1847,7 +1920,7 @@ window.submitSellSafeKeep = async (e, customerId, goldType, maxGrams) => {
         const res = await window.api.post('/keepers/liquidate.php', data);
         window.showToast(res.message || 'Sale successful', 'success');
         window.closeModal();
-        
+
         const hash = window.location.hash.replace('#', '');
         if (window.viewCustomer) {
             window.viewCustomer(customerId, hash.includes('view-customer') ? 'customers' : hash);
