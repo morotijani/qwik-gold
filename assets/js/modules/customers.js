@@ -1839,8 +1839,8 @@ window.openSellSafeKeepModal = (customerId, goldType, maxGrams, maxSecondaryUnit
             ${goldType === 'balls' ? `
             <div class="form-group">
                 <label>Total Blades Represented</label>
-                <input type="number" step="0.01" min="0" max="${totalBlades || ''}" name="total_blades" class="form-control" placeholder="0.00" oninput="window.calcSellSafeKeepPayout('${formId}', '${goldType}')">
-                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Optional. Note: Max available blades is ${totalBlades}</div>
+                <input type="number" step="0.01" min="0" max="${maxSecondaryUnit || ''}" name="total_blades" class="form-control" placeholder="0.00" oninput="window.calcSellSafeKeepPayout('${formId}', '${goldType}')">
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">Optional. Note: Max available blades is ${maxSecondaryUnit}</div>
             </div>
             ` :
             `<div class="form-group">

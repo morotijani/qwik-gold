@@ -73,7 +73,7 @@ try {
     $currentPrincipal = (float)$loan['principal_amount'];
     
     // 2. Fetch keeper's current hold records in FIFO order and lock them for update
-    $stmt = $pdo->prepare("SELECT id, weight_grams FROM gold_vault WHERE customer_id = ? AND gold_type = ? AND ownership_status = 'keeper_held' ORDER BY id ASC FOR UPDATE");
+    $stmt = $pdo->prepare("SELECT id, weight_grams FROM gold_vault WHERE customer_id = ? AND gold_type = ? AND ownership_status = 'keeper_held' AND current_location = 'office_vault' ORDER BY id ASC FOR UPDATE");
     $stmt->execute([$customerId, $goldType]);
     $vaultRecords = $stmt->fetchAll();
 
