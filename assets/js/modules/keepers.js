@@ -935,22 +935,51 @@ window.confirmKeeperLiquidate = async (customerId) => {
     }
 };
 
-window.openCreateKeeperModal = () => {
+window.openCreateKeeperModal = async () => {
     document.getElementById('modal-title').textContent = 'Register New Keeper';
     const modalBody = document.getElementById('modal-body');
 
-    modalBody.innerHTML = `
-        <form id="create-keeper-form" onsubmit="window.submitCreateKeeper(event)">
-            <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                    <span class="material-symbols-outlined" style="font-size: 1.6rem;">how_to_reg</span>
-                </div>
-                <div>
-                    <div style="font-size: 0.95rem; font-weight: 800; color: #2563eb; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Register Keeper</div>
-                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Create a profile to securely track keeper deposits and liquidations.</div>
-                </div>
-            </div>
+    modalBody.innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin" style="font-size: 2rem;">sync</span><p>Loading customers...</p></div>';
+    document.getElementById('global-modal').classList.add('active');
 
+    let customers = [];
+    try {
+        const res = await window.api.get('/customers/list.php');
+        customers = res.filter(c => c.type !== 'keeper');
+    } catch(err) {
+        console.error('Failed to fetch customers:', err);
+    }
+    
+    let optionsHtml = '<option value="">-- Select an existing customer --</option>';
+    customers.forEach(c => {
+        optionsHtml += `<option value="${c.id}">${c.name} (${c.customer_uid})</option>`;
+    });
+
+    modalBody.innerHTML = `
+        <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                <span class="material-symbols-outlined" style="font-size: 1.6rem;">how_to_reg</span>
+            </div>
+            <div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #2563eb; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Register Keeper</div>
+                <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Create a new profile or select an existing customer to upgrade them to a Keeper.</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px dashed var(--border);">
+            <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Select Existing Customer</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="existing_customer_select" class="form-control" style="flex: 1;">
+                    ${optionsHtml}
+                </select>
+                <button type="button" class="btn btn-outline" onclick="window.submitUpgradeKeeper()" id="btnUpgradeKeeper" style="white-space: nowrap;">
+                    <span class="material-symbols-outlined">upgrade</span> Add to Keepers
+                </button>
+            </div>
+        </div>
+
+        <form id="create-keeper-form" onsubmit="window.submitCreateKeeper(event)">
+            <h4 style="margin-bottom: 15px; color: var(--text-main); font-weight: 700;">Or Create New Profile</h4>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                 <div class="form-group" style="margin: 0;">
                     <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Full Name <span style="color: var(--danger);">*</span></label>
@@ -1008,8 +1037,30 @@ window.openCreateKeeperModal = () => {
             </button>
         </form>
     `;
+};
 
-    document.getElementById('global-modal').classList.add('active');
+window.submitUpgradeKeeper = async () => {
+    const select = document.getElementById('existing_customer_select');
+    const customerId = select.value;
+    if (!customerId) {
+        window.showToast('Please select a customer first', 'error');
+        return;
+    }
+    const btn = document.getElementById('btnUpgradeKeeper');
+    const ogHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span>...';
+
+    try {
+        await window.api.post('/customers/make_keeper.php', { customer_id: customerId });
+        window.showToast('Customer added to Keepers successfully', 'success');
+        window.closeModal();
+        window.dispatchEvent(new Event('hashchange')); // Refresh list
+    } catch (err) {
+        window.showToast(err.message || 'Error upgrading customer', 'error');
+        btn.disabled = false;
+        btn.innerHTML = ogHtml;
+    }
 };
 
 window.submitCreateKeeper = async (event) => {

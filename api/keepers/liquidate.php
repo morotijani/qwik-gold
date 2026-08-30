@@ -81,8 +81,9 @@ try {
 
         if ($recordGrams <= $remainingToSell) {
             // Full record converted to company ownership
-            $updateStmt = $pdo->prepare("UPDATE gold_vault SET ownership_status = 'company_owned' WHERE id = ?");
-            $updateStmt->execute([$recordId]);
+            $proportionalValue = ($recordGrams / $totalGramsSold) * $totalPayoutGhs;
+            $updateStmt = $pdo->prepare("UPDATE gold_vault SET ownership_status = 'company_owned', guessed_value_ghs = ? WHERE id = ?");
+            $updateStmt->execute([$proportionalValue, $recordId]);
             
             $remainingToSell -= $recordGrams;
         } else {
@@ -92,8 +93,9 @@ try {
             $updateStmt->execute([$newKeeperGrams, $recordId]);
 
             // Insert new company_owned record for the converted amount
-            $insertStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id) VALUES (?, 'company_owned', ?, 'office_vault', ?)");
-            $insertStmt->execute([$goldType, $remainingToSell, $customerId]);
+            $proportionalValue = ($remainingToSell / $totalGramsSold) * $totalPayoutGhs;
+            $insertStmt = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id, guessed_value_ghs) VALUES (?, 'company_owned', ?, 'office_vault', ?, ?)");
+            $insertStmt->execute([$goldType, $remainingToSell, $customerId, $proportionalValue]);
 
             $remainingToSell = 0;
             break; // Done

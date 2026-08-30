@@ -106,7 +106,7 @@ try {
     $insertLedger = $pdo->prepare("INSERT INTO capital_ledger (transaction_type, amount_ghs, running_balance, reference_id) VALUES ('out_sale_revenue', ?, ?, ?)");
     $insertLedger->execute([$actualCash, $newBalance, $newMasterId]);
 
-    log_activity($pdo, $handlerId, 'MERGE_COMPLETE_SALE', 'market_sales', $newMasterId, ['merged_ids' => $saleIds], ['new_status' => 'completed', 'actual_cash' => $actualCash]);
+    log_activity($pdo, $current_user_id, 'MERGE_COMPLETE_SALE', 'market_sales', $newMasterId, ['merged_ids' => $saleIds], ['new_status' => 'completed', 'actual_cash' => $actualCash]);
 
     $pdo->commit();
 
