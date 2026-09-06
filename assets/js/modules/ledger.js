@@ -189,7 +189,7 @@ window.addEventListener('route-changed', async (e) => {
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Date Sold</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Vault Est. Grams</th>
-                                    <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Est. Amount</th>
+                                    <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Capital Spent</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Handler</th>
                                     <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Brought In (GHS)</th>
                                 </tr>
@@ -256,7 +256,7 @@ window.addEventListener('route-changed', async (e) => {
                                         </td>
                                         <td style="padding: 16px; color: var(--text-main); font-weight: 600;">${Number(s.total_grams).toFixed(4)}g</td>
                                         <td style="padding: 16px; font-weight: 500; text-align: right; color: var(--text-muted);">
-                                            ${Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            ${Number(s.total_cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </td>
                                         <td style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">
                                             <div style="display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
