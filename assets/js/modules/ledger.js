@@ -398,6 +398,10 @@ window.addEventListener('route-changed', async (e) => {
                 estimated_volume: preselectedGoldType === 'balls' ? 0 : refVol,
                 estimated_blades: preselectedGoldType === 'balls' ? ballsBlades : 0,
 
+                // For balls conversion form
+                converted_refined_grams: '',
+                converted_refined_volume: '',
+
                 estimated_local_price: '',
                 estimated_cash: 0,
                 pounds: 0,
@@ -414,17 +418,25 @@ window.addEventListener('route-changed', async (e) => {
     window.calcInitiateSale = () => {
         const s = window._initiateSaleState;
         const truncate2 = (num) => Math.floor(num * 100) / 100;
-        const grams = parseFloat(s.estimated_grams) || 0;
         const clp = parseFloat(s.estimated_local_price) || 0;
 
         if (s.goldType === 'balls') {
-            const blades = parseFloat(s.estimated_blades) || 0;
-            s.estimated_cash = Math.floor(blades * clp);
+            const rGrams = parseFloat(s.converted_refined_grams) || 0;
+            const rVol = parseFloat(s.converted_refined_volume) || 0;
+            
+            s.pounds = truncate2(rGrams / 7.75);
+            s.density = rVol > 0 ? truncate2(rGrams / rVol) : 0;
+            s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
+            s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
 
+            if (document.getElementById('calc_pounds')) document.getElementById('calc_pounds').innerText = s.pounds.toFixed(2) + ' lbs';
+            if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
+            if (document.getElementById('calc_karat')) document.getElementById('calc_karat').innerText = s.karat.toFixed(2);
             if (document.getElementById('calc_est_cash_text')) {
                 document.getElementById('calc_est_cash_text').innerText = 'GHS ' + s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
             }
         } else {
+            const grams = parseFloat(s.estimated_grams) || 0;
             const vol = parseFloat(s.estimated_volume) || 0;
             s.pounds = truncate2(grams / 7.75);
             s.density = vol > 0 ? truncate2(grams / vol) : 0;
@@ -451,7 +463,6 @@ window.addEventListener('route-changed', async (e) => {
 
     window.renderInitiateSaleWizard = () => {
         const s = window._initiateSaleState;
-
         const currentCostBasis = s.goldType === 'balls' ? s.balls_cost_basis : s.refined_cost_basis;
         const estProfit = s.estimated_cash - currentCostBasis;
 
@@ -479,8 +490,8 @@ window.addEventListener('route-changed', async (e) => {
                             </span>
                         </div>
                         <div>
-                            <div style="font-weight: 600; color: var(--text-main); font-size: 1.1rem; margin-bottom: 4px;">Gold Balls</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">Unrefined / Sponge</div>
+                            <div style="font-weight: 600; color: var(--text-main); font-size: 1.1rem; margin-bottom: 4px;">Convert Gold Balls</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Melt to Refined Gold</div>
                             <div style="font-size: 0.8rem; font-weight: 600; color: ${s.goldType === 'balls' ? '#d97706' : 'var(--text-muted)'}; margin-top: 8px;">Vault: ${Number(s.balls_grams).toFixed(2)}g</div>
                         </div>
                     </div>
@@ -505,7 +516,7 @@ window.addEventListener('route-changed', async (e) => {
                         </div>
                         <div>
                             <div style="font-weight: 600; color: var(--text-main); font-size: 1.1rem; margin-bottom: 4px;">Refined Gold</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">Processed Bars</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Direct Market Sale</div>
                             <div style="font-size: 0.8rem; font-weight: 600; color: ${s.goldType === 'refined' ? '#d97706' : 'var(--text-muted)'}; margin-top: 8px;">Vault: ${Number(s.refined_grams).toFixed(2)}g</div>
                         </div>
                     </div>
@@ -513,42 +524,55 @@ window.addEventListener('route-changed', async (e) => {
             </div>
             ` : ''}
 
-            <!-- Form content directly renders here now without the balls restriction -->
             <form id="initiate-sale-form" onsubmit="window.confirmInitiateSale(event)">
+                ${s.goldType === 'balls' ? `
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>Est. Grams (Editable) <span style="color: red;">*</span></label>
+                            <input type="number" step="0.0001" min="0" value="${s.estimated_grams}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_grams = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label>Est. Blades (Editable) <span style="color: red;">*</span></label>
+                            <input type="number" step="0.0001" min="0" value="${s.estimated_blades}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_blades = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 style="margin: 24px 0 16px 0; font-size: 0.95rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px;">New Converted Refined Gold</h4>
+                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label>Refined Grams <span style="color: red;">*</span></label>
+                        <input type="number" step="0.0001" min="0" value="${s.converted_refined_grams}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.converted_refined_grams = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label>Refined Volume <span style="color: red;">*</span></label>
+                        <input type="number" step="0.0001" min="0" value="${s.converted_refined_volume}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.converted_refined_volume = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
+                    </div>
+                </div>
+                ` : `
                 <div style="display: flex; gap: 16px; margin-bottom: 16px;">
                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label>Est. Grams (Editable) <span style="color: red;">*</span></label>
                         <input type="number" step="0.0001" min="0" value="${s.estimated_grams}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_grams = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
                     </div>
-                    ${s.goldType === 'refined' ? `
                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label>Est. Volume (Editable) <span style="color: red;">*</span></label>
                         <input type="number" step="0.0001" min="0" value="${s.estimated_volume}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_volume = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
                     </div>
-                    ` : `
-                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label>Est. Blades (Editable) <span style="color: red;">*</span></label>
-                        <input type="number" step="0.0001" min="0" value="${s.estimated_blades}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_blades = this.value; window.calcInitiateSale();" class="form-control" required placeholder="0.00">
-                    </div>
-                    `}
                 </div>
+                `}
                 
                 <div class="form-group" style="margin-bottom: 16px;">
-                    <label>${s.goldType === 'balls' ? 'Price per Blade (GHS)' : 'Local Current Price (GHS)'} <span style="color: red;">*</span></label>
-                    <input type="number" step="0.01" min="0" value="${s.estimated_local_price}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_local_price = this.value; window.calcInitiateSale();" class="form-control" required placeholder="Enter estimated price">
+                    <label>Local Current Price (GHS) <span style="color: red;">*</span></label>
+                    <input type="number" step="0.01" min="0" value="${s.estimated_local_price}" oninput="if(parseFloat(this.value) < 0) this.value = Math.abs(this.value); window._initiateSaleState.estimated_local_price = this.value; window.calcInitiateSale();" class="form-control" required placeholder="Enter local current price">
                 </div>
                 
-                ${s.goldType === 'balls' ? `
-                <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid var(--border);">
-                    <div style="display: flex; justify-content: space-between;"><span>Total Blades:</span> <span style="font-weight: 600;">${Number(s.estimated_blades).toFixed(4)}</span></div>
-                </div>
-                ` : `
                 <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 16px; border: 1px solid var(--border);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Pounds:</span> <span id="calc_pounds" style="font-weight: 600;">${s.pounds.toFixed(2)} lbs</span></div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span>Density:</span> <span id="calc_density" style="font-weight: 600;">${s.density.toFixed(2)}</span></div>
                     <div style="display: flex; justify-content: space-between;"><span>Karat:</span> <span id="calc_karat" style="font-weight: 600;">${s.karat.toFixed(2)}</span></div>
                 </div>
-                `}
                 
                 <div style="background: rgba(16, 185, 129, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.2);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(16, 185, 129, 0.1);">
@@ -569,31 +593,33 @@ window.addEventListener('route-changed', async (e) => {
                 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
                     <button type="button" class="btn btn-outline" onclick="window.closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btn-initiate-sale">Initiate Sale <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">arrow_forward</span></button>
+                    <button type="submit" class="btn btn-primary" id="btn-initiate-sale">${s.goldType === 'balls' ? 'Convert Balls' : 'Initiate Sale'} <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">arrow_forward</span></button>
                 </div>
             </form>
         `;
-        window.openModal('Initiate Market Sale', html);
+        window.openModal(s.goldType === 'balls' ? 'Convert Gold Balls' : 'Initiate Market Sale', html);
     };
 
     window.confirmInitiateSale = (e) => {
         e.preventDefault();
         const s = window._initiateSaleState;
         if (!s.estimated_grams || parseFloat(s.estimated_grams) <= 0) return window.showToast('Estimated grams must be > 0', 'error');
-        if (!s.estimated_local_price || parseFloat(s.estimated_local_price) <= 0) return window.showToast('Estimated local price must be > 0', 'error');
+        if (!s.estimated_local_price || parseFloat(s.estimated_local_price) <= 0) return window.showToast('Local current price must be > 0', 'error');
 
         if (s.goldType === 'refined' && (!s.estimated_volume || parseFloat(s.estimated_volume) <= 0)) return window.showToast('Estimated volume must be > 0', 'error');
         if (s.goldType === 'balls' && (!s.estimated_blades || parseFloat(s.estimated_blades) <= 0)) return window.showToast('Estimated blades must be > 0', 'error');
+        if (s.goldType === 'balls' && (!s.converted_refined_grams || parseFloat(s.converted_refined_grams) <= 0)) return window.showToast('Refined grams must be > 0', 'error');
+        if (s.goldType === 'balls' && (!s.converted_refined_volume || parseFloat(s.converted_refined_volume) <= 0)) return window.showToast('Refined volume must be > 0', 'error');
 
         const confirmHtml = `
             <div style="text-align: center; padding: 20px 0;">
                 <span class="material-symbols-outlined" style="font-size: 48px; color: var(--warning); margin-bottom: 16px;">warning</span>
-                <h3 style="margin: 0 0 16px 0;">Confirm Market Sale</h3>
+                <h3 style="margin: 0 0 16px 0;">Confirm ${s.goldType === 'balls' ? 'Conversion' : 'Market Sale'}</h3>
                 
                 <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: left;">
-                    <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px;">Sale Summary</h4>
+                    <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px;">Summary</h4>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
-                        <div><span style="color: var(--text-muted);">Gold Type:</span> <strong style="color: var(--text-main); text-transform: capitalize;">${s.goldType}</strong></div>
+                        <div><span style="color: var(--text-muted);">Action:</span> <strong style="color: var(--text-main);">${s.goldType === 'balls' ? 'Convert to Refined' : 'Market Sale'}</strong></div>
                         <div><span style="color: var(--text-muted);">Est. Grams:</span> <strong style="color: var(--text-main);">${Number(s.estimated_grams).toFixed(4)}g</strong></div>
                         ${s.goldType === 'refined' ? `
                         <div><span style="color: var(--text-muted);">Est. Volume:</span> <strong style="color: var(--text-main);">${Number(s.estimated_volume).toFixed(4)}</strong></div>
@@ -602,6 +628,13 @@ window.addEventListener('route-changed', async (e) => {
                         `}
                         <div><span style="color: var(--text-muted);">Local Price:</span> <strong style="color: var(--text-main);">GHS ${Number(s.estimated_local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong></div>
                     </div>
+                    ${s.goldType === 'balls' ? `
+                    <h4 style="margin: 16px 0 12px 0; font-size: 0.95rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 8px;">New Refined Gold</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.9rem;">
+                        <div><span style="color: var(--text-muted);">Refined Grams:</span> <strong style="color: var(--text-main);">${Number(s.converted_refined_grams).toFixed(4)}g</strong></div>
+                        <div><span style="color: var(--text-muted);">Refined Volume:</span> <strong style="color: var(--text-main);">${Number(s.converted_refined_volume).toFixed(4)}</strong></div>
+                    </div>
+                    ` : ''}
                     <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: var(--text-muted); font-weight: 600;">Est. Total Cash:</span>
                         <span style="font-size: 1.2rem; font-weight: 800; color: var(--success);">GHS ${Number(s.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
@@ -609,11 +642,11 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
 
                 <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem;">
-                    Are you sure? This will move all current ${s.goldType} company gold from the vault to a "Pending Sale" state.
+                    ${s.goldType === 'balls' ? 'Are you sure? This will melt the balls and add the resulting refined gold to your Refined Vault.' : `Are you sure? This will process a final Market Sale for all your ${s.goldType} company gold and update your ledger balances immediately.`}
                 </p>
                 <div style="display: flex; gap: 12px; justify-content: center;">
                     <button type="button" class="btn btn-outline" onclick="window.renderInitiateSaleWizard()">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="window.submitInitiateSale()">Yes, Initiate Sale</button>
+                    <button type="button" class="btn btn-primary" onclick="window.submitInitiateSale()">Yes, ${s.goldType === 'balls' ? 'Convert' : 'Initiate Sale'}</button>
                 </div>
             </div>
         `;
@@ -623,23 +656,33 @@ window.addEventListener('route-changed', async (e) => {
     window.submitInitiateSale = async () => {
         const s = window._initiateSaleState;
         try {
-            document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span><div style="margin-top:16px;">Initiating...</div></div>';
+            document.getElementById('modal-body').innerHTML = '<div style="text-align:center; padding: 40px;"><span class="material-symbols-outlined spin">sync</span><div style="margin-top:16px;">Processing...</div></div>';
 
-            const payload = {
-                gold_type: s.goldType,
-                estimated_local_price: s.estimated_local_price,
-                total_grams: s.estimated_grams,
-                source_location: s.source_location || 'office_vault'
-            };
-            if (s.goldType === 'refined') {
-                payload.total_volume = s.estimated_volume;
+            if (s.goldType === 'balls') {
+                const payload = {
+                    balls_grams: s.estimated_grams,
+                    balls_blades: s.estimated_blades,
+                    refined_grams: s.converted_refined_grams,
+                    refined_volume: s.converted_refined_volume,
+                    local_price: s.estimated_local_price,
+                    source_location: s.source_location || 'office_vault'
+                };
+                await window.api.post('/vault/convert_balls.php', payload);
+                window.closeModal();
+                window.showToast('Gold Balls Converted successfully!', 'success');
             } else {
-                payload.total_blades = s.estimated_blades;
+                const payload = {
+                    gold_type: s.goldType,
+                    estimated_local_price: s.estimated_local_price,
+                    total_grams: s.estimated_grams,
+                    source_location: s.source_location || 'office_vault',
+                    total_volume: s.estimated_volume
+                };
+                await window.api.post('/sales/initiate_sale.php', payload);
+                window.closeModal();
+                window.showToast('Sale initiated successfully!', 'success');
             }
-
-            await window.api.post('/sales/initiate_sale.php', payload);
-            window.closeModal();
-            window.showToast('Sale initiated successfully!', 'success');
+            
             window.loadLedgerDashboard();
         } catch (error) {
             window.showToast('Error: ' + error.message, 'error');
@@ -951,6 +994,60 @@ window.addEventListener('route-changed', async (e) => {
                     <!-- Financial Summary Cards -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                         
+                        ${s.gold_type === 'balls' ? `
+                        <!-- Balls Card -->
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+                            <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="color: var(--warning); font-size: 18px;">scatter_plot</span> 
+                                Original Gold Balls
+                            </h4>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Est. Weight</span>
+                                    <span style="font-weight: 600; color: var(--text-main);">${Number(s.total_grams).toFixed(4)}g</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Est. Blades</span>
+                                    <span style="font-weight: 600; color: var(--text-main);">${Number(s.total_blades).toFixed(4)}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Total Capital Spent</div>
+                                <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">GHS ${costBasisFmt}</div>
+                            </div>
+                        </div>
+
+                        <!-- Converted Refined Card -->
+                        <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
+                            <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                                <span class="material-symbols-outlined" style="color: var(--success); font-size: 18px;">diamond</span> 
+                                Converted Refined Gold
+                            </h4>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Refined Weight</span>
+                                    <span style="font-weight: 600; color: var(--text-main);">${Number(s.actual_grams_market).toFixed(4)}g</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Refined Volume</span>
+                                    <span style="font-weight: 600; color: var(--text-main);">${Number(s.actual_volume_market).toFixed(4)}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Local Price</span>
+                                    <span style="font-weight: 600; color: var(--text-main);">GHS ${Number(s.actual_local_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="border-top: 1px dashed rgba(16, 185, 129, 0.3); padding-top: 12px;">
+                                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Est. Total Cash</div>
+                                <div style="font-size: 1.2rem; font-weight: 700; color: var(--success);">GHS ${actCashFmt}</div>
+                            </div>
+                        </div>
+                        ` : `
+                        <!-- Refined Gold Layout -->
                         <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
                             <h4 style="margin: 0 0 16px 0; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
                                 <span class="material-symbols-outlined" style="color: var(--warning); font-size: 18px;">account_balance_wallet</span> 
@@ -980,11 +1077,11 @@ window.addEventListener('route-changed', async (e) => {
                                     <span style="font-weight: 600; color: var(--text-main);">${actGramsFmt}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-muted); font-size: 0.85rem;">${s.gold_type === 'refined' ? 'Volume' : 'Blades'}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Volume</span>
                                     <span style="font-weight: 600; color: var(--text-main);">${actVolBladesFmt}</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Price ${s.gold_type === 'refined' ? '' : '/ Blade'}</span>
+                                    <span style="color: var(--text-muted); font-size: 0.85rem;">Price</span>
                                     <span style="font-weight: 600; color: var(--text-main);">${actPriceFmt}</span>
                                 </div>
                             </div>
@@ -994,7 +1091,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="font-size: 1.2rem; font-weight: 700; color: var(--success);">GHS ${actCashFmt}</div>
                             </div>
                         </div>
-                        
+                        `}
                     </div>
 
                     <!-- Variance -->

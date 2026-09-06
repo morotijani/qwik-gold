@@ -13,135 +13,126 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $jsonInput = file_get_contents('php://input');
 $data = json_decode($jsonInput, true);
 
-if (!isset($data['ownership_status'])) {
-    sendResponse('error', 'Missing ownership information', [], 400);
-}
-if (!isset($data['balls_grams_used']) || !isset($data['refined_grams_produced']) || !isset($data['refined_volume'])) {
-    sendResponse('error', 'Missing conversion metrics', [], 400);
+// Validate inputs
+$requiredFields = ['balls_grams', 'balls_blades', 'refined_grams', 'refined_volume', 'local_price'];
+foreach ($requiredFields as $field) {
+    if (!isset($data[$field])) {
+        sendResponse('error', "Missing required field: $field", [], 400);
+    }
 }
 
-$ownershipStatus = $data['ownership_status']; // 'company_owned' or 'keeper_held'
-$customerId = isset($data['customer_id']) && $data['customer_id'] !== '' && $data['customer_id'] !== null ? (int)$data['customer_id'] : null;
+$ballsGrams = (float)$data['balls_grams'];
+$ballsBlades = (float)$data['balls_blades'];
+$refinedGrams = (float)$data['refined_grams'];
+$refinedVolume = (float)$data['refined_volume'];
+$localPrice = (float)$data['local_price'];
 $sourceLocation = isset($data['source_location']) && $data['source_location'] === 'on_hold' ? 'on_hold' : 'office_vault';
 
-$ballsGramsUsed = (float)$data['balls_grams_used'];
-$refinedGrams = (float)$data['refined_grams_produced'];
-$refinedVolume = (float)$data['refined_volume'];
-
-if ($ballsGramsUsed <= 0 || $refinedGrams <= 0 || $refinedVolume <= 0) {
-    sendResponse('error', 'Metrics must be greater than zero', [], 400);
+if ($refinedGrams <= 0 || $refinedVolume <= 0 || $localPrice <= 0) {
+    sendResponse('error', 'Values must be greater than zero', [], 400);
 }
 
 try {
     $pdo->beginTransaction();
 
-    // 1. Fetch available balls for this owner
-    if ($ownershipStatus === 'company_owned') {
-        $stmt = $pdo->prepare("SELECT id, weight_grams, guessed_value_ghs FROM gold_vault WHERE ownership_status = 'company_owned' AND gold_type = 'balls' AND current_location = ? ORDER BY id ASC FOR UPDATE");
-        $stmt->execute([$sourceLocation]);
-    } else {
-        $stmt = $pdo->prepare("SELECT id, weight_grams, guessed_value_ghs FROM gold_vault WHERE ownership_status = 'keeper_held' AND customer_id = ? AND gold_type = 'balls' AND current_location = 'office_vault' ORDER BY id ASC FOR UPDATE");
-        $stmt->execute([$customerId]);
+    // 1. Fetch all company_owned balls in the chosen location
+    $sumStmt = $pdo->prepare("
+        SELECT 
+            SUM(weight_grams) as total_grams,
+            SUM(total_blades) as total_blades,
+            SUM(guessed_value_ghs) as total_cost_basis
+        FROM gold_vault 
+        WHERE ownership_status = 'company_owned' 
+        AND current_location = ? 
+        AND gold_type = 'balls'
+        FOR UPDATE
+    ");
+    $sumStmt->execute([$sourceLocation]);
+    $item = $sumStmt->fetch();
+
+    $overallGrams = (float)$item['total_grams'];
+    $overallBlades = (float)$item['total_blades'];
+    $totalCostBasis = (float)$item['total_cost_basis'];
+
+    if ($overallGrams <= 0 && $overallBlades <= 0) {
+        throw new Exception("No company_owned balls found in the $sourceLocation to convert.");
     }
     
-    $balls = $stmt->fetchAll();
+    // Override with user-provided estimates if present
+    if ($ballsGrams > 0) $overallGrams = $ballsGrams;
+    if ($ballsBlades > 0) $overallBlades = $ballsBlades;
 
-    $totalAvailable = 0;
-    foreach ($balls as $ball) {
-        $totalAvailable += (float)$ball['weight_grams'];
+    // Calculate refined cash value
+    $density = floor(($refinedGrams / $refinedVolume) * 100) / 100;
+    $karat = 0;
+    if ($density > 0) {
+        $karat = floor(((($density - 10.51) * 52.838) / $density) * 100) / 100;
     }
-
-    // Fix floating point precision issues by rounding to 4 decimal places
-    $totalAvailableRounded = round($totalAvailable, 4);
-    $ballsGramsUsedRounded = round($ballsGramsUsed, 4);
-
-    if ($totalAvailableRounded < $ballsGramsUsedRounded) {
-        throw new \Exception("Insufficient gold balls available. Requested: {$ballsGramsUsed}g, Available: {$totalAvailable}g");
-    }
-
-    // 2. Deduct from oldest balls first
-    $remainingToConvert = $ballsGramsUsedRounded;
-    $lastBallId = null; 
+    $pounds = floor(($refinedGrams / 7.75) * 100) / 100;
+    $estimatedCash = floor(($karat * $localPrice / 23) * $pounds);
     
-    $totalCostBasisUsed = 0.0;
-    $totalGuessedValueUsed = 0.0;
+    $netProfit = $estimatedCash - $totalCostBasis;
+    $saleUid = 'CNV-' . strtoupper(uniqid());
 
-    foreach ($balls as $ball) {
-        if ($remainingToConvert <= 0) break;
+    // 2. Insert into market_sales as completed conversion
+    $insertSaleStmt = $pdo->prepare("
+        INSERT INTO market_sales 
+        (sale_uid, gold_type, total_grams, total_blades, actual_grams_market, actual_volume_market, actual_local_price, actual_cash, estimated_cash, net_profit_ghs, status, notes, handler_id, is_merged) 
+        VALUES (?, 'balls', ?, ?, ?, ?, ?, ?, ?, ?, 'completed', 'Converted to Refined Gold', ?, 1)
+    ");
+    $insertSaleStmt->execute([
+        $saleUid, 
+        $overallGrams, 
+        $overallBlades, 
+        $refinedGrams,
+        $refinedVolume,
+        $localPrice,
+        $estimatedCash, // Using actual_cash to store cash value, even though no physical cash is moving
+        $estimatedCash, 
+        $netProfit,
+        $current_user_id ?? 1
+    ]);
+    $marketSaleId = $pdo->lastInsertId();
 
-        $ballId = $ball['id'];
-        $lastBallId = $ballId;
-        $ballWeight = round((float)$ball['weight_grams'], 4);
-        $ballGuessedValue = (float)($ball['guessed_value_ghs'] ?? 0);
+    // 3. Update old balls records in gold_vault to 'converted'
+    $updateStmt = $pdo->prepare("
+        UPDATE gold_vault 
+        SET current_location = 'converted', sale_id = ? 
+        WHERE ownership_status = 'company_owned' 
+        AND current_location = ?
+        AND gold_type = 'balls'
+    ");
+    $updateStmt->execute([$marketSaleId, $sourceLocation]);
 
-        if ($ballWeight <= $remainingToConvert) {
-            // Entire ball is converted
-            $totalGuessedValueUsed += $ballGuessedValue;
-
-            $upd = $pdo->prepare("UPDATE gold_vault SET current_location = 'converted' WHERE id = ?");
-            $upd->execute([$ballId]);
-            $remainingToConvert = round($remainingToConvert - $ballWeight, 4);
-        } else {
-            // Partial conversion: reduce weight of existing ball
-            $fraction = $remainingToConvert / $ballWeight;
-            $guessedUsed = $ballGuessedValue * $fraction;
-
-            $totalGuessedValueUsed += $guessedUsed;
-
-            $newWeight = round($ballWeight - $remainingToConvert, 4);
-            $newGuessed = $ballGuessedValue - $guessedUsed;
-
-            $upd = $pdo->prepare("UPDATE gold_vault SET weight_grams = ?, guessed_value_ghs = ? WHERE id = ?");
-            $upd->execute([$newWeight, $newGuessed, $ballId]);
-
-            // Create a historical "converted" record for the portion we used
-            $ins = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, current_location, customer_id, guessed_value_ghs) VALUES ('balls', ?, ?, 'converted', ?, ?)");
-            $ins->execute([$ownershipStatus, $remainingToConvert, $customerId, $guessedUsed]);
-            $lastBallId = $pdo->lastInsertId();
-
-            $remainingToConvert = 0;
-        }
-    }
-
-    // 3. Create Refined Gold Record
-    $insRefined = $pdo->prepare("INSERT INTO gold_vault (gold_type, ownership_status, weight_grams, volume, current_location, customer_id, parent_ball_id, guessed_value_ghs) VALUES ('refined', ?, ?, ?, ?, ?, ?, ?)");
-    $insRefined->execute([$ownershipStatus, $refinedGrams, $refinedVolume, $sourceLocation, $customerId, $lastBallId, $totalGuessedValueUsed]);
-    $newRefinedId = $pdo->lastInsertId();
-    
-    // 4. Update Collateral on Loan (if applicable)
-    if ($ownershipStatus === 'keeper_held' && $customerId) {
-        $loanStmt = $pdo->prepare("SELECT id, collateral_gold_type, collateral_weight FROM loans WHERE customer_id = ? AND status = 'active' AND type = 'collateral' AND collateral_gold_type = 'balls' FOR UPDATE");
-        $loanStmt->execute([$customerId]);
-        $loan = $loanStmt->fetch();
-        
-        if ($loan) {
-            $currentCollateralWeight = (float)$loan['collateral_weight'];
-            if ($ballsGramsUsed >= $currentCollateralWeight) {
-                // Completely converted
-                $updLoan = $pdo->prepare("UPDATE loans SET collateral_gold_type = 'refined', collateral_weight = ?, collateral_volume = ? WHERE id = ?");
-                $updLoan->execute([$refinedGrams, $refinedVolume, $loan['id']]);
-            } else {
-                // Partially converted
-                $newColWeight = $currentCollateralWeight - $ballsGramsUsed;
-                $updLoan = $pdo->prepare("UPDATE loans SET collateral_weight = ?, notes = CONCAT(COALESCE(notes, ''), '\\n[Partially converted ', ?, 'g to Refined]') WHERE id = ?");
-                $updLoan->execute([$newColWeight, $ballsGramsUsed, $loan['id']]);
-            }
-        }
-    }
-
-    log_activity($pdo, $current_user_id ?? null, 'CONVERT_BALLS', 'gold_vault', $newRefinedId, null, [
-        'balls_used' => $ballsGramsUsed,
-        'refined_produced' => $refinedGrams,
-        'volume' => $refinedVolume
+    // 4. Create new refined gold record in gold_vault with carried over cost basis
+    $insertRefinedStmt = $pdo->prepare("
+        INSERT INTO gold_vault 
+        (gold_type, ownership_status, weight_grams, volume, current_location, guessed_value_ghs) 
+        VALUES ('refined', 'company_owned', ?, ?, 'office_vault', ?)
+    ");
+    $insertRefinedStmt->execute([
+        $refinedGrams,
+        $refinedVolume,
+        $totalCostBasis // Transfer the cost basis so it's not double-counted later
     ]);
 
+    // 5. Log activity
+    log_activity($pdo, $current_user_id ?? 1, 'CONVERT_BALLS', 'market_sales', $marketSaleId, 
+        ['grams' => $overallGrams, 'blades' => $overallBlades], 
+        ['new_refined_grams' => $refinedGrams, 'new_refined_volume' => $refinedVolume]
+    );
+
     $pdo->commit();
-    sendResponse('success', 'Gold successfully converted to Refined', [], 200);
+
+    sendResponse('success', 'Gold Balls successfully converted to Refined Gold', [
+        'sale_id' => $marketSaleId,
+        'estimated_cash' => $estimatedCash
+    ], 200);
 
 } catch (\Exception $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    error_log("Conversion Error: " . $e->getMessage());
-    sendResponse('error', $e->getMessage(), [], 400);
+    error_log("System Error (Convert Balls): " . $e->getMessage());
+    sendResponse('error', $e->getMessage(), [], 500);
 }

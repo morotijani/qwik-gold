@@ -80,13 +80,20 @@ try {
         }
     }
 
+    // Calculate total cost basis
+    $costStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE ownership_status = 'company_owned' AND current_location = ? AND gold_type = ?");
+    $costStmt->execute([$sourceLocation, $goldType]);
+    $totalCostBasis = (float)$costStmt->fetchColumn();
+
     $saleUid = 'SALE-' . strtoupper(uniqid());
 
-    // 2. Insert into market_sales as pending
+    // 2. Insert into market_sales as completed
+    $netProfit = $estimatedCash - $totalCostBasis;
+    
     $insertSaleStmt = $pdo->prepare("
         INSERT INTO market_sales 
-        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_local_price, estimated_cash, status, notes, handler_id) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)
+        (sale_uid, gold_type, total_grams, total_volume, total_blades, estimated_local_price, estimated_cash, actual_local_price, actual_grams_market, actual_volume_market, actual_blades_market, actual_cash, net_profit_ghs, status, notes, handler_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?)
     ");
     $insertSaleStmt->execute([
         $saleUid, 
@@ -95,7 +102,13 @@ try {
         $overallVolume, 
         $overallBlades, 
         $estimatedPrice,
-        $estimatedCash, 
+        $estimatedCash,
+        $estimatedPrice, // actual_local_price
+        $overallGrams,   // actual_grams_market
+        $overallVolume,  // actual_volume_market
+        $overallBlades,  // actual_blades_market
+        $estimatedCash,  // actual_cash
+        $netProfit,
         $data['notes'] ?? '',
         $current_user_id ?? null
     ]);
@@ -110,6 +123,16 @@ try {
         AND gold_type = ?
     ");
     $updateStmt->execute([$marketSaleId, $sourceLocation, $goldType]);
+
+    // 4. Inject into capital_ledger because it is immediately completed
+    $balanceStmt = $pdo->query("SELECT running_balance FROM capital_ledger ORDER BY id DESC LIMIT 1 FOR UPDATE");
+    $lastLedger = $balanceStmt->fetch();
+    $currentBalance = $lastLedger ? (float)$lastLedger['running_balance'] : 0.0;
+    
+    $newBalance = $currentBalance + $estimatedCash;
+
+    $insertLedger = $pdo->prepare("INSERT INTO capital_ledger (transaction_type, amount_ghs, running_balance, reference_id) VALUES ('out_sale_revenue', ?, ?, ?)");
+    $insertLedger->execute([$estimatedCash, $newBalance, $marketSaleId]);
 
     log_activity($pdo, $current_user_id ?? null, 'INITIATE_SALE', 'market_sales', $marketSaleId, null, ['gold_type' => $goldType, 'estimated_cash' => $estimatedCash]);
 
