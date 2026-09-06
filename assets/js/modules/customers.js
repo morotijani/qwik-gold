@@ -1097,7 +1097,14 @@ window.renderSettleLoanWizard = () => {
                          style="background: white; border: 2px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;"
                          onmouseover="this.style.borderColor='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--border)'">
                         <span class="material-symbols-outlined" style="font-size: 32px; color: var(--gold-primary); margin-bottom: 12px; display: block;">key</span>
-                        <div style="font-weight: 600; color: var(--text-main);">Vault Collateral</div>
+                        <div style="font-weight: 600; color: var(--text-main);">Offset Loan</div>
+                    </div>
+                    
+                    <div onclick="window._settleWizardState.settleMethod = 'sell_collateral'; window._settleWizardState.step = 2; window.renderSettleLoanWizard();" 
+                         style="background: white; border: 2px solid var(--border); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;"
+                         onmouseover="this.style.borderColor='#8b5cf6'" onmouseout="this.style.borderColor='var(--border)'">
+                        <span class="material-symbols-outlined" style="font-size: 32px; color: #8b5cf6; margin-bottom: 12px; display: block;">sell</span>
+                        <div style="font-weight: 600; color: var(--text-main);">Sell Collateral (Keep Loan)</div>
                     </div>
                     ` : ''}
                 </div>
@@ -1189,7 +1196,7 @@ window.renderSettleLoanWizard = () => {
                 </div>
             `;
         }
-        else if (s.settleMethod === 'collateral') {
+        else if (s.settleMethod === 'collateral' || s.settleMethod === 'sell_collateral') {
             const c = s.collateralData;
 
             const hasRefined = c && parseFloat(c.refined_grams) > 0;
@@ -1297,7 +1304,7 @@ window.renderSettleLoanWizard = () => {
 
         html = `
             <div style="display: flex; flex-direction: column; gap: 16px;">
-                <h3 style="margin: 0; color: var(--text-main); font-size: 1.1rem;">Provide Details (${s.settleMethod === 'cash' ? 'Cash' : s.settleMethod === 'gold' ? 'Walk-in Gold' : 'Collateral'})</h3>
+                <h3 style="margin: 0; color: var(--text-main); font-size: 1.1rem;">Provide Details (${s.settleMethod === 'cash' ? 'Cash' : s.settleMethod === 'gold' ? 'Walk-in Gold' : s.settleMethod === 'sell_collateral' ? 'Sell Collateral' : 'Offset Collateral'})</h3>
                 
                 ${detailsHtml}
                 
@@ -1310,8 +1317,8 @@ window.renderSettleLoanWizard = () => {
                     <button class="btn btn-outline" style="flex: 1;" onclick="window._settleWizardState.step = 1; window.renderSettleLoanWizard();">Back</button>
                     <button class="btn btn-primary" style="flex: 2; ${s.settleMethod === 'cash' ? 'background: var(--text-main); border-color: var(--text-main);' : ''}" onclick="
                         if(window._settleWizardState.settleMethod === 'cash' && (!window._settleWizardState.amountPaid || parseFloat(window._settleWizardState.amountPaid) <= 0)) return window.showToast('Enter valid amount', 'error');
-                        if((window._settleWizardState.settleMethod === 'gold' || window._settleWizardState.settleMethod === 'collateral') && (!window._settleWizardState.grams || parseFloat(window._settleWizardState.grams) <= 0)) return window.showToast('Enter valid grams or select collateral', 'error');
-                        if((window._settleWizardState.settleMethod === 'gold' || window._settleWizardState.settleMethod === 'collateral') && (!window._settleWizardState.agreedValue || parseFloat(window._settleWizardState.agreedValue) <= 0)) return window.showToast('Enter valid price to compute value', 'error');
+                        if((window._settleWizardState.settleMethod === 'gold' || window._settleWizardState.settleMethod === 'collateral' || window._settleWizardState.settleMethod === 'sell_collateral') && (!window._settleWizardState.grams || parseFloat(window._settleWizardState.grams) <= 0)) return window.showToast('Enter valid grams or select collateral', 'error');
+                        if((window._settleWizardState.settleMethod === 'gold' || window._settleWizardState.settleMethod === 'collateral' || window._settleWizardState.settleMethod === 'sell_collateral') && (!window._settleWizardState.agreedValue || parseFloat(window._settleWizardState.agreedValue) <= 0)) return window.showToast('Enter valid price to compute value', 'error');
                         
                         window._settleWizardState.step = 3; 
                         window.renderSettleLoanWizard();
@@ -1328,6 +1335,9 @@ window.renderSettleLoanWizard = () => {
         if (s.settleMethod === 'cash') {
             displayAmount = parseFloat(s.amountPaid);
             diff = s.principal - displayAmount;
+        } else if (s.settleMethod === 'sell_collateral') {
+            displayAmount = parseFloat(s.agreedValue);
+            diff = s.principal;
         } else {
             displayAmount = parseFloat(s.agreedValue);
             diff = s.principal - displayAmount; // if < 0, customer gets change
@@ -1353,7 +1363,7 @@ window.renderSettleLoanWizard = () => {
                         <span style="font-weight: 700; color: var(--success);">GHS ${displayAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
                     
-                    ${(s.settleMethod === 'gold' || s.settleMethod === 'collateral') ? `
+                    ${(s.settleMethod === 'gold' || s.settleMethod === 'collateral' || s.settleMethod === 'sell_collateral') ? `
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
                             <span style="color: var(--text-muted); font-weight: 500;">Gold Weight Used</span>
                             <span style="font-weight: 600;">${parseFloat(s.grams).toFixed(2)} g</span>
@@ -1392,12 +1402,25 @@ window.renderSettleLoanWizard = () => {
                         ` : ''}
                     ` : ''}
                     
+                    ${s.settleMethod === 'sell_collateral' ? `
+                    <div style="display: flex; justify-content: space-between; margin-top: 16px; border-top: 2px solid var(--border); padding-top: 16px;">
+                        <span style="color: var(--text-main); font-weight: 600;">Cash Payout to Customer</span>
+                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--success);">
+                            GHS ${displayAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                        <span style="color: var(--text-muted); font-weight: 500;">Loan Balance (Unaffected)</span>
+                        <span style="font-weight: 600;">GHS ${diff.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    ` : `
                     <div style="display: flex; justify-content: space-between; margin-top: 16px; border-top: 2px solid var(--border); padding-top: 16px;">
                         <span style="color: var(--text-main); font-weight: 600;">${diff < 0 ? 'Change Due to Customer' : 'Remaining Balance'}</span>
                         <span style="font-weight: 700; font-size: 1.1rem; color: ${diff < 0 ? 'var(--info)' : 'var(--warning)'};">
                             GHS ${Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </span>
                     </div>
+                    `}
                     
                     ${s.notes ? `
                         <div style="margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border);">
@@ -1473,6 +1496,24 @@ window.submitSettleLoanWizard = async () => {
             comment: s.notes,
 
             // Re-submit collateral details for record keeping
+            current_local_price: parseFloat(s.currentLocalPrice) || null,
+            volume: parseFloat(s.volume) || null,
+            total_blades: parseFloat(s.totalBlades) || null,
+            pounds: s.pounds,
+            density: s.density,
+            karat: s.karat,
+            price_per_blade: parseFloat(s.pricePerBlade) || null
+        };
+    } else if (s.settleMethod === 'sell_collateral') {
+        endpoint = '/loans/sell_collateral_keep_loan.php';
+        payload = {
+            loan_id: s.loanId,
+            customer_id: s.customerId,
+            gold_type: s.goldType,
+            grams_to_use: parseFloat(s.grams),
+            agreed_value_ghs: parseFloat(s.agreedValue),
+            comment: s.notes,
+
             current_local_price: parseFloat(s.currentLocalPrice) || null,
             volume: parseFloat(s.volume) || null,
             total_blades: parseFloat(s.totalBlades) || null,
