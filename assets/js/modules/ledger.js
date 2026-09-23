@@ -192,12 +192,13 @@ window.addEventListener('route-changed', async (e) => {
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Capital Spent</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Handler</th>
                                     <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Brought In (GHS)</th>
+                                    <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">True Net Profit</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${sales.length === 0 ? `
                                 <tr>
-                                    <td colspan="8" style="text-align:center; padding: 60px 20px;">
+                                    <td colspan="9" style="text-align:center; padding: 60px 20px;">
                                         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
                                             <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                                                 <span class="material-symbols-outlined" style="font-size: 32px; opacity: 0.5;">history</span>
@@ -241,6 +242,10 @@ window.addEventListener('route-changed', async (e) => {
                 const typeIcon = s.gold_type === 'refined' ? 'diamond' : 'scatter_plot';
                 const typeColor = s.gold_type === 'refined' ? '#f59e0b' : '#64748b';
 
+                const netProfit = isPending ? null : (Number(s.actual_cash) - Number(s.total_cost || 0));
+                const profitColor = netProfit > 0 ? 'var(--success)' : (netProfit < 0 ? 'var(--danger)' : 'var(--text-main)');
+                const profitText = isPending ? '-' : (netProfit > 0 ? '+' : '') + netProfit.toLocaleString(undefined, { minimumFractionDigits: 2 });
+
                 return `
                                     <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s; cursor: pointer;" 
                                         onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'"
@@ -268,6 +273,9 @@ window.addEventListener('route-changed', async (e) => {
                                         </td>
                                         <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${isPending ? 'var(--text-muted)' : 'var(--success)'}; font-size: 1.05rem;">
                                             ${isPending ? '-' : '+' + Number(s.actual_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                        </td>
+                                        <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${isPending ? 'var(--text-muted)' : profitColor}; font-size: 1.05rem;">
+                                            ${profitText}
                                         </td>
                                     </tr>
                                     `;
