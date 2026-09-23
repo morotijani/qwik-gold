@@ -649,3 +649,43 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }, 1000);
 });
+
+// --- Withdraw All Capital ---
+window.withdrawAllCapital = () => {
+    document.getElementById('global-modal').classList.add('active');
+    document.getElementById('modal-title').textContent = 'Confirm Full Withdrawal';
+    document.getElementById('modal-body').innerHTML = `
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <span class="material-symbols-outlined" style="font-size: 32px;">warning</span>
+            </div>
+            <h3 style="margin: 0 0 12px; color: var(--text-main); font-size: 1.2rem;">Are you absolutely sure?</h3>
+            <p style="color: var(--text-muted); line-height: 1.5; margin: 0 0 24px;">
+                You are about to withdraw all available capital from the system. This will reset your available liquidity to <strong>GHS 0.00</strong>.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
+                <button class="btn btn-primary" style="flex: 1; background: #ef4444; border-color: #ef4444;" onclick="window.executeWithdrawAllCapital()">Yes, Clear Capital</button>
+            </div>
+        </div>
+    `;
+};
+
+window.executeWithdrawAllCapital = async () => {
+    try {
+        const res = await window.api.post('/capital/withdraw_all.php', {});
+        window.showToast(res.message || 'Capital cleared successfully.', 'success');
+        window.closeModal();
+        // Refresh whatever page we are on
+        if (window.location.hash === '#dashboard' && window.loadDashboard) {
+            window.loadDashboard();
+        } else if (window.location.hash === '#ledger' && window.loadLedgerDashboard) {
+            window.loadLedgerDashboard();
+        } else {
+            window.dispatchEvent(new CustomEvent('route-changed', { detail: { route: window.location.hash.replace('#', '') || 'dashboard', container: document.getElementById('view-container') } }));
+        }
+    } catch (e) {
+        window.showToast(e.message || 'Failed to withdraw capital', 'error');
+        window.closeModal();
+    }
+};

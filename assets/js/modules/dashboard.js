@@ -57,6 +57,11 @@ window.addEventListener('route-changed', async (e) => {
                 <!-- Available Liquidity -->
                 <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px;">
                     <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(20px);"></div>
+                    <div style="position: absolute; top: 20px; right: 20px; z-index: 2;">
+                        <button class="btn-icon" onclick="window.withdrawAllCapital()" title="Withdraw All Capital" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.2)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">cleaning_services</span>
+                        </button>
+                    </div>
                     <div style="display: flex; align-items: center; gap: 12px; position: relative; z-index: 1;">
                         <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
                             <span class="material-symbols-outlined" style="font-size: 24px;">account_balance</span>

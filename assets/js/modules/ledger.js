@@ -49,8 +49,13 @@ window.addEventListener('route-changed', async (e) => {
                             <div style="position: relative; z-index: 1;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
                                     <div style="color: #059669; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Total Capital</div>
-                                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
-                                        <span class="material-symbols-outlined" style="font-size: 24px;">account_balance</span>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn-icon" onclick="window.withdrawAllCapital()" title="Withdraw All Capital" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: none; border-radius: 14px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.2)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'">
+                                            <span class="material-symbols-outlined" style="font-size: 20px;">cleaning_services</span>
+                                        </button>
+                                        <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
+                                            <span class="material-symbols-outlined" style="font-size: 24px;">account_balance</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
