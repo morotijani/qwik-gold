@@ -115,12 +115,9 @@ window.viewKeeper = async (keeperId) => {
                 </div>
 
                 <!-- Main Profile Banner Card -->
-                <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; position: relative; overflow: hidden;">
-                    <!-- Decorative background glow -->
-                    <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--gold-primary); filter: blur(80px); opacity: 0.1; border-radius: 50%;"></div>
-                    
-                    <div style="display: flex; align-items: center; gap: 24px; z-index: 1;">
-                        <div style="width: 80px; height: 80px; border-radius: 20px; background: rgba(255, 215, 0, 0.1); color: var(--gold-primary); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700;">
+                <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                    <div style="display: flex; align-items: center; gap: 24px;">
+                        <div style="width: 72px; height: 72px; border-radius: 18px; background: #EEF2FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800;">
                             ${initial}
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -684,10 +681,23 @@ window.toggleKeeperLiqFields = () => {
         const grams = parseFloat(form.dataset.refinedGrams) || 0;
         const volume = parseFloat(form.dataset.refinedVolume) || 0;
 
-        const truncate2 = (num) => Math.floor(num * 100) / 100;
-        const pounds = truncate2(grams / 7.75);
-        const density = volume > 0 ? truncate2(grams / volume) : 0;
-        const karat = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
+        let pounds = 0, density = 0, rawKarat = 0, karat = 0, purity = 0;
+        if (window.GoldMath) {
+            const calc = window.GoldMath.calculate({ grams, volume });
+            pounds = calc.pounds;
+            density = calc.density;
+            rawKarat = calc.rawKarat;
+            karat = calc.payableKarat;
+            purity = calc.purityPercent;
+        } else {
+            const truncate2 = (num) => Math.floor(num * 100) / 100;
+            pounds = truncate2(grams / 7.75);
+            density = volume > 0 ? truncate2(grams / volume) : 0;
+            const raw = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
+            rawKarat = raw;
+            karat = raw > 0 ? truncate2(raw * 0.993) : 0;
+            purity = karat > 0 ? Math.round(((karat / 24) * 100) * 100) / 100 : 0;
+        }
 
         container.innerHTML = `
             <div style="display: flex; gap: 16px; margin-bottom: 16px;">
@@ -701,18 +711,22 @@ window.toggleKeeperLiqFields = () => {
                 </div>
             </div>
             
-            <div style="display: flex; gap: 16px; margin-bottom: 24px; padding: 16px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 12px;">
-                <div style="flex: 1; text-align: center; border-right: 1px solid var(--border);">
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Pounds</div>
-                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;" id="liq_calc_pounds">${pounds.toFixed(2)}</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; padding: 16px; background: var(--bg-hover); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Pounds</div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.05rem;" id="liq_calc_pounds">${pounds.toFixed(2)}</div>
                 </div>
-                <div style="flex: 1; text-align: center; border-right: 1px solid var(--border);">
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Density</div>
-                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;" id="liq_calc_density">${density.toFixed(2)}</div>
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Density</div>
+                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.05rem;" id="liq_calc_density">${density.toFixed(2)}</div>
                 </div>
-                <div style="flex: 1; text-align: center;">
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px;">Karat</div>
-                    <div style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;" id="liq_calc_karat">${karat.toFixed(2)}</div>
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase;">Gross Karat</div>
+                    <div style="font-weight: 700; color: #64748b; font-size: 1.05rem;" id="liq_calc_raw_karat">${rawKarat.toFixed(2)}k</div>
+                </div>
+                <div style="background: rgba(59, 130, 246, 0.08); border-radius: 8px; padding: 4px;">
+                    <div style="font-size: 0.75rem; color: #1d4ed8; font-weight: 700; margin-bottom: 4px; text-transform: uppercase;">Payable Karat</div>
+                    <div style="font-weight: 800; color: #1d4ed8; font-size: 1.05rem;" id="liq_calc_karat">${karat.toFixed(2)}k</div>
                 </div>
             </div>
             
@@ -956,13 +970,13 @@ window.openCreateKeeperModal = async () => {
     });
 
     modalBody.innerHTML = `
-        <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.02) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+        <div style="background: #FFFFFF; border: 1px solid rgba(0, 0, 0, 0.06); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+            <div style="width: 48px; height: 48px; border-radius: 14px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <span class="material-symbols-outlined" style="font-size: 1.6rem;">how_to_reg</span>
             </div>
             <div>
-                <div style="font-size: 0.95rem; font-weight: 800; color: #2563eb; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Register Keeper</div>
-                <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Create a new profile or select an existing customer to upgrade them to a Keeper.</div>
+                <div style="font-size: 0.95rem; font-weight: 800; color: #121926; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Register Keeper</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Create a new profile or select an existing customer to upgrade them to a Keeper.</div>
             </div>
         </div>
 
@@ -1098,13 +1112,13 @@ window.openEditKeeperModal = (profile) => {
 
     modalBody.innerHTML = `
         <form id="edit-keeper-form" onsubmit="window.submitEditKeeper(event, ${profile.id})">
-            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+            <div style="background: #FFFFFF; border: 1px solid rgba(0, 0, 0, 0.06); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                <div style="width: 48px; height: 48px; border-radius: 14px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     <span class="material-symbols-outlined" style="font-size: 1.6rem;">edit_document</span>
                 </div>
                 <div>
-                    <div style="font-size: 0.95rem; font-weight: 800; color: #d97706; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Update Keeper</div>
-                    <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">Modify existing profile details for this keeper.</div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #121926; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Update Keeper</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Modify existing profile details for this keeper.</div>
                 </div>
             </div>
 
@@ -1160,7 +1174,7 @@ window.openEditKeeperModal = (profile) => {
                 <textarea id="edit_keeper_address" rows="2" class="form-control" style="width: 100%; border-radius: 8px; border: 1px solid var(--border); padding: 12px;">${profile.address || ''}</textarea>
             </div>
             
-            <button type="submit" class="btn" style="width: 100%; background: #f59e0b; color: white; padding: 16px; font-size: 1.05rem; font-weight: 600; border: none; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); cursor: pointer;">
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-pill); display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <span class="material-symbols-outlined">save</span> Save Changes
             </button>
         </form>
@@ -1298,16 +1312,29 @@ window.openKeeperConversionDetailsModal = (data) => {
     let density = 0;
     let karatText = '-';
     let pounds = 0;
+    let purityText = '-';
+    let discountPercent = 0.70;
 
     const truncate2 = (num) => Math.floor(num * 100) / 100;
 
     if (refinedGrams > 0) {
-        pounds = truncate2(refinedGrams / 7.75);
-        if (volume > 0) {
-            density = truncate2(refinedGrams / volume);
-            if (density > 0) {
-                const karat = truncate2(((density - 10.51) * 52.838) / density);
-                karatText = Math.max(0, karat).toFixed(2) + 'k';
+        if (window.GoldMath) {
+            const calc = window.GoldMath.calculate({ grams: refinedGrams, volume: volume });
+            pounds = calc.pounds;
+            density = calc.density;
+            karatText = calc.payableKarat.toFixed(2) + 'k';
+            purityText = calc.purityPercent.toFixed(2) + '%';
+            discountPercent = calc.discountPercent;
+        } else {
+            pounds = truncate2(refinedGrams / 7.75);
+            if (volume > 0) {
+                density = truncate2(refinedGrams / volume);
+                if (density > 0) {
+                    const rawKarat = truncate2(((density - 10.51) * 52.838) / density);
+                    const payableKarat = truncate2(rawKarat * 0.993);
+                    karatText = Math.max(0, payableKarat).toFixed(2) + 'k';
+                    purityText = (Math.min(100, (payableKarat / 24) * 100)).toFixed(2) + '%';
+                }
             }
         }
     }
@@ -1343,15 +1370,22 @@ window.openKeeperConversionDetailsModal = (data) => {
 
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
                     <span style="color: var(--text-muted);">Density</span>
-                    <span style="font-weight: 600; color: var(--text-main);">${density.toFixed(4)}</span>
+                    <span style="font-weight: 600; color: var(--text-main);">${density.toFixed(2)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-                    <span style="color: var(--text-muted);">Karat</span>
-                    <span style="font-weight: 600; color: var(--warning);">${karatText}</span>
+                    <div>
+                        <span style="color: var(--text-muted);">Karat</span>
+                        ${discountPercent > 0 ? `<span style="margin-left: 6px; font-size: 0.72rem; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 2px 6px; border-radius: 4px; font-weight: 600;">-${discountPercent}%</span>` : ''}
+                    </div>
+                    <span style="font-weight: 700; color: var(--warning); font-size: 1.05rem;">${karatText}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                    <span style="color: var(--text-muted);">Purity</span>
+                    <span style="font-weight: 600; color: var(--text-main);">${purityText}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span style="color: var(--text-muted);">Pounds (lb)</span>
-                    <span style="font-weight: 600; color: var(--text-main);">${pounds.toFixed(4)}</span>
+                    <span style="font-weight: 600; color: var(--text-main);">${pounds.toFixed(2)}</span>
                 </div>
             </div>
 

@@ -4,7 +4,9 @@
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
 require_once '../middleware/auth.php';
+requireRole('admin', 'staff');
 require_once '../helpers/logger.php';
+require_once '../helpers/settings.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendResponse('error', 'Method not allowed', [], 405);
@@ -52,13 +54,17 @@ try {
     }
 
     // 2. Calculate actuals using Refined Gold math
-    $density = $actualGrams / $actualVolume;
-    $karat = 0;
+    $discountPercent = (float)get_system_setting($pdo, 'purity_discount_percent', 0.70);
+    $discountFactor = (100 - $discountPercent) / 100;
+
+    $density = floor(($actualGrams / $actualVolume) * 100) / 100;
+    $rawKarat = 0;
     if ($density > 0) {
-        $karat = (($density - 10.51) * 52.838) / $density;
+        $rawKarat = floor(((($density - 10.51) * 52.838) / $density) * 100) / 100;
     }
-    $pounds = $actualGrams / 7.75;
-    $actualCash = ($karat * $actualPrice / 23) * $pounds;
+    $karat = $rawKarat > 0 ? floor(($rawKarat * $discountFactor) * 100) / 100 : 0;
+    $pounds = floor(($actualGrams / 7.75) * 100) / 100;
+    $actualCash = floor(($karat * $actualPrice / 23) * $pounds);
     
     $netProfit = $actualCash - $totalCostBasis;
 

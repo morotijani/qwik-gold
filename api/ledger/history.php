@@ -6,6 +6,7 @@ require_once '../../config/database.php';
 
 // Secure the endpoint by requiring the Auth Gatekeeper
 require_once '../middleware/auth.php';
+requireRole('admin', 'staff');
 
 // Only allow GET requests
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

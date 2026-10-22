@@ -3,6 +3,8 @@
 
 // Include the headers and standard response helper
 require_once '../../config/headers.php';
+require_once '../../config/database.php';
+require_once '../helpers/settings.php';
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -78,8 +80,12 @@ if ($goldType === 'balls') {
     
     // Calculations for refined gold
     $truncate2 = function($num) {
-        return floor($num * 100) / 100;
+        return floor(($num + 0.00000001) * 100) / 100;
     };
+
+    $discountPercent = isset($data['discount_percent']) 
+        ? (float)$data['discount_percent'] 
+        : (float)get_system_setting($pdo, 'purity_discount_percent', 0.70);
     
     $density = 0;
     if ($volume > 0) {
@@ -88,17 +94,29 @@ if ($goldType === 'balls') {
     
     $pounds = $truncate2($grams / 7.75);
     
-    $karat = 0;
+    $rawKarat = 0;
     if ($density > 0) {
-        $karat = $truncate2((($density - 10.51) * 52.838) / $density);
+        $rawKarat = $truncate2((($density - 10.51) * 52.838) / $density);
+        if ($rawKarat < 0) $rawKarat = 0;
     }
+
+    $discountFactor = (100 - $discountPercent) / 100;
+    $payableKarat = $rawKarat > 0 
+        ? ($discountPercent > 0 ? $truncate2($rawKarat * $discountFactor) : $rawKarat) 
+        : 0;
+
+    $purityPercent = $payableKarat > 0 ? round(($payableKarat / 24) * 100, 2) : 0;
     
-    $totalPayout = ($karat * $pricePerPound / 23) * $pounds;
+    $totalPayout = floor(($payableKarat * $pricePerPound / 23) * $pounds);
     
     $responseData['breakdown'] = [
         'density' => $density,
-        'karat' => $karat,
-        'pounds' => $pounds
+        'pounds' => $pounds,
+        'raw_karat' => $rawKarat,
+        'payable_karat' => $payableKarat,
+        'karat' => $payableKarat,
+        'purity_percent' => $purityPercent,
+        'discount_percent' => $discountPercent
     ];
     $responseData['total_payout_ghs'] = $totalPayout;
 

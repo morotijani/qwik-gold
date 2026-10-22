@@ -7,6 +7,9 @@ require_once '../middleware/auth.php';
 require_once '../helpers/logger.php';
 require_once '../helpers/ledger.php';
 
+// Only administrators can edit capital injections
+requireRole('admin');
+
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendResponse('error', 'Method not allowed', [], 405);

@@ -4,6 +4,7 @@
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
 require_once '../middleware/auth.php';
+requireRole('admin', 'staff');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse('error', 'Method not allowed', [], 405);
@@ -35,11 +36,16 @@ try {
     
     $sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Compute total cost for each sale
+    // Compute total cost for each sale (admin only - hide profit and cost from staff)
     foreach ($sales as &$s) {
-        $costStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE sale_id = ?");
-        $costStmt->execute([$s['id']]);
-        $s['total_cost'] = (float)$costStmt->fetchColumn();
+        if ($current_user_role !== 'admin') {
+            unset($s['total_cost']);
+            $s['net_profit_ghs'] = null;
+        } else {
+            $costStmt = $pdo->prepare("SELECT SUM(guessed_value_ghs) FROM gold_vault WHERE sale_id = ?");
+            $costStmt->execute([$s['id']]);
+            $s['total_cost'] = (float)$costStmt->fetchColumn();
+        }
     }
 
     sendResponse('success', 'Sold gold retrieved', [

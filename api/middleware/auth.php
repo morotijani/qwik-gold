@@ -76,3 +76,25 @@ try {
 } catch (\PDOException $e) {
     sendResponse('error', 'Authentication failed due to system error', [], 500);
 }
+
+/**
+ * Require one or more specific roles.
+ * Halts execution immediately with 403 Forbidden if current user role is not authorized.
+ *
+ * @param string|array ...$roles Allowed roles (e.g. requireRole('admin') or requireRole('admin', 'staff'))
+ */
+function requireRole(...$roles) {
+    global $current_user_role;
+    $allowed = [];
+    foreach ($roles as $r) {
+        if (is_array($r)) {
+            $allowed = array_merge($allowed, $r);
+        } else {
+            $allowed[] = $r;
+        }
+    }
+    if (!in_array($current_user_role, $allowed, true)) {
+        sendResponse('error', 'Forbidden: You do not have permission to perform this action.', [], 403);
+    }
+}
+

@@ -26,7 +26,9 @@ $handlerId = $current_user_id ?? null;
 $localPrice = isset($input['local_price']) ? (float)$input['local_price'] : null;
 $volume = isset($input['volume']) ? (float)$input['volume'] : null;
 $density = isset($input['density']) ? (float)$input['density'] : null;
+$rawKarat = isset($input['raw_karat']) ? (float)$input['raw_karat'] : null;
 $karat = isset($input['karat']) ? (float)$input['karat'] : null;
+$discountPercent = isset($input['discount_percent']) ? (float)$input['discount_percent'] : null;
 $pounds = isset($input['pounds']) ? (float)$input['pounds'] : null;
 $totalBlades = isset($input['total_blades']) ? (float)$input['total_blades'] : null;
 
@@ -62,8 +64,8 @@ try {
     $txnRef = 'PUR-' . strtoupper(substr(uniqid(), -6)) . rand(100, 999);
 
     // 2. Insert into gold_purchases
-    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, volume, total_paid_ghs, local_price, density, karat, pounds, total_blades, origin, handler_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?, ?)");
-    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $volume, $totalPaid, $localPrice, $density, $karat, $pounds, $totalBlades, $handlerId, $notes]);
+    $purchaseStmt = $pdo->prepare("INSERT INTO gold_purchases (transaction_ref, customer_id, gold_type, weight_grams, volume, total_paid_ghs, local_price, density, raw_karat, karat, discount_percent, pounds, total_blades, origin, handler_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'walk_in', ?, ?)");
+    $purchaseStmt->execute([$txnRef, $customerId, $goldType, $weightGrams, $volume, $totalPaid, $localPrice, $density, $rawKarat, $karat, $discountPercent, $pounds, $totalBlades, $handlerId, $notes]);
     $purchaseId = $pdo->lastInsertId();
 
     // Link the vault record back to the purchase

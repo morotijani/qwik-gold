@@ -22,6 +22,7 @@ window.addEventListener('route-changed', async (e) => {
             const transactionsList = data.transactions || [];
             const totalCount = data.total_count || 0;
             const totalPages = Math.ceil(totalCount / window._txState.limit);
+            const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
 
         container.innerHTML = `
             <div>
@@ -57,17 +58,16 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
                 
                 <!-- Hero Capital Banner -->
-                <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 40px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(40px);"></div>
-                    <div style="position: relative; z-index: 1;">
-                        <div style="color: #059669; font-size: 1rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Current Capital Balance</div>
-                        <div style="font-size: 3.5rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 12px; line-height: 1;">
-                            <span style="font-size: 1.8rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
+                <div class="page-header-card">
+                    <div>
+                        <div style="color: var(--gold-primary); font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Current Capital Balance</div>
+                        <div style="font-size: 3rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 12px; line-height: 1;">
+                            <span style="font-size: 1.5rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
                             ${Number(data.current_running_balance_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
-                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); position: relative; z-index: 1;">
-                        <span class="material-symbols-outlined" style="font-size: 40px;">account_balance</span>
+                    <div style="background: var(--gold-pill); color: var(--gold-primary); width: 64px; height: 64px; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                        <span class="material-symbols-outlined" style="font-size: 32px;">account_balance</span>
                     </div>
                 </div>
                 
@@ -133,6 +133,8 @@ window.addEventListener('route-changed', async (e) => {
                                     case 'gold_purchase':
                                     case 'from_keeper':
                                         badgeColor = '#f59e0b'; badgeBg = 'rgba(245, 158, 11, 0.1)'; icon = 'diamond'; break;
+                                    case 'capital_withdrawal':
+                                        badgeColor = '#ef4444'; badgeBg = 'rgba(239, 68, 68, 0.1)'; icon = 'cleaning_services'; break;
                                     default:
                                         badgeColor = '#64748b'; badgeBg = 'rgba(100, 116, 139, 0.1)'; icon = 'sync_alt'; break;
                                 }
@@ -156,8 +158,8 @@ window.addEventListener('route-changed', async (e) => {
                                     <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${amountColor}; font-size: 1.05rem;">
                                         ${amountSign}${parseFloat(tx.amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </td>
-                                    <td style="padding: 16px 24px; text-align: center;">
-                                        ${tx.type === 'external_capital_in' ? `
+                                     <td style="padding: 16px 24px; text-align: center;">
+                                        ${isAdmin && tx.type === 'external_capital_in' ? `
                                             <div style="position: relative; display: inline-block;">
                                                 <button class="btn btn-outline" style="padding: 6px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: none; background: var(--bg-main);" onclick="
                                                     event.stopPropagation();
@@ -178,7 +180,7 @@ window.addEventListener('route-changed', async (e) => {
                                                 </div>
                                             </div>
                                         ` : '<span style="opacity: 0.3">-</span>'}
-                                    </td>
+                                     </td>
                                 </tr>
                                 `;
                             }).join('')}
@@ -225,6 +227,9 @@ window.addEventListener('route-changed', async (e) => {
     });
 
     window.openEditCapitalInjectionModal = (id, amount, desc) => {
+        if (typeof window.isAdmin === 'function' && !window.isAdmin()) {
+            return window.showToast('Access Denied: Only administrators can edit capital injections.', 'error');
+        }
         const html = `
             <div style="padding: 20px;">
                 <div class="form-group" style="margin-bottom: 24px;">
@@ -269,6 +274,9 @@ window.addEventListener('route-changed', async (e) => {
     };
 
     window.confirmDeleteCapitalInjection = (id) => {
+        if (typeof window.isAdmin === 'function' && !window.isAdmin()) {
+            return window.showToast('Access Denied: Only administrators can delete capital injections.', 'error');
+        }
         const html = `
             <div style="padding: 20px; text-align: center;">
                 <span class="material-symbols-outlined" style="font-size: 48px; color: var(--danger); margin-bottom: 16px;">warning</span>

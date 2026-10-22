@@ -11,6 +11,9 @@ window.addEventListener('route-changed', async (e) => {
     try {
         const response = await window.api.get('/auth/me.php');
         const user = response.user;
+        if (typeof window.updateCurrentUserUI === 'function') {
+            window.updateCurrentUserUI(user);
+        }
 
         container.innerHTML = `
             <div class="module-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -91,9 +94,13 @@ window.addEventListener('route-changed', async (e) => {
 
                 // Update local storage and UI
                 localStorage.setItem('qwik_gold_user', JSON.stringify(res.user));
-                const userNameEl = document.getElementById('current-user-name');
-                if (userNameEl) {
-                    userNameEl.textContent = res.user.name;
+                if (typeof window.updateCurrentUserUI === 'function') {
+                    window.updateCurrentUserUI(res.user);
+                } else {
+                    const userNameEl = document.getElementById('current-user-name');
+                    if (userNameEl) {
+                        userNameEl.textContent = res.user.name;
+                    }
                 }
 
             } catch (error) {

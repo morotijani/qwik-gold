@@ -3,6 +3,7 @@
 
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
+require_once '../middleware/auth.php';
 
 // Only allow GET requests
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {

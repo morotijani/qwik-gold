@@ -14,6 +14,8 @@ window.addEventListener('route-changed', async (e) => {
 
     window.loadLedgerDashboard = async () => {
         try {
+            const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
+
             // Fetch Vault Stats
             const stats = await window.api.get('/ledger/vault_stats.php');
 
@@ -27,99 +29,105 @@ window.addEventListener('route-changed', async (e) => {
 
             container.innerHTML = `
                 <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 700; color: var(--text-main);">Company Ledger & Vault</h2>
+                    <!-- Page Header -->
+                    <div class="page-header-card">
+                        <div>
+                            <div style="color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                                <div class="page-header-icon">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">account_balance</span>
+                                </div>
+                                Treasury & Inventory
+                            </div>
+                            <h2 class="page-header-title">Company Ledger & Vault</h2>
+                            <p class="page-header-subtitle">Real-time capital balance, company gold holdings, and vault operations.</p>
+                        </div>
                         <div style="display: flex; gap: 12px;">
                             ${(stats.gold_balls.grams > 0 || stats.refined_gold.grams > 0) ? `
                             <button class="btn btn-outline" style="color: var(--text-main);" onclick="window.moveVaultToHold()">
                                 <span class="material-symbols-outlined">inventory_2</span> Move to Hold
                             </button>
                             ` : ''}
-                            <!-- <button class="btn btn-primary" onclick="window.initiateMarketSale('office_vault')">
-                                <span class="material-symbols-outlined">outbound</span> Initiate Market Sale
-                            </button> -->
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 32px;">
                         
                         <!-- Total Capital -->
-                        <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05);">
-                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                            <div style="position: relative; z-index: 1;">
+                        <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 26px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                    <div style="color: #059669; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Total Capital</div>
+                                    <div style="color: #64748B; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Capital</div>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-icon" onclick="window.withdrawAllCapital()" title="Withdraw All Capital" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: none; border-radius: 14px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.2)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'">
-                                            <span class="material-symbols-outlined" style="font-size: 20px;">cleaning_services</span>
+                                        ${isAdmin ? `
+                                        <button class="btn-icon" onclick="window.withdrawAllCapital()" title="Withdraw Capital" style="background: #DCFCE7; color: #15803D; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                            <span class="material-symbols-outlined" style="font-size: 18px;">payments</span>
                                         </button>
-                                        <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
-                                            <span class="material-symbols-outlined" style="font-size: 24px;">account_balance</span>
+                                        ` : ''}
+                                        <div style="background: #DCFCE7; color: #15803D; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                            <span class="material-symbols-outlined" style="font-size: 20px;">account_balance</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                    <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
+                                <div style="font-size: 2.2rem; font-weight: 900; color: #121926; display: flex; align-items: center; gap: 8px; line-height: 1; letter-spacing: -0.5px;">
+                                    <span style="font-size: 1.1rem; font-weight: 600; color: #94A3B8;">GHS</span> 
                                     ${Number(stats.total_capital_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         </div>
 
                         <!-- Gold Balls Vault -->
-                        <div style="background: linear-gradient(145deg, rgba(71, 85, 105, 0.15) 0%, rgba(71, 85, 105, 0.03) 100%); border: 1px solid rgba(71, 85, 105, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(71, 85, 105, 0.05);">
-                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(71, 85, 105, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                            <div style="position: relative; z-index: 1;">
+                        <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 26px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                    <div style="color: #475569; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Vault: Gold Balls</div>
-                                    <div style="background: linear-gradient(135deg, #64748b, #475569); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(71, 85, 105, 0.3);">
-                                        <span class="material-symbols-outlined" style="font-size: 24px;">scatter_plot</span>
+                                    <div style="color: #64748B; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Vault: Gold Balls</div>
+                                    <div style="background: #F1F5F9; color: #475569; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">scatter_plot</span>
                                     </div>
                                 </div>
-                                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                    ${Number(stats.gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">g</span>
+                                <div style="font-size: 2.2rem; font-weight: 900; color: #121926; display: flex; align-items: center; gap: 8px; line-height: 1; letter-spacing: -0.5px;">
+                                    ${Number(stats.gold_balls.grams || 0).toFixed(4)}<span style="font-size: 1.1rem; font-weight: 600; color: #94A3B8;">g</span>
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.95rem; color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <div style="margin-top: 10px; font-size: 0.92rem; color: #10B981; font-weight: 700; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">view_agenda</span>
                                     ${Number(stats.gold_balls.total_balls_blades || 0).toFixed(2)} Total Blades
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.95rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <div style="margin-top: 6px; font-size: 0.92rem; color: #64748B; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">payments</span>
-                                    GHS ${Number(stats.gold_balls.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} System Value
+                                    GHS ${Number(stats.gold_balls.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} Value
                                 </div>
-                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(16, 185, 129, 0.2);">
-                                    <button class="btn btn-primary" style="width: 100%; background: #10b981; border-color: #10b981; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; border-radius: 12px;" onclick="window.initiateMarketSale('office_vault', 'balls')">
-                                        <span class="material-symbols-outlined">query_stats</span> Simulate & Sell
-                                    </button>
-                                </div>
+                            </div>
+                            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                <button class="btn btn-primary" style="width: 100%; border-radius: var(--radius-pill);" onclick="window.initiateMarketSale('office_vault', 'balls')">
+                                    <span class="material-symbols-outlined">query_stats</span> Simulate & Sell
+                                </button>
                             </div>
                         </div>
 
                         <!-- Refined Gold Vault -->
-                        <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);">
-                            <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                            <div style="position: relative; z-index: 1;">
+                        <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 26px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                    <div style="color: #d97706; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Vault: Refined Gold</div>
-                                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
-                                        <span class="material-symbols-outlined" style="font-size: 24px;">diamond</span>
+                                    <div style="color: #64748B; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Vault: Refined Gold</div>
+                                    <div style="background: #EAF0FF; color: #2D5BFF; width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                        <span class="material-symbols-outlined" style="font-size: 20px;">diamond</span>
                                     </div>
                                 </div>
-                                <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                    ${Number(stats.refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">g</span>
+                                <div style="font-size: 2.2rem; font-weight: 900; color: #121926; display: flex; align-items: center; gap: 8px; line-height: 1; letter-spacing: -0.5px;">
+                                    ${Number(stats.refined_gold.grams || 0).toFixed(4)}<span style="font-size: 1.1rem; font-weight: 600; color: #94A3B8;">g</span>
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.95rem; color: #d97706; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <div style="margin-top: 10px; font-size: 0.92rem; color: #2D5BFF; font-weight: 700; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">water_drop</span>
                                     ${Number(stats.refined_gold.volume || 0).toFixed(4)} Total Volume
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.95rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <div style="margin-top: 6px; font-size: 0.92rem; color: #64748B; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                     <span class="material-symbols-outlined" style="font-size: 16px;">payments</span>
-                                    GHS ${Number(stats.refined_gold.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} System Value
+                                    GHS ${Number(stats.refined_gold.guessed_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} Value
                                 </div>
-                                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(245, 158, 11, 0.2);">
-                                    <button class="btn btn-primary" style="width: 100%; background: #f59e0b; border-color: #f59e0b; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; border-radius: 12px;" onclick="window.initiateMarketSale('office_vault', 'refined')">
-                                        <span class="material-symbols-outlined">query_stats</span> Simulate & Sell
-                                    </button>
-                                </div>
+                            </div>
+                            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.05);">
+                                <button class="btn btn-primary" style="width: 100%; border-radius: var(--radius-pill);" onclick="window.initiateMarketSale('office_vault', 'refined')">
+                                    <span class="material-symbols-outlined">query_stats</span> Simulate & Sell
+                                </button>
                             </div>
                         </div>
 
@@ -194,16 +202,16 @@ window.addEventListener('route-changed', async (e) => {
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Date Sold</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Type</th>
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border);">Vault Est. Grams</th>
-                                    <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Capital Spent</th>
+                                    ${isAdmin ? `<th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Capital Spent</th>` : ''}
                                     <th style="padding: 16px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Handler</th>
                                     <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">Brought In (GHS)</th>
-                                    <th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">True Net Profit</th>
+                                    ${isAdmin ? `<th style="padding: 16px 24px; font-weight: 600; border-bottom: 1px solid var(--border); text-align: right;">True Net Profit</th>` : ''}
                                 </tr>
                             </thead>
                             <tbody>
                                 ${sales.length === 0 ? `
                                 <tr>
-                                    <td colspan="9" style="text-align:center; padding: 60px 20px;">
+                                    <td colspan="${isAdmin ? 9 : 7}" style="text-align:center; padding: 60px 20px;">
                                         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted);">
                                             <div style="background: var(--bg-main); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
                                                 <span class="material-symbols-outlined" style="font-size: 32px; opacity: 0.5;">history</span>
@@ -259,15 +267,16 @@ window.addEventListener('route-changed', async (e) => {
                                         <td style="padding: 16px 24px;">${statusBadge}</td>
                                         <td style="padding: 16px; color: var(--text-main); font-weight: 500;">${dateStr}</td>
                                         <td style="padding: 16px;">
-                                            <span style="display: inline-flex; align-items: center; gap: 6px; color: ${typeColor}; font-weight: 600; font-size: 0.95rem;">
+                                             <span style="display: inline-flex; align-items: center; gap: 6px; color: ${typeColor}; font-weight: 600; font-size: 0.95rem;">
                                                 <span class="material-symbols-outlined" style="font-size: 18px;">${typeIcon}</span>
                                                 <span style="color: var(--text-muted); text-transform: capitalize;">${s.gold_type}</span>
                                             </span>
                                         </td>
                                         <td style="padding: 16px; color: var(--text-main); font-weight: 600;">${Number(s.total_grams).toFixed(4)}g</td>
+                                        ${isAdmin ? `
                                         <td style="padding: 16px; font-weight: 500; text-align: right; color: var(--text-muted);">
                                             ${Number(s.total_cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </td>
+                                        </td>` : ''}
                                         <td style="padding: 16px; color: var(--text-muted); font-size: 0.9rem;">
                                             <div style="display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
                                                 <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--bg-main); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--text-main);">
@@ -279,9 +288,10 @@ window.addEventListener('route-changed', async (e) => {
                                         <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${isPending ? 'var(--text-muted)' : 'var(--success)'}; font-size: 1.05rem;">
                                             ${isPending ? '-' : '+' + Number(s.actual_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </td>
+                                        ${isAdmin ? `
                                         <td style="padding: 16px 24px; font-weight: 800; text-align: right; color: ${isPending ? 'var(--text-muted)' : profitColor}; font-size: 1.05rem;">
                                             ${profitText}
-                                        </td>
+                                        </td>` : ''}
                                     </tr>
                                     `;
             }).join('')}
@@ -437,10 +447,19 @@ window.addEventListener('route-changed', async (e) => {
             const rGrams = parseFloat(s.converted_refined_grams) || 0;
             const rVol = parseFloat(s.converted_refined_volume) || 0;
             
-            s.pounds = truncate2(rGrams / 7.75);
-            s.density = rVol > 0 ? truncate2(rGrams / rVol) : 0;
-            s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
-            s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
+            if (window.GoldMath) {
+                const calc = window.GoldMath.calculate({ grams: rGrams, volume: rVol, pricePerPound: clp });
+                s.pounds = calc.pounds;
+                s.density = calc.density;
+                s.karat = calc.payableKarat;
+                s.rawKarat = calc.rawKarat;
+                s.estimated_cash = calc.totalPayout;
+            } else {
+                s.pounds = truncate2(rGrams / 7.75);
+                s.density = rVol > 0 ? truncate2(rGrams / rVol) : 0;
+                s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
+                s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
+            }
 
             if (document.getElementById('calc_pounds')) document.getElementById('calc_pounds').innerText = s.pounds.toFixed(2) + ' lbs';
             if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
@@ -451,10 +470,20 @@ window.addEventListener('route-changed', async (e) => {
         } else {
             const grams = parseFloat(s.estimated_grams) || 0;
             const vol = parseFloat(s.estimated_volume) || 0;
-            s.pounds = truncate2(grams / 7.75);
-            s.density = vol > 0 ? truncate2(grams / vol) : 0;
-            s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
-            s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
+            
+            if (window.GoldMath) {
+                const calc = window.GoldMath.calculate({ grams, volume: vol, pricePerPound: clp });
+                s.pounds = calc.pounds;
+                s.density = calc.density;
+                s.karat = calc.payableKarat;
+                s.rawKarat = calc.rawKarat;
+                s.estimated_cash = calc.totalPayout;
+            } else {
+                s.pounds = truncate2(grams / 7.75);
+                s.density = vol > 0 ? truncate2(grams / vol) : 0;
+                s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
+                s.estimated_cash = Math.floor((s.karat * clp / 23) * s.pounds);
+            }
 
             if (document.getElementById('calc_pounds')) document.getElementById('calc_pounds').innerText = s.pounds.toFixed(2) + ' lbs';
             if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
@@ -588,20 +617,24 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
                 
                 <div style="background: rgba(16, 185, 129, 0.05); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                    ${isAdmin ? `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(16, 185, 129, 0.1);">
                         <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Total Capital Spent</span>
                         <span style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">GHS ${currentCostBasis.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
+                    ` : ''}
                     
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; ${isAdmin ? 'margin-bottom: 16px;' : ''}">
                         <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase;">Est. Total Cash</span>
                         <span style="font-size: 1.6rem; font-weight: 800; color: var(--text-main);" id="calc_est_cash_text">GHS ${s.estimated_cash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                     </div>
 
+                    ${isAdmin ? `
                     <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px dashed rgba(16, 185, 129, 0.3);">
                         <span id="calc_est_profit_title" style="color: ${estProfit >= 0 ? 'var(--success)' : 'var(--danger)'}; font-size: 1rem; font-weight: 700; text-transform: uppercase;">Estimated Profit</span>
                         <span id="calc_est_profit_text" style="font-size: 1.8rem; font-weight: 800; color: ${estProfit >= 0 ? 'var(--success)' : 'var(--danger)'};">${estProfit >= 0 ? '+' : '-'}GHS ${Math.abs(estProfit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                     </div>
+                    ` : ''}
                 </div>
                 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -715,13 +748,21 @@ window.addEventListener('route-changed', async (e) => {
             cash = blades * price;
         } else {
             const vol = parseFloat(document.getElementById('cs_volume').value) || 0;
-            const truncate2 = (num) => Math.floor(num * 100) / 100;
+            let pounds = 0, density = 0, karat = 0;
 
-            const pounds = truncate2(grams / 7.75);
-            const density = vol > 0 ? truncate2(grams / vol) : 0;
-            const karat = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
-
-            cash = (karat * price / 23) * pounds;
+            if (window.GoldMath) {
+                const calc = window.GoldMath.calculate({ grams, volume: vol, pricePerPound: price });
+                pounds = calc.pounds;
+                density = calc.density;
+                karat = calc.payableKarat;
+                cash = calc.totalPayout;
+            } else {
+                const truncate2 = (num) => Math.floor(num * 100) / 100;
+                pounds = truncate2(grams / 7.75);
+                density = vol > 0 ? truncate2(grams / vol) : 0;
+                karat = density > 0 ? truncate2(((density - 10.51) * 52.838) / density) : 0;
+                cash = (karat * price / 23) * pounds;
+            }
 
             if (document.getElementById('cs_calc_pounds')) document.getElementById('cs_calc_pounds').innerText = pounds.toFixed(2) + ' lbs';
             if (document.getElementById('cs_calc_density')) document.getElementById('cs_calc_density').innerText = density.toFixed(2);
@@ -734,8 +775,9 @@ window.addEventListener('route-changed', async (e) => {
             const estCash = parseFloat(document.getElementById('cs_est_cash').value);
             const diff = cash - estCash;
             const diffEl = document.getElementById('cs_calc_variance');
+            const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
             if (diffEl) {
-                if (cash === 0) {
+                if (!isAdmin || cash === 0) {
                     diffEl.innerHTML = '';
                 } else if (diff >= 0) {
                     diffEl.innerHTML = `<span style="color: var(--success); font-size: 0.9rem; font-weight: 600;">Profit: +GHS ${diff.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>`;
@@ -747,6 +789,7 @@ window.addEventListener('route-changed', async (e) => {
     };
 
     window.openCompleteSaleModal = (dataStr) => {
+        const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
         const s = JSON.parse(decodeURIComponent(dataStr));
         const profit = s.status === 'completed' ? Number(s.net_profit_ghs) : 0;
         const capitalSpent = Number(s.total_cost || 0);
@@ -765,13 +808,13 @@ window.addEventListener('route-changed', async (e) => {
 
         const formHtml = `
             <!-- Pending Sale Detailed Summary -->
-            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.02) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #f59e0b; color: white; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center;">
                         <span class="material-symbols-outlined">${s.gold_type === 'refined' ? 'diamond' : 'scatter_plot'}</span>
                     </div>
                     <div>
-                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Pending Sale: ${s.gold_type === 'refined' ? 'Refined Gold' : 'Gold Balls'}</h4>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 800;">Pending Sale: ${s.gold_type === 'refined' ? 'Refined Gold' : 'Gold Balls'}</h4>
                         <div style="font-size: 0.85rem; color: var(--text-muted);">Sale Breakdown</div>
                     </div>
                 </div>
@@ -788,20 +831,24 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
+                    ${isAdmin ? `
                     <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                         <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Total Capital Spent</span>
                         <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${capitalFormatted}</span>
                     </div>
+                    ` : ''}
                     <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                         <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Est. Total Cash (at GHS ${estPriceFormatted})</span>
                         <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${estCashFormatted}</span>
                     </div>
                 </div>
                 
+                ${isAdmin ? `
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(245, 158, 11, 0.2); padding-top: 12px;">
                     <span style="font-weight: 600; color: var(--text-main);">Estimated Profit</span>
                     <span style="font-size: 1.2rem; font-weight: 800; color: ${profitColor};">GHS ${profitFormatted}</span>
                 </div>
+                ` : ''}
             </div>
 
             <!-- Initial Action Buttons -->
@@ -919,6 +966,7 @@ window.addEventListener('route-changed', async (e) => {
             const res = await window.api.get(`/ledger/sold_gold_details.php?sale_id=${saleId}`);
             const s = res.sale;
             const consts = res.constituents;
+            const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
 
             const costBasis = parseFloat(s.total_cost) || 0;
             const actualCash = parseFloat(s.actual_cash) || 0;
@@ -973,7 +1021,7 @@ window.addEventListener('route-changed', async (e) => {
                                 <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
                                     <div>
                                         <div style="font-weight: 600; color: var(--text-main); text-transform: capitalize;">${ms.gold_type} Sale</div>
-                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g &bull; Cap: GHS ${Number(ms.total_cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">${Number(ms.total_grams).toFixed(4)}g${isAdmin && ms.total_cost != null ? ` &bull; Cap: GHS ${Number(ms.total_cost).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : ''}</div>
                                     </div>
                                     <div style="text-align: right;">
                                         <div style="font-weight: 600; color: var(--text-main);">Est: GHS ${Number(ms.estimated_cash).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
@@ -1026,10 +1074,12 @@ window.addEventListener('route-changed', async (e) => {
                                 </div>
                             </div>
                             
+                            ${isAdmin ? `
                             <div style="border-top: 1px solid var(--border); padding-top: 12px;">
                                 <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Total Capital Spent</div>
                                 <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">GHS ${costBasisFmt}</div>
                             </div>
+                            ` : ''}
                         </div>
 
                         <!-- Converted Refined Card -->
@@ -1067,10 +1117,12 @@ window.addEventListener('route-changed', async (e) => {
                                 Initial Capital Spent
                             </h4>
                             
+                            ${isAdmin ? `
                             <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px;">
                                 <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Total Direct Capital</div>
                                 <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">GHS ${costBasisFmt}</div>
                             </div>
+                            ` : ''}
                             
                             <div>
                                 <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 4px;">Estimated Return</div>
@@ -1108,12 +1160,14 @@ window.addEventListener('route-changed', async (e) => {
                     </div>
 
                     <!-- Variance -->
+                    ${isAdmin ? `
                     <div style="background: ${diffBg}; border: 1px solid ${diffBorder}; padding: 16px; border-radius: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="font-weight: 600; font-size: 1.1rem; color: ${diffColor}; text-transform: uppercase;">${diffLabel}</div>
                         </div>
                         <div style="font-size: 1.6rem; font-weight: 800; color: ${diffColor};">${diff > 0 ? '+' : ''}${diff === 0 ? '' : 'GHS '}${diffCashFmt}</div>
                     </div>
+                    ` : ''}
 
                 </div>
                 <div style="text-align: right;">
@@ -1166,6 +1220,7 @@ window.addEventListener('route-changed', async (e) => {
         });
 
         const estProfit = totalEstCash - totalCapital;
+        const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
 
         const estCashFormatted = totalEstCash.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         const capitalFormatted = totalCapital.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -1175,13 +1230,13 @@ window.addEventListener('route-changed', async (e) => {
         const profitColor = estProfit >= 0 ? 'var(--success)' : 'var(--danger)';
 
         const formHtml = `
-            <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.02) 100%); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                    <div style="width: 40px; height: 40px; border-radius: 10px; background: #8b5cf6; color: white; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center;">
                         <span class="material-symbols-outlined">call_merge</span>
                     </div>
                     <div>
-                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main);">Merged Sale Breakdown</h4>
+                        <h4 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 800;">Merged Sale Breakdown</h4>
                         <div style="font-size: 0.85rem; color: var(--text-muted);">${selected.length} sales combined</div>
                     </div>
                 </div>
@@ -1194,20 +1249,24 @@ window.addEventListener('route-changed', async (e) => {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
+                    ${isAdmin ? `
                     <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                         <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Total Combined Capital Spent</span>
                         <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${capitalFormatted}</span>
                     </div>
+                    ` : ''}
                     <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
                         <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">Combined Est. Cash</span>
                         <span style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">GHS ${estCashFormatted}</span>
                     </div>
                 </div>
                 
+                ${isAdmin ? `
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(139, 92, 246, 0.2); padding-top: 12px;">
                     <span style="font-weight: 600; color: var(--text-main);">Combined Est. Profit</span>
                     <span style="font-size: 1.2rem; font-weight: 800; color: ${profitColor};">GHS ${profitFormatted}</span>
                 </div>
+                ` : ''}
             </div>
 
             <!-- Market Actuals Form -->

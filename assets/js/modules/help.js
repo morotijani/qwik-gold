@@ -159,7 +159,7 @@
             for (const [key, data] of Object.entries(sections)) {
                 const isActive = key === currentSection;
                 tabsHtml += `
-                    <div class="help-tab ${isActive ? 'active' : ''}" onclick="window.selectHelpTab('${key}')" style="padding: 16px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; ${isActive ? 'background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02)); border-left: 4px solid var(--gold-primary); color: var(--gold-primary); font-weight: 700;' : 'color: var(--text-muted); border-left: 4px solid transparent; hover: background: var(--bg-hover);'}">
+                    <div class="help-tab ${isActive ? 'active' : ''}" onclick="window.selectHelpTab('${key}')" style="padding: 16px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; ${isActive ? 'background: rgba(45, 91, 255, 0.08); border-left: 4px solid var(--gold-primary); color: var(--gold-primary); font-weight: 700;' : 'color: var(--text-muted); border-left: 4px solid transparent;'}">
                         <span class="material-symbols-outlined" style="${isActive ? 'color: var(--gold-primary);' : ''}">${data.icon}</span>
                         ${data.title}
                     </div>
@@ -177,19 +177,16 @@
         container.innerHTML = `
             <div>
                 <!-- Header Banner -->
-                <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.03) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(59, 130, 246, 0.05);">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; filter: blur(40px);"></div>
-                    <div style="position: absolute; bottom: -30px; left: 100px; width: 150px; height: 150px; background: rgba(59, 130, 246, 0.05); border-radius: 50%; filter: blur(20px);"></div>
-                    
-                    <div style="position: relative; z-index: 1;">
-                        <div style="color: #2563eb; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); margin-right: 4px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">menu_book</span>
+                <div class="page-header-card">
+                    <div>
+                        <div style="color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div class="page-header-icon">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">menu_book</span>
                             </div>
                             Knowledge Base
                         </div>
-                        <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: var(--text-main);">Help & Documentation</h2>
-                        <p style="margin: 0; color: var(--text-muted); font-size: 1.05rem; max-width: 600px; line-height: 1.5;">Learn how to navigate the Qwik Gold system, understand automated ledger calculations, and follow operational best practices.</p>
+                        <h2 class="page-header-title">Help & Documentation</h2>
+                        <p class="page-header-subtitle">Learn how to navigate the Qwik Gold system, understand automated ledger calculations, and follow operational best practices.</p>
                     </div>
                 </div>
                 

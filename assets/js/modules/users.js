@@ -9,24 +9,20 @@
         container.innerHTML = `
             <div>
                 <!-- Header Banner -->
-                <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: clamp(24px, 5vw, 40px); position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.05);">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(40px);"></div>
-                    <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                    <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                        <div>
-                            <div style="color: #059669; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); margin-right: 4px;">
-                                    <span class="material-symbols-outlined" style="font-size: 18px;">admin_panel_settings</span>
-                                </div>
-                                Access Control
+                <div class="page-header-card">
+                    <div>
+                        <div style="color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div class="page-header-icon">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">admin_panel_settings</span>
                             </div>
-                            <h2 style="margin: 0 0 12px 0; font-size: clamp(1.8rem, 6vw, 2.2rem); font-weight: 800; color: var(--text-main);">System Users</h2>
-                            <p style="margin: 0; color: var(--text-muted); font-size: clamp(0.95rem, 3vw, 1.05rem); max-width: 500px; line-height: 1.5;">Manage administrative access, roles, and security credentials for staff members.</p>
+                            Access Control
                         </div>
-                        <button class="btn btn-primary" onclick="window.openCreateUserModal()" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-weight: 700; padding: clamp(12px, 3vw, 14px) clamp(20px, 4vw, 28px); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); display: flex; align-items: center; gap: 8px; font-size: clamp(0.95rem, 3vw, 1.05rem); border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                            <span class="material-symbols-outlined">person_add</span> Create User
-                        </button>
+                        <h2 class="page-header-title">System Users</h2>
+                        <p class="page-header-subtitle">Manage administrative access, roles, and security credentials for staff members.</p>
                     </div>
+                    <button class="btn btn-primary" onclick="window.openCreateUserModal()">
+                        <span class="material-symbols-outlined">person_add</span> Create User
+                    </button>
                 </div>
                 
                 <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid var(--border);">
@@ -119,12 +115,12 @@
     window.openCreateUserModal = () => {
         const html = `
             <form onsubmit="window.submitCreateUser(event)">
-                <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.02) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                <div style="background: #FFFFFF; border: 1px solid rgba(0, 0, 0, 0.06); border-radius: 16px; padding: 20px; margin-bottom: 24px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <span class="material-symbols-outlined" style="font-size: 1.6rem;">how_to_reg</span>
                     </div>
                     <div>
-                        <h4 style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: 700; color: var(--text-main);">New System User</h4>
+                        <h4 style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main);">New System User</h4>
                         <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Create credentials and assign a role to provide system access.</p>
                     </div>
                 </div>

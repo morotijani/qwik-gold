@@ -4,7 +4,9 @@
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
 require_once '../middleware/auth.php';
+requireRole('admin', 'staff');
 require_once '../helpers/logger.php';
+require_once '../helpers/settings.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendResponse('error', 'Method not allowed', [], 405);
@@ -70,11 +72,15 @@ try {
         $estimatedCash = floor($overallBlades * $estimatedPrice);
     } else if ($goldType === 'refined') {
         if ($overallVolume > 0) {
+            $discountPercent = (float)get_system_setting($pdo, 'purity_discount_percent', 0.70);
+            $discountFactor = (100 - $discountPercent) / 100;
+
             $density = floor(($overallGrams / $overallVolume) * 100) / 100;
-            $karat = 0;
+            $rawKarat = 0;
             if ($density > 0) {
-                $karat = floor(((($density - 10.51) * 52.838) / $density) * 100) / 100;
+                $rawKarat = floor(((($density - 10.51) * 52.838) / $density) * 100) / 100;
             }
+            $karat = $rawKarat > 0 ? floor(($rawKarat * $discountFactor) * 100) / 100 : 0;
             $pounds = floor(($overallGrams / 7.75) * 100) / 100;
             $estimatedCash = floor(($karat * $estimatedPrice / 23) * $pounds);
         }

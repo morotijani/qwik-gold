@@ -12,6 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse('error', 'Method not allowed. Use GET.', [], 405);
 }
 
+requireRole('admin', 'staff');
+
 try {
     // Query to SUM weight_grams and group by type and ownership
     // Strictly filtering out 'sold_main_market' by ensuring current_location is 'office_vault'

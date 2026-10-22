@@ -2,6 +2,7 @@
 // api/users/create.php
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
+require_once '../helpers/logger.php';
 
 // Secure the endpoint
 require_once '../middleware/auth.php';
@@ -46,8 +47,25 @@ try {
 
     $stmt = $pdo->prepare("INSERT INTO users (name, username, password_hash, role, status) VALUES (?, ?, ?, ?, 'active')");
     $stmt->execute([$name, $username, $passwordHash, $role]);
+    $newUserId = (int)$pdo->lastInsertId();
 
-    sendResponse('success', 'User registered successfully', ['id' => $pdo->lastInsertId()], 201);
+    // Log the user creation in the Global Audit Trail
+    log_activity(
+        $pdo,
+        $current_user_id ?? null,
+        'CREATE_USER',
+        'users',
+        $newUserId,
+        null,
+        [
+            'name' => $name,
+            'username' => $username,
+            'role' => $role,
+            'status' => 'active'
+        ]
+    );
+
+    sendResponse('success', 'User registered successfully', ['id' => $newUserId], 201);
 } catch (\PDOException $e) {
     error_log("System Error: " . $e->getMessage());
     sendResponse('error', 'A system error occurred while processing your request.', [], 500);

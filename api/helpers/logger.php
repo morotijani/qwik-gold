@@ -13,9 +13,10 @@
  * @param array|object|null $new_data The state after the action
  * @return void
  */
-function log_activity($pdo, $user_id, $action, $table_affected, $record_id, $old_data = null, $new_data = null) {
+function log_activity($pdo, $user_id, $action, $table_affected, $record_id = 0, $old_data = null, $new_data = null) {
     // 1) Capture the IP address of the staff member making the request
     $ip_address = $_SERVER['REMOTE_ADDR'] ?? null;
+    $record_id = (int)($record_id ?? 0);
     
     // 2) JSON encode the flexible data payloads if they were provided
     $old_data_json = $old_data !== null ? json_encode($old_data) : null;

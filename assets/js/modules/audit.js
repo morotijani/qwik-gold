@@ -66,21 +66,20 @@ window.addEventListener('route-changed', async (e) => {
         container.innerHTML = `
             <div style="width: 100%; padding-bottom: 60px;">
                 <!-- Hero Banner -->
-                <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 40px; position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.02); border-radius: 50%; filter: blur(40px);"></div>
-                    <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(148, 163, 184, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                    <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">policy</span> Security & Compliance
+                <div class="page-header-card">
+                    <div>
+                        <div style="color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div class="page-header-icon">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">policy</span>
                             </div>
-                            <h2 style="margin: 0 0 12px 0; font-size: 2.2rem; font-weight: 800; color: white;">Global Audit Trail</h2>
-                            <p style="margin: 0; color: #cbd5e1; font-size: 1.05rem; max-width: 500px; line-height: 1.5;">Immutable log of all business operations and data mutations across the entire Qwik Gold platform.</p>
+                            Security & Compliance
                         </div>
-                        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 16px 24px; border-radius: 12px; text-align: center;">
-                            <span class="material-symbols-outlined" style="font-size: 32px; color: #94a3b8; margin-bottom: 8px; display: block;">security</span>
-                            <div style="color: white; font-weight: 700; font-size: 1.1rem;">Secured</div>
-                        </div>
+                        <h2 class="page-header-title">Global Audit Trail</h2>
+                        <p class="page-header-subtitle">Immutable log of all business operations and data mutations across the entire Qwik Gold platform.</p>
+                    </div>
+                    <div style="background: #EAF0FF; color: #2D5BFF; padding: 12px 20px; border-radius: var(--radius-pill); font-weight: 800; font-size: 0.92rem; display: flex; align-items: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">security</span>
+                        System Secured
                     </div>
                 </div>
                 
@@ -129,13 +128,13 @@ window.addEventListener('route-changed', async (e) => {
                 let actionColor = 'rgba(100, 116, 139, 0.1)';
                 let actionText = '#64748b';
                 
-                if (log.action.toUpperCase().includes('CREATE') || log.action.toUpperCase().includes('ADD')) {
+                if (log.action.toUpperCase().includes('CREATE') || log.action.toUpperCase().includes('ADD') || log.action.toUpperCase().includes('REACTIVATE')) {
                     actionColor = 'rgba(16, 185, 129, 0.1)';
                     actionText = '#10b981';
                 } else if (log.action.toUpperCase().includes('UPDATE') || log.action.toUpperCase().includes('EDIT') || log.action.toUpperCase().includes('APPROVE') || log.action.toUpperCase().includes('SETTLE')) {
                     actionColor = 'rgba(59, 130, 246, 0.1)';
                     actionText = '#2563eb';
-                } else if (log.action.toUpperCase().includes('DELETE') || log.action.toUpperCase().includes('REMOVE') || log.action.toUpperCase().includes('CANCEL')) {
+                } else if (log.action.toUpperCase().includes('DELETE') || log.action.toUpperCase().includes('REMOVE') || log.action.toUpperCase().includes('CANCEL') || log.action.toUpperCase().includes('SUSPEND') || log.action.toUpperCase().includes('VOID')) {
                     actionColor = 'rgba(239, 68, 68, 0.1)';
                     actionText = '#ef4444';
                 }

@@ -2,6 +2,7 @@
 // api/users/toggle_status.php
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
+require_once '../helpers/logger.php';
 
 // Secure the endpoint
 require_once '../middleware/auth.php';
@@ -31,18 +32,36 @@ if ($userId === $current_user_id) {
 
 try {
     // Get current status
-    $stmt = $pdo->prepare("SELECT status FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT id, name, username, role, status FROM users WHERE id = ?");
     $stmt->execute([$userId]);
-    $user = $stmt->fetch();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$user) {
         sendResponse('error', 'User not found', [], 404);
     }
     
-    $newStatus = $user['status'] === 'active' ? 'suspended' : 'active';
+    $oldStatus = $user['status'];
+    $newStatus = $oldStatus === 'active' ? 'suspended' : 'active';
     
     $updateStmt = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
     $updateStmt->execute([$newStatus, $userId]);
+
+    // Log the user status change in the Global Audit Trail
+    $action = $newStatus === 'active' ? 'REACTIVATE_USER' : 'SUSPEND_USER';
+    log_activity(
+        $pdo,
+        $current_user_id ?? null,
+        $action,
+        'users',
+        $userId,
+        ['status' => $oldStatus],
+        [
+            'status' => $newStatus,
+            'name' => $user['name'],
+            'username' => $user['username'],
+            'role' => $user['role']
+        ]
+    );
     
     sendResponse('success', 'User status updated to ' . $newStatus, ['new_status' => $newStatus], 200);
 } catch (\PDOException $e) {

@@ -4,6 +4,7 @@
 require_once '../../config/headers.php';
 require_once '../../config/database.php';
 require_once '../middleware/auth.php';
+requireRole('admin', 'staff');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     sendResponse('error', 'Method not allowed', [], 405);
@@ -79,6 +80,15 @@ try {
         
         // Ensure the master sale's total cost is accurate
         $sale['total_cost'] = max($totalCost, $mergedTotalCost);
+    }
+
+    if ($current_user_role !== 'admin') {
+        unset($sale['total_cost']);
+        $sale['net_profit_ghs'] = null;
+        foreach ($mergedSales as &$ms) {
+            unset($ms['total_cost']);
+            $ms['net_profit_ghs'] = null;
+        }
     }
 
     sendResponse('success', 'Sale details retrieved', [

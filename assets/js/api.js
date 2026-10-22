@@ -71,6 +71,41 @@ class ApiClient {
     // Convenience methods
     get(endpoint) { return this.request(endpoint, 'GET'); }
     post(endpoint, body) { return this.request(endpoint, 'POST', body); }
+
+    async postForm(endpoint, formData) {
+        const headers = {
+            'Accept': 'application/json'
+        };
+
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+
+        try {
+            const response = await fetch(`${this.baseUrl}${endpoint}`, {
+                method: 'POST',
+                headers,
+                body: formData
+            });
+
+            if (response.status === 401) {
+                this.clearSession();
+                throw new Error("Session expired or unauthorized. Please log in.");
+            }
+
+            const data = await response.json();
+
+            if (!response.ok || data.status === 'error') {
+                throw new Error(data.message || 'API Error occurred');
+            }
+
+            return data.data;
+
+        } catch (error) {
+            console.error(`API Error [POST (Form) ${endpoint}]:`, error);
+            throw error;
+        }
+    }
 }
 
 // Instantiate globally

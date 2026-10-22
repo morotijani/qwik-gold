@@ -6,6 +6,8 @@ require_once '../../config/database.php';
 require_once '../middleware/auth.php';
 require_once '../helpers/logger.php';
 
+// Salespersons do not have access to loans
+requireRole('admin', 'staff');
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

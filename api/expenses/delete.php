@@ -11,6 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendResponse('error', 'Method not allowed. Use POST.', [], 405);
 }
 
+requireRole('admin', 'staff');
+
 $jsonInput = file_get_contents('php://input');
 $data = json_decode($jsonInput, true);
 
@@ -20,6 +22,9 @@ if (!isset($data['expense_id'])) {
 
 $expenseId = (int)$data['expense_id'];
 $isPermanent = isset($data['permanent']) && $data['permanent'] === true;
+if ($isPermanent) {
+    requireRole('admin');
+}
 
 try {
     $pdo->beginTransaction();

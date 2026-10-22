@@ -34,6 +34,9 @@ window.addEventListener('route-changed', async (e) => {
 
             const response = await window.api.get(`/expenses/list.php?status=${status}&limit=${limit}&offset=${offset}`);
 
+            const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
+            const isSalesperson = typeof window.isSalesperson === 'function' ? window.isSalesperson() : false;
+
             let expensesHtml = '';
             if (!response.expenses || response.expenses.length === 0) {
                 expensesHtml = `
@@ -53,17 +56,25 @@ window.addEventListener('route-changed', async (e) => {
 
                     let actionsHtml = '';
                     if (isVoided) {
-                        actionsHtml = `
-                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #fca5a5; color: #ef4444; border-radius: 8px; background: white;" onclick="window.confirmPermanentDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
-                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">delete_forever</span> Perm Delete
-                            </button>
-                        `;
+                        if (isAdmin) {
+                            actionsHtml = `
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #fca5a5; color: #ef4444; border-radius: 8px; background: white;" onclick="window.confirmPermanentDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
+                                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">delete_forever</span> Perm Delete
+                                </button>
+                            `;
+                        } else {
+                            actionsHtml = '<span style="opacity: 0.3">-</span>';
+                        }
                     } else {
-                        actionsHtml = `
-                            <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #fcd34d; color: #d97706; border-radius: 8px; background: white;" onclick="window.confirmDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
-                                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">block</span> Void
-                            </button>
-                        `;
+                        if (!isSalesperson) {
+                            actionsHtml = `
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; border-color: #fcd34d; color: #d97706; border-radius: 8px; background: white;" onclick="window.confirmDeleteExpense(${exp.id}, ${exp.amount_ghs}, '${exp.description.replace(/'/g, "\\'")}')">
+                                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">block</span> Void
+                                </button>
+                            `;
+                        } else {
+                            actionsHtml = '<span style="opacity: 0.3">-</span>';
+                        }
                     }
 
                     return `
@@ -101,63 +112,63 @@ window.addEventListener('route-changed', async (e) => {
             }
 
             container.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                    <h2 class="page-title" style="margin: 0; font-size: initial; font-weight: 700; color: var(--text-main);">Office Expenditures</h2>
+                <div class="page-header-card">
+                    <div>
+                        <div style="color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div class="page-header-icon">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">receipt_long</span>
+                            </div>
+                            Finance
+                        </div>
+                        <h2 class="page-header-title">Office Expenditures</h2>
+                        <p class="page-header-subtitle">Log, monitor, and audit operational office expenses and overhead outlays.</p>
+                    </div>
                     <button class="btn btn-primary" onclick="window.openRecordExpenseModal()">
-                        <span class="material-symbols-outlined" style="font-size: 20px; font-weight: 300;">add</span> Record Expense
+                        <span class="material-symbols-outlined">add</span> Record Expense
                     </button>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 28px;">
                     
                     <!-- Total Lifetime -->
-                    <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.03) 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05);">
-                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                        <div style="position: relative; z-index: 1;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <div style="color: #b91c1c; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Lifetime Expenses</div>
-                                <div style="background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
-                                    <span class="material-symbols-outlined" style="font-size: 24px;">receipt_long</span>
-                                </div>
+                    <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="color: #64748B; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Lifetime Expenses</div>
+                            <div style="background: #FEE2E2; color: #DC2626; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">receipt_long</span>
                             </div>
-                            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
-                                ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </div>
+                        </div>
+                        <div style="font-size: 2.2rem; font-weight: 900; color: #121926; letter-spacing: -0.5px;">
+                            <span style="font-size: 1.1rem; font-weight: 600; color: #94A3B8;">GHS</span> 
+                            ${Number(response.total_lifetime_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
 
                     <!-- Expenses This Month -->
-                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);">
-                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                        <div style="position: relative; z-index: 1;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <div style="color: #d97706; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Expenses This Month</div>
-                                <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
-                                    <span class="material-symbols-outlined" style="font-size: 24px;">calendar_month</span>
-                                </div>
+                    <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="color: #64748B; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Expenses This Month</div>
+                            <div style="background: #FEF3C7; color: #D97706; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">calendar_month</span>
                             </div>
-                            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
-                                ${Number(response.total_month_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </div>
+                        </div>
+                        <div style="font-size: 2.2rem; font-weight: 900; color: #121926; letter-spacing: -0.5px;">
+                            <span style="font-size: 1.1rem; font-weight: 600; color: #94A3B8;">GHS</span> 
+                            ${Number(response.total_month_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
 
                     <!-- Expenses Today -->
-                    <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05);">
-                        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                        <div style="position: relative; z-index: 1;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <div style="color: #059669; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Expenses Today</div>
-                                <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
-                                    <span class="material-symbols-outlined" style="font-size: 24px;">today</span>
-                                </div>
+                    <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="color: #64748B; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Expenses Today</div>
+                            <div style="background: #DCFCE7; color: #16A34A; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">today</span>
                             </div>
-                            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; line-height: 1;">
-                                <span style="font-size: 1.2rem; font-weight: 600; color: var(--text-muted);">GHS</span> 
-                                ${Number(response.total_today_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </div>
+                        </div>
+                        <div style="font-size: 2.2rem; font-weight: 900; color: #121926; letter-spacing: -0.5px;">
+                            <span style="font-size: 1.1rem; font-weight: 600; color: #94A3B8;">GHS</span> 
+                            ${Number(response.total_today_ghs || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
                 </div>
@@ -218,13 +229,13 @@ window.addEventListener('route-changed', async (e) => {
         const html = `
             <form id="record-expense-form" onsubmit="window.submitExpense(event)">
                 <!-- Info Banner -->
-                <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.02) 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.05);">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--danger), #b91c1c); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
+                <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 20px; margin-bottom: 32px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <span class="material-symbols-outlined" style="font-size: 1.6rem;">account_balance_wallet</span>
                     </div>
                     <div>
-                        <div style="font-size: 0.95rem; font-weight: 800; color: var(--danger); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Ledger Deduction</div>
-                        <div style="font-size: 0.85rem; color: var(--text-main); line-height: 1.4;">This amount will be directly deducted from the Capital Ledger. Ensure the amount and date are correct before proceeding.</div>
+                        <div style="font-size: 0.95rem; font-weight: 800; color: #121926; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Ledger Deduction</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">This amount will be directly deducted from the Capital Ledger. Ensure the amount and date are correct before proceeding.</div>
                     </div>
                 </div>
 
@@ -240,54 +251,54 @@ window.addEventListener('route-changed', async (e) => {
                 </style>
 
                 <!-- Amount Input -->
-                <div class="form-group" style="margin-bottom: 32px;">
-                    <label style="display: block; font-weight: 800; color: var(--text-muted); margin-bottom: 12px; font-size: 0.85rem; text-align: center; letter-spacing: 1.5px; text-transform: uppercase;">Expense Amount <span style="color: var(--danger);">*</span></label>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label style="display: block; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; font-size: 0.74rem; text-align: center; letter-spacing: 1px; text-transform: uppercase;">Expense Amount <span style="color: var(--danger);">*</span></label>
                     <div style="position: relative;">
-                        <span style="position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-weight: 700; font-size: 1.8rem; pointer-events: none;">₵</span>
+                        <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-weight: 700; font-size: 1.4rem; pointer-events: none;">₵</span>
                         <input type="number" id="expense_amount" required step="0.01" min="0.01" placeholder="0.00" 
-                               style="width: 100%; padding: 24px 64px; font-size: 2.8rem; font-weight: 800; border: 2px solid #e2e8f0; border-radius: 20px; background: #f8fafc; transition: all 0.3s; text-align: center; color: var(--danger); letter-spacing: -1px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);"
-                               onfocus="this.style.borderColor='var(--danger)'; this.style.background='white'; this.style.boxShadow='0 0 0 4px rgba(239, 68, 68, 0.1), inset 0 2px 4px rgba(0,0,0,0.02)';" 
-                               onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='inset 0 2px 6px rgba(0,0,0,0.02)';">
+                               style="width: 100%; padding: 10px 42px; font-size: 2rem; font-weight: 800; border: 1.5px solid #e2e8f0; border-radius: 14px; background: #f8fafc; transition: all 0.2s; text-align: center; color: var(--danger); letter-spacing: -0.5px;"
+                               onfocus="this.style.borderColor='var(--danger)'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(239, 68, 68, 0.1)';" 
+                               onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
                     </div>
                 </div>
 
                 <!-- Description & Date Inputs -->
-                <div style="margin-bottom: 32px;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Description <span style="color: var(--danger);">*</span></label>
+                <div style="margin-bottom: 16px;">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 6px; font-size: 0.85rem;">Description <span style="color: var(--danger);">*</span></label>
                         <div style="position: relative;">
-                            <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">edit_note</span>
+                            <span class="material-symbols-outlined" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 1.15rem;">edit_note</span>
                             <input type="text" id="expense_description" required placeholder="e.g. Fuel, Light Bill..." 
-                                   style="width: 100%; padding: 14px 16px 14px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1rem; transition: all 0.2s;"
+                                   style="width: 100%; padding: 9px 12px 9px 42px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg-main); font-size: 0.88rem; transition: all 0.2s;"
                                    onfocus="this.style.borderColor='var(--info)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
                         </div>
                     </div>
-                </div>
-                
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 8px; font-size: 0.95rem;">Date</label>
-                    <div style="position: relative;">
-                        <span class="material-symbols-outlined" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">calendar_today</span>
-                        <input type="date" id="expense_date" 
-                                style="width: 100%; padding: 14px 16px 14px 48px; border: 2px solid var(--border); border-radius: 12px; background: var(--bg-main); font-size: 1rem; transition: all 0.2s; font-family: inherit;"
-                                onfocus="this.style.borderColor='var(--info)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="display: block; font-weight: 600; color: var(--text-main); margin-bottom: 6px; font-size: 0.85rem;">Date</label>
+                        <div style="position: relative;">
+                            <span class="material-symbols-outlined" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 1.15rem;">calendar_today</span>
+                            <input type="date" id="expense_date" 
+                                    style="width: 100%; padding: 9px 12px 9px 42px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg-main); font-size: 0.88rem; transition: all 0.2s; font-family: inherit;"
+                                    onfocus="this.style.borderColor='var(--info)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg-main)';">
+                        </div>
                     </div>
-                </div>
 
-                <div style="text-align: right; margin-top: 17px; margin-bottom: 32px;">
-                    <small style="color: var(--text-muted); font-size: 0.8rem; font-weight: 500;">Leave date empty to use today's date</small>
+                    <div style="text-align: right; margin-top: 6px;">
+                        <small style="color: var(--text-muted); font-size: 0.75rem; font-weight: 500;">Leave date empty to use today's date</small>
+                    </div>
                 </div>
                 
                 <!-- Submit Action -->
-                <div style="padding-top: 24px; border-top: 1px dashed var(--border); margin-top: 16px;">
-                    <button type="submit" class="btn" style="width: 100%; background: linear-gradient(135deg, var(--danger), #b91c1c); color: white; border: none; font-weight: 700; padding: 16px; font-size: 1.1rem; border-radius: 12px; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
-                        <span class="material-symbols-outlined">payments</span> Deduct from Ledger
+                <div style="padding-top: 14px; border-top: 1px dashed var(--border); margin-top: 14px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px 18px; font-size: 0.88rem; border-radius: var(--radius-pill); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span class="material-symbols-outlined" style="font-size: 1.15rem;">payments</span> Deduct from Ledger
                     </button>
                 </div>
             </form>
         `;
 
-        window.openModal('Record Office Expense', html, { maxWidth: '600px' });
+        window.openModal('Record Office Expense', html, { maxWidth: '420px' });
     };
 
     window.submitExpense = async (event) => {
@@ -315,23 +326,26 @@ window.addEventListener('route-changed', async (e) => {
     };
 
     window.confirmDeleteExpense = (id, amount, description) => {
+        if (typeof window.isSalesperson === 'function' && window.isSalesperson()) {
+            return window.showToast('Access Denied: Only administrators and staff can void expenses.', 'error');
+        }
         const html = `
-            <div style="text-align: center; padding: 10px 0;">
-                <div style="width: 64px; height: 64px; background: var(--warning-bg); color: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
-                    <span class="material-symbols-outlined" style="font-size: 32px;">block</span>
+            <div style="text-align: center; padding: 6px 0;">
+                <div style="width: 50px; height: 50px; background: var(--warning-bg); color: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">block</span>
                 </div>
-                <h3 style="margin-top: 0;">Void Expense</h3>
-                <p style="color: var(--text-muted); margin-bottom: 24px;">
+                <h3 style="margin-top: 0; font-size: 1.05rem;">Void Expense</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.85rem; line-height: 1.5;">
                     Are you sure you want to void <strong>${description}</strong> for <strong>GHS ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>?<br><br>
                     This will mark the record as voided and refund the amount back to the Capital Ledger.
                 </p>
-                <div style="display: flex; gap: 12px; justify-content: center;">
+                <div style="display: flex; gap: 10px; justify-content: center;">
                     <button class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
                     <button class="btn btn-primary" id="btn-confirm-delete" style="flex: 1; background: var(--danger); border-color: var(--danger); color: white;" onclick="window.executeDeleteExpense(${id})">Yes, Void It</button>
                 </div>
             </div>
         `;
-        window.openModal('Confirm Action', html, { maxWidth: '450px' });
+        window.openModal('Confirm Action', html, { maxWidth: '380px', size: 'sm' });
     };
 
     window.executeDeleteExpense = async (id) => {
@@ -356,23 +370,26 @@ window.addEventListener('route-changed', async (e) => {
     };
 
     window.confirmPermanentDeleteExpense = (id, amount, description) => {
+        if (typeof window.isAdmin === 'function' && !window.isAdmin()) {
+            return window.showToast('Access Denied: Only administrators can permanently delete expenses.', 'error');
+        }
         const html = `
-            <div style="text-align: center; padding: 10px 0;">
-                <div style="width: 64px; height: 64px; background: var(--danger-bg); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
-                    <span class="material-symbols-outlined" style="font-size: 32px;">delete_forever</span>
+            <div style="text-align: center; padding: 6px 0;">
+                <div style="width: 50px; height: 50px; background: var(--danger-bg); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">delete_forever</span>
                 </div>
-                <h3 style="margin-top: 0;">Permanently Delete</h3>
-                <p style="color: var(--text-muted); margin-bottom: 24px;">
+                <h3 style="margin-top: 0; font-size: 1.05rem;">Permanently Delete</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.85rem; line-height: 1.5;">
                     Are you sure you want to permanently delete <strong>${description}</strong>?<br><br>
                     This action cannot be undone. It will remove the record entirely from the database.
                 </p>
-                <div style="display: flex; gap: 12px; justify-content: center;">
+                <div style="display: flex; gap: 10px; justify-content: center;">
                     <button class="btn btn-outline" style="flex: 1;" onclick="window.closeModal()">Cancel</button>
                     <button class="btn btn-primary" id="btn-confirm-perm-delete" style="flex: 1; background: var(--danger); border-color: var(--danger); color: white;" onclick="window.executePermanentDeleteExpense(${id})">Permanently Delete</button>
                 </div>
             </div>
         `;
-        window.openModal('Confirm Permanent Delete', html, { maxWidth: '450px' });
+        window.openModal('Confirm Permanent Delete', html, { maxWidth: '380px', size: 'sm' });
     };
 
     window.executePermanentDeleteExpense = async (id) => {

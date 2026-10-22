@@ -18,7 +18,7 @@ CREATE TABLE customers (
 -- capital_ledger (The Single Source of Truth for Cash)
 CREATE TABLE capital_ledger (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    transaction_type ENUM('loan_issued', 'loan_repaid', 'gold_purchase', 'expense', 'out_sale_revenue', 'external_capital_in', 'expense_refunded', 'purchase_reversal') NOT NULL,
+    transaction_type ENUM('loan_issued', 'loan_repaid', 'gold_purchase', 'expense', 'out_sale_revenue', 'external_capital_in', 'expense_refunded', 'purchase_reversal', 'capital_withdrawal') NOT NULL,
     amount_ghs DECIMAL(15, 2) NOT NULL,
     running_balance DECIMAL(15, 2) NOT NULL,
     reference_id INT DEFAULT NULL, -- Links to specific loan, purchase, or expense ID
@@ -143,3 +143,24 @@ CREATE TABLE expenses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (handler_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- system_settings
+CREATE TABLE IF NOT EXISTS system_settings (
+    setting_key VARCHAR(100) PRIMARY KEY,
+    setting_value TEXT NOT NULL,
+    description VARCHAR(255) DEFAULT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT IGNORE INTO system_settings (setting_key, setting_value, description) VALUES 
+('purity_discount_percent', '0.7', 'Purity discount percentage deducted from raw karat for refined gold calculations'),
+('company_name', 'Qwik Gold', 'Company Name'),
+('company_tagline', 'Enterprise Precious Metals Ledger', 'Company Tagline / Subtitle'),
+('company_address', 'Accra Gold Market, Greater Accra, Ghana', 'Physical Address'),
+('company_phone', '+233 24 123 4567', 'Phone Number'),
+('company_email', 'info@qwikgold.com', 'Email Address'),
+('company_website', 'https://qwikgold.com', 'Website URL'),
+('company_currency', 'GHS', 'Currency Symbol / Code'),
+('company_logo', 'assets/img/logo.png', 'Company Logo URL or Path'),
+('company_receipt_footer', 'Thank you for doing business with Qwik Gold!', 'Receipt Footer Note');
+

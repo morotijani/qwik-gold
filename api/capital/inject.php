@@ -6,6 +6,8 @@ require_once '../../config/database.php';
 require_once '../middleware/auth.php';
 require_once '../helpers/logger.php';
 
+// Only administrators can inject capital
+requireRole('admin');
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

@@ -15,24 +15,20 @@ window.addEventListener('route-changed', async (e) => {
             const customers = await window.api.get('/customers/list.php');
 
             container.innerHTML = `
-                <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: clamp(24px, 5vw, 40px); position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);">
-                    <div style="position: absolute; top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(40px);"></div>
-                    <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                    <div style="position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                        <div>
-                            <div style="color: #d97706; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                                <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); margin-right: 4px;">
-                                    <span class="material-symbols-outlined" style="font-size: 18px;">contacts</span>
-                                </div>
-                                Network
+                <div class="page-header-card">
+                    <div>
+                        <div style="color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <div class="page-header-icon">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">contacts</span>
                             </div>
-                            <h2 style="margin: 0 0 12px 0; font-size: clamp(1.8rem, 6vw, 2.2rem); font-weight: 800; color: var(--text-main);">Customer Directory</h2>
-                            <p style="margin: 0; color: var(--text-muted); font-size: clamp(0.95rem, 3vw, 1.05rem); max-width: 500px; line-height: 1.5;">Manage all your suppliers, track their interactions, and build deep relationships through comprehensive profile tracking.</p>
+                            Network
                         </div>
-                        <button class="btn btn-primary" onclick="window.openCreateCustomerModal()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; font-weight: 700; padding: clamp(12px, 3vw, 14px) clamp(20px, 4vw, 28px); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 8px; font-size: clamp(0.95rem, 3vw, 1.05rem); border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                            <span class="material-symbols-outlined">person_add</span> Add Contact
-                        </button>
+                        <h2 class="page-header-title">Customer Directory</h2>
+                        <p class="page-header-subtitle">Manage all your suppliers, track their interactions, and build deep relationships through comprehensive profile tracking.</p>
                     </div>
+                    <button class="btn btn-primary" onclick="window.openCreateCustomerModal()">
+                        <span class="material-symbols-outlined">person_add</span> Add Contact
+                    </button>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px;">
@@ -40,7 +36,7 @@ window.addEventListener('route-changed', async (e) => {
                     ${customers.map(c => `
                         <div class="contact-card" style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.06)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.03)';">
                             <div class="contact-left" style="display: flex; align-items: center; gap: 16px;">
-                                <div class="contact-avatar" style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);">
+                                <div class="contact-avatar" style="width: 56px; height: 56px; border-radius: 16px; background: #EEF2FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">
                                     ${c.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div class="contact-info">
@@ -212,6 +208,7 @@ window.addEventListener('route-changed', async (e) => {
             const hasLoans = (data.all_loans && data.all_loans.length > 0) || parseFloat(data.active_debt.total_amount_ghs) > 0 || parseFloat(data.total_settled_ghs) > 0;
             const hasKeptGold = parseFloat(data.current_kept_gold.balls_grams) > 0 || parseFloat(data.current_kept_gold.refined_grams) > 0;
             const hasSales = data.all_purchases && data.all_purchases.length > 0;
+            const isSalesperson = typeof window.isSalesperson === 'function' ? window.isSalesperson() : false;
 
             container.innerHTML = `
                 <div style="width: 100%; padding-bottom: 60px;">
@@ -220,8 +217,8 @@ window.addEventListener('route-changed', async (e) => {
                         <button class="btn btn-text" onclick="window.location.hash = '#${returnRoute}'; window.dispatchEvent(new CustomEvent('route-changed', {detail:{route:'${returnRoute}', container: document.getElementById('view-container')}}))" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-weight: 600; padding: 8px 16px; border-radius: 12px; transition: background 0.2s; white-space: nowrap; font-size: clamp(0.85rem, 2vw, 1rem);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
                             <span class="material-symbols-outlined">arrow_back</span> Back
                         </button>
-<div style="display: flex; gap: clamp(8px, 2vw, 12px); flex-wrap: wrap;">
-                            ${parseFloat(data.active_debt.total_amount_ghs) === 0 ? `
+                        <div style="display: flex; gap: clamp(8px, 2vw, 12px); flex-wrap: wrap;">
+                            ${!isSalesperson && parseFloat(data.active_debt.total_amount_ghs) === 0 ? `
                             <button class="btn btn-outline" onclick="window.confirmClearHistory(${data.profile.id}, '${returnRoute}')" style="background: white; border-color: rgba(239, 68, 68, 0.3); color: var(--danger); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">delete_sweep</span> Clear History
                             </button>
@@ -229,118 +226,114 @@ window.addEventListener('route-changed', async (e) => {
                             <button class="btn btn-outline" onclick='window.openEditCustomerModal(${JSON.stringify(data.profile).replace(/'/g, "&#39;")})' style="background: white; border-color: var(--border); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">edit</span> Edit Profile
                             </button>
-                            <button class="btn btn-primary" onclick="window.openCustomerSafeKeepModal(${data.profile.id})" style="background: linear-gradient(135deg, #10b981, #059669); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem); color: white;">
+                            <button class="btn btn-pill" onclick="window.openCustomerSafeKeepModal(${data.profile.id})" style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">security</span> Safe Keep Gold
                             </button>
-                            <button class="btn btn-primary" onclick="window.openCustomerIssueLoanModal(${data.profile.id})" style="background: linear-gradient(135deg, var(--warning), #d97706); border: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); border-radius: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px); font-size: clamp(0.85rem, 2vw, 1rem);">
+                            ${!isSalesperson ? `
+                            <button class="btn btn-primary" onclick="window.openCustomerIssueLoanModal(${data.profile.id})" style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
                                 <span class="material-symbols-outlined" style="font-size: 18px;">payments</span> Issue New Loan
                             </button>
+                            ` : ''}
                         </div>
                     </div>
 
                     <!-- Main Profile Card -->
-                    <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border-radius: 20px; padding: clamp(24px, 5vw, 40px); box-shadow: 0 10px 30px rgba(245, 158, 11, 0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; border: 1px solid rgba(245, 158, 11, 0.2); position: relative; overflow: hidden; flex-wrap: wrap; gap: 20px;">
-                        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(30px);"></div>
-                        <div style="display: flex; align-items: center; gap: clamp(16px, 4vw, 32px); position: relative; z-index: 1; flex-wrap: wrap;">
-                            <div style="width: clamp(64px, 15vw, 100px); height: clamp(64px, 15vw, 100px); border-radius: 24px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display: flex; align-items: center; justify-content: center; font-size: clamp(2rem, 5vw, 3rem); color: white; font-weight: 800; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);">
+                    <div style="background: #FFFFFF; border-radius: 24px; padding: clamp(24px, 4vw, 36px); box-shadow: 0 4px 20px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 20px;">
+                        <div style="display: flex; align-items: center; gap: clamp(16px, 4vw, 28px); flex-wrap: wrap;">
+                            <div style="width: clamp(64px, 12vw, 88px); height: clamp(64px, 12vw, 88px); border-radius: 24px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; font-size: clamp(2rem, 4vw, 2.6rem); font-weight: 800;">
                                 ${data.profile.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <h3 style="font-size: clamp(1.6rem, 5vw, 2.2rem); font-weight: 800; margin: 0 0 12px 0; color: var(--text-main); display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                <h3 style="font-size: clamp(1.6rem, 5vw, 2.1rem); font-weight: 800; margin: 0 0 10px 0; color: var(--text-main); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; letter-spacing: -0.02em;">
                                     ${data.profile.name}
-                                    <span style="font-size: 0.85rem; padding: 6px 14px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);"><span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Active</span>
-                                    <span style="font-size: 0.85rem; padding: 6px 14px; background: var(--bg-hover); color: var(--text-muted); border-radius: 20px; font-weight: 700; text-transform: capitalize; box-shadow: inset 0 0 0 1px var(--border);"><span class="material-symbols-outlined" style="font-size: 14px;">storefront</span> ${data.profile.type}</span>
+                                    <span style="font-size: 0.82rem; padding: 6px 14px; background: #DCFCE7; color: #15803D; border-radius: 20px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"><span class="material-symbols-outlined" style="font-size: 14px;">check_circle</span> Active</span>
+                                    <span style="font-size: 0.82rem; padding: 6px 14px; background: #F1F5F9; color: var(--text-muted); border-radius: 20px; font-weight: 700; text-transform: capitalize;"><span class="material-symbols-outlined" style="font-size: 14px;">storefront</span> ${data.profile.type}</span>
                                 </h3>
-                                <div style="display: flex; align-items: center; gap: clamp(12px, 2vw, 24px); color: var(--text-muted); font-size: clamp(0.9rem, 2vw, 1rem); font-weight: 500; flex-wrap: wrap;">
-                                    <span style="display: flex; align-items: center; gap: 8px; background: var(--bg-main); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);"><span class="material-symbols-outlined" style="font-size: 18px; color: #0284c7;">badge</span> ${data.profile.customer_uid || '#' + data.profile.id}</span>
-                                    <span style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">call</span> ${data.profile.phone || 'No phone'}</span>
-                                    ${data.profile.business_name ? `<span style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">store</span> ${data.profile.business_name}</span>` : ''}
-                                    <span style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 4px 10px; border-radius: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">support_agent</span> Handled by: <span style="font-weight: 700; color: var(--text-main);">${data.profile.handler_name || 'System'}</span></span>
+                                <div style="display: flex; align-items: center; gap: clamp(10px, 2vw, 20px); color: var(--text-muted); font-size: clamp(0.88rem, 2vw, 0.95rem); font-weight: 500; flex-wrap: wrap;">
+                                    <span style="display: flex; align-items: center; gap: 6px; background: var(--bg-main); padding: 6px 12px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.04);"><span class="material-symbols-outlined" style="font-size: 17px; color: #2D5BFF;">badge</span> ${data.profile.customer_uid || '#' + data.profile.id}</span>
+                                    <span style="display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 17px;">call</span> ${data.profile.phone || 'No phone'}</span>
+                                    ${data.profile.business_name ? `<span style="display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 17px;">store</span> ${data.profile.business_name}</span>` : ''}
+                                    <span style="display: flex; align-items: center; gap: 6px; background: var(--bg-main); padding: 4px 10px; border-radius: 8px;"><span class="material-symbols-outlined" style="font-size: 16px;">support_agent</span> Handled by: <span style="font-weight: 700; color: var(--text-main);">${data.profile.handler_name || 'System'}</span></span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Financial Stats Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 48px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 40px;">
                         
                         ${hasLoans ? `
                             <!-- Active Debt -->
-                            <div style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.03) 100%); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px;">
-                                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; filter: blur(20px);"></div>
-                                <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;">
-                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #ef4444, #dc2626); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #FEE2E2; color: #DC2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                         <span class="material-symbols-outlined" style="font-size: 20px;">money_off</span>
                                     </div>
-                                    <div style="color: #dc2626; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Active Debt</div>
+                                    <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Active Debt</div>
                                 </div>
-                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${parseFloat(data.active_debt.total_amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #DC2626; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; letter-spacing: -0.5px;">
+                                    <span style="font-size: 1rem; color: #94A3B8; font-weight: 600;">GHS</span> ${parseFloat(data.active_debt.total_amount_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                             
                             <!-- Total Settled -->
-                            <div style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.03) 100%); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px;">
-                                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; filter: blur(20px);"></div>
-                                <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;">
-                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);">
+                            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #DCFCE7; color: #15803D; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                         <span class="material-symbols-outlined" style="font-size: 20px;">task_alt</span>
                                     </div>
-                                    <div style="color: #059669; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Total Settled</div>
+                                    <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Settled</div>
                                 </div>
-                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${parseFloat(data.total_settled_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #121926; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; letter-spacing: -0.5px;">
+                                    <span style="font-size: 1rem; color: #94A3B8; font-weight: 600;">GHS</span> ${parseFloat(data.total_settled_ghs).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         ` : ''}
                         
                         ${hasKeptGold ? `
                             <!-- Kept Gold -->
-                            <div style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.03) 100%); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onclick='window.openVaultBreakdownModal(${JSON.stringify(data).replace(/'/g, "&#39;")})' onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(245, 158, 11, 0.05)';">
-                                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; filter: blur(20px);"></div>
-                                <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;">
-                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
+                            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: all 0.2s;" onclick='window.openVaultBreakdownModal(${JSON.stringify(data).replace(/'/g, "&#39;")})'>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #FEF3C7; color: #B45309; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                         <span class="material-symbols-outlined" style="font-size: 20px;">inventory_2</span>
                                     </div>
-                                    <div style="color: #d97706; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Vault Balance</div>
+                                    <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Vault Balance</div>
                                 </div>
-                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    ${parseFloat(data.current_kept_gold.balls_grams + data.current_kept_gold.refined_grams).toFixed(2)} <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">g</span>
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #121926; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; letter-spacing: -0.5px;">
+                                    ${parseFloat(data.current_kept_gold.balls_grams + data.current_kept_gold.refined_grams).toFixed(2)} <span style="font-size: 1rem; color: #94A3B8; font-weight: 600;">g</span>
                                 </div>
-                                <div style="position: relative; z-index: 1; margin-top: 4px;">
-                                    <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-color: rgba(217,119,6,0.5); color: #d97706; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
-                                        <span class="material-symbols-outlined" style="font-size: 14px;">open_in_new</span> View Breakdown
-                                    </button>
+                                <div style="margin-top: 4px;">
+                                    <span style="font-size: 0.8rem; color: #2D5BFF; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                        <span class="material-symbols-outlined" style="font-size: 15px;">open_in_new</span> View Breakdown
+                                    </span>
                                 </div>
                             </div>
                         ` : ''}
 
                         ${hasSales ? `
                             <!-- Total Gold Supplied -->
-                            <div style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.03) 100%); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px;">
-                                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; filter: blur(20px);"></div>
-                                <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;">
-                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #2563eb); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);">
+                            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                         <span class="material-symbols-outlined" style="font-size: 20px;">diamond</span>
                                     </div>
-                                    <div style="color: #2563eb; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Gold Supplied</div>
+                                    <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Gold Supplied</div>
                                 </div>
-                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    ${totalGoldSold.toFixed(2)} <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">g</span>
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #121926; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; letter-spacing: -0.5px;">
+                                    ${totalGoldSold.toFixed(2)} <span style="font-size: 1rem; color: #94A3B8; font-weight: 600;">g</span>
                                 </div>
                             </div>
 
                             <!-- Total Revenue Paid -->
-                            <div style="background: linear-gradient(145deg, rgba(202, 138, 4, 0.15) 0%, rgba(202, 138, 4, 0.03) 100%); border: 1px solid rgba(202, 138, 4, 0.2); border-radius: 20px; padding: 20px; box-shadow: 0 4px 20px rgba(202, 138, 4, 0.05); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px;">
-                                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(202, 138, 4, 0.1); border-radius: 50%; filter: blur(20px);"></div>
-                                <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 1;">
-                                    <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #eab308, #ca8a04); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(202, 138, 4, 0.3);">
+                            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 36px; height: 36px; border-radius: 12px; background: #EAF0FF; color: #2D5BFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                         <span class="material-symbols-outlined" style="font-size: 20px;">payments</span>
                                     </div>
-                                    <div style="color: #ca8a04; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2;">Total Revenue</div>
+                                    <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Revenue</div>
                                 </div>
-                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; position: relative; z-index: 1;">
-                                    <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">GHS</span> ${totalRevenuePaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                <div style="font-size: 1.8rem; font-weight: 900; color: #121926; display: flex; align-items: baseline; gap: 6px; white-space: nowrap; letter-spacing: -0.5px;">
+                                    <span style="font-size: 1rem; color: #94A3B8; font-weight: 600;">GHS</span> ${totalRevenuePaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         ` : ''}
@@ -408,9 +401,9 @@ window.addEventListener('route-changed', async (e) => {
                                                 <td style="padding: 20px 24px; text-align: right;">
                                                     ${node.status === 'active'
                             ? `<span style="padding: 6px 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Unpaid</span>
-                                                           <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px; box-shadow: 0 4px 10px rgba(245,158,11,0.2); border: none;" onclick="window.openSettleLoanWizard(${node.id}, ${id}, '${node.type}', ${node.principal_amount})">Settle</button>`
+                                                           ${!isSalesperson ? `<button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px; box-shadow: 0 4px 10px rgba(245,158,11,0.2); border: none;" onclick="window.openSettleLoanWizard(${node.id}, ${id}, '${node.type}', ${node.principal_amount})">Settle</button>` : ''}`
                             : `<span style="padding: 6px 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Settled</span>`}
-                                                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px;" onclick="window.openLoanDetailsModal(${node.id})">Details</button>
+                                                    ${!isSalesperson ? `<button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 8px; margin-left: 12px;" onclick="window.openLoanDetailsModal(${node.id})">Details</button>` : ''}
                                                 </td>
                                             </tr>
                                         `;
@@ -591,6 +584,9 @@ window.openEditCustomerModal = (customer) => {
 window._loanWizardState = { step: 1 };
 
 window.openCustomerIssueLoanModal = async (customerId = null) => {
+    if (typeof window.isSalesperson === 'function' && window.isSalesperson()) {
+        return window.showToast('Access Denied: Only administrators and staff can issue loans.', 'error');
+    }
     window._loanWizardState = {
         step: 1,
         customerId: customerId,
@@ -639,10 +635,18 @@ window.calculateLoanCollateral = () => {
         const domBlades = document.getElementById('calc-loan-blades');
         if (domBlades) domBlades.innerText = s.blades.toFixed(4);
     } else {
-        const truncate2 = (num) => Math.floor(num * 100) / 100;
-        s.pounds = truncate2(grams / 7.75);
-        s.density = volume > 0 ? truncate2(grams / volume) : 0;
-        s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
+        if (window.GoldMath) {
+            const calc = window.GoldMath.calculate({ grams, volume });
+            s.pounds = calc.pounds;
+            s.density = calc.density;
+            s.karat = calc.payableKarat;
+            s.rawKarat = calc.rawKarat;
+        } else {
+            const truncate2 = (num) => Math.floor(num * 100) / 100;
+            s.pounds = truncate2(grams / 7.75);
+            s.density = volume > 0 ? truncate2(grams / volume) : 0;
+            s.karat = s.density > 0 ? truncate2(((s.density - 10.51) * 52.838) / s.density) : 0;
+        }
 
         const domDensity = document.getElementById('calc-loan-density');
         const domKarat = document.getElementById('calc-loan-karat');
@@ -660,13 +664,13 @@ window.renderLoanWizard = () => {
     if (s.step === 1) {
         html = `
             <div style="display: flex; flex-direction: column; gap: 24px;">
-                <div style="background: linear-gradient(to right, #fffbeb, #fef3c7); border: 1px solid #fde68a; padding: 16px 20px; border-radius: 16px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.05);">
-                    <div style="background: #f59e0b; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);">
+                <div style="background: #FEF8D8; border: 1.5px solid #F8EEB2; padding: 18px 20px; border-radius: 18px; display: flex; gap: 16px; align-items: center;">
+                    <div style="background: #2D5BFF; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
                         <span class="material-symbols-outlined" style="font-size: 24px;">account_balance_wallet</span>
                     </div>
                     <div>
-                        <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px; color: #92400e;">Capital Deduction</strong>
-                        <span style="font-size: 0.85rem; line-height: 1.4; color: #b45309; display: block;">This principal amount will be directly deducted from the company's Capital Ledger upon issuance.</span>
+                        <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px; color: #1C1917;">Capital Deduction</strong>
+                        <span style="font-size: 0.85rem; line-height: 1.4; color: #78716C; display: block;">This principal amount will be directly deducted from the company's Capital Ledger upon issuance.</span>
                     </div>
                 </div>
                 
@@ -815,7 +819,7 @@ window.renderLoanWizard = () => {
                     </div>
                 </div>
                 
-                <button type="button" class="btn btn-primary btn-block" style="margin-top: 8px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; padding: 16px; font-size: 1.05rem; border-radius: 14px; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25); transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px rgba(245, 158, 11, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(245, 158, 11, 0.25)';" onclick="
+                <button type="button" class="btn btn-primary btn-block" style="margin-top: 8px; padding: 16px; font-size: 1.05rem; border-radius: var(--radius-pill); font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="
                     if(!window._loanWizardState.principal || window._loanWizardState.principal <= 0) return window.showToast('Enter valid principal amount', 'error');
                     if(window._loanWizardState.hasCollateral) {
                         if(!window._loanWizardState.grams || window._loanWizardState.grams <= 0) return window.showToast('Enter collateral weight', 'error');
@@ -831,7 +835,7 @@ window.renderLoanWizard = () => {
         html = `
             <div style="display: flex; flex-direction: column; gap: 24px;">
                 <div style="text-align: center;">
-                    <div style="background: #fffbeb; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f59e0b; margin: 0 auto 16px auto; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.1);">
+                    <div style="background: #EAF0FF; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #2D5BFF; margin: 0 auto 16px auto;">
                         <span class="material-symbols-outlined" style="font-size: 32px;">fact_check</span>
                     </div>
                     <h3 style="margin: 0 0 8px 0; color: var(--text-main); font-size: 1.2rem;">Confirm Loan Issuance</h3>
@@ -893,8 +897,8 @@ window.renderLoanWizard = () => {
                 </div>
                 
                 <div style="display: flex; gap: 12px; margin-top: 8px;">
-                    <button type="button" class="btn btn-outline" style="flex: 1; border-radius: 12px; font-weight: 600; color: #64748b; border-color: #cbd5e1;" onclick="window._loanWizardState.step = 1; window.renderLoanWizard()">Back to Edit</button>
-                    <button type="button" class="btn btn-primary" id="btn-submit-loan" style="flex: 2; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; color: white; border-radius: 12px; font-weight: 600; font-size: 1.05rem; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);" onclick="window.submitLoanWizard()">
+                    <button type="button" class="btn btn-outline" style="flex: 1; border-radius: var(--radius-pill); font-weight: 700;" onclick="window._loanWizardState.step = 1; window.renderLoanWizard()">Back to Edit</button>
+                    <button type="button" class="btn btn-primary" id="btn-submit-loan" style="flex: 2; border-radius: var(--radius-pill); font-weight: 800; font-size: 1.05rem;" onclick="window.submitLoanWizard()">
                         <span class="material-symbols-outlined" style="font-size: 20px;">check_circle</span> Confirm Issue
                     </button>
                 </div>
@@ -970,6 +974,9 @@ window.submitLoanWizard = async () => {
 window._settleWizardState = {};
 
 window.openSettleLoanWizard = async (loanId, customerId, loanType, principalAmount) => {
+    if (typeof window.isSalesperson === 'function' && window.isSalesperson()) {
+        return window.showToast('Access Denied: Only administrators and staff can settle loans.', 'error');
+    }
     window._settleWizardState = {
         step: 1,
         loanId: loanId,
@@ -1037,14 +1044,23 @@ window.calculateSettleGold = () => {
         const vol = parseFloat(s.volume) || 0;
         const clp = parseFloat(s.currentLocalPrice) || 0;
 
-        s.pounds = truncate2(grams / 7.75);
-        s.density = vol > 0 ? truncate2(grams / vol) : 0;
-        if (s.density > 0) {
-            s.karat = truncate2(((s.density - 10.51) * 52.838) / s.density);
+        if (window.GoldMath) {
+            const calc = window.GoldMath.calculate({ grams, volume: vol, pricePerPound: clp });
+            s.pounds = calc.pounds;
+            s.density = calc.density;
+            s.karat = calc.payableKarat;
+            s.rawKarat = calc.rawKarat;
+            s.agreedValue = calc.totalPayout;
         } else {
-            s.karat = 0;
+            s.pounds = truncate2(grams / 7.75);
+            s.density = vol > 0 ? truncate2(grams / vol) : 0;
+            if (s.density > 0) {
+                s.karat = truncate2(((s.density - 10.51) * 52.838) / s.density);
+            } else {
+                s.karat = 0;
+            }
+            s.agreedValue = Math.floor((s.karat * clp / 23) * s.pounds);
         }
-        s.agreedValue = Math.floor((s.karat * clp / 23) * s.pounds);
 
         if (document.getElementById('calc_density')) document.getElementById('calc_density').innerText = s.density.toFixed(2);
         if (document.getElementById('calc_karat')) document.getElementById('calc_karat').innerText = s.karat.toFixed(2);
@@ -1539,6 +1555,9 @@ window.submitSettleLoanWizard = async () => {
 };
 
 window.confirmClearHistory = (customerId, returnRoute) => {
+    if (typeof window.isSalesperson === 'function' && window.isSalesperson()) {
+        return window.showToast('Access Denied: Only administrators and staff can clear customer history.', 'error');
+    }
     const html = `
         <div style="text-align: center; padding: 20px 10px;">
             <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
@@ -1692,15 +1711,15 @@ window.renderSafeKeepModal = () => {
                 `}
 
                 <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 24px; border-top: 1px dashed var(--border);">
-                    <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="padding: 12px 24px; border-radius: 12px; font-weight: 600;">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitSafeKeep" style="background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 12px 28px; border-radius: 12px; color: white; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.35)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
+                    <button type="button" class="btn btn-outline" onclick="window.closeModal()" style="border-radius: var(--radius-pill); font-weight: 700;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitSafeKeep" style="padding: 12px 28px; border-radius: var(--radius-pill); font-weight: 800; display: flex; align-items: center; gap: 8px;">
                         <span class="material-symbols-outlined" style="font-size: 18px;">lock</span> Save in Vault
                     </button>
                 </div>
             </form>
         </div>
     `;
-    window.openModal('Safe Keep Gold', html, { maxWidth: '540px' });
+    window.openModal('Safe Keep Gold', html, { maxWidth: '440px' });
 };
 
 window.submitSafeKeepForm = async (e, customerId) => {
@@ -1756,29 +1775,29 @@ window.openVaultBreakdownModal = (data) => {
 
     const html = `
         <div style="display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; padding: 10px;">
-            <div style="background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
-                <h3 style="margin-top: 0; color: #334155; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    <span class="material-symbols-outlined" style="color: #64748b;">lock</span> Collateral Gold (Locked)
+            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                <h3 style="margin-top: 0; color: #121926; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; font-weight: 800;">
+                    <span class="material-symbols-outlined" style="color: #64748B;">lock</span> Collateral Gold (Locked)
                 </h3>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">This gold is actively securing outstanding loans and cannot be sold or withdrawn.</p>
+                <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 15px;">This gold is actively securing outstanding loans and cannot be sold or withdrawn.</p>
                 
                 <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                        <div style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Balls</div>
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 5px;">${cBalls.toFixed(2)}g</div>
+                    <div style="flex: 1; background: #F8FAFC; padding: 15px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.04);">
+                        <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Balls</div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: #121926; margin-top: 5px;">${cBalls.toFixed(2)}g</div>
                     </div>
-                    <div style="flex: 1; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                        <div style="color: #64748b; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Refined</div>
-                        <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 5px;">${cRefined.toFixed(2)}g</div>
+                    <div style="flex: 1; background: #F8FAFC; padding: 15px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.04);">
+                        <div style="color: #64748B; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">Refined</div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: #121926; margin-top: 5px;">${cRefined.toFixed(2)}g</div>
                     </div>
                 </div>
             </div>
 
-            <div style="background: linear-gradient(145deg, #fff7ed 0%, #ffedd5 100%); border: 1px solid #fed7aa; border-radius: 16px; padding: 20px;">
-                <h3 style="margin-top: 0; color: #c2410c; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                    <span class="material-symbols-outlined" style="color: #f97316;">inventory_2</span> Safe Keep Gold (Available)
+            <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 20px; padding: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);">
+                <h3 style="margin-top: 0; color: #121926; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; font-weight: 800;">
+                    <span class="material-symbols-outlined" style="color: #2D5BFF;">inventory_2</span> Safe Keep Gold (Available)
                 </h3>
-                <p style="font-size: 0.85rem; color: #9a3412; margin-bottom: 15px;">This gold is purely deposited and is available to be liquidated to the company.</p>
+                <p style="font-size: 0.85rem; color: #64748B; margin-bottom: 15px;">This gold is purely deposited and is available to be liquidated to the company.</p>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <div style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #fdba74; display: flex; align-items: center; justify-content: space-between;">
@@ -1808,7 +1827,7 @@ window.openVaultBreakdownModal = (data) => {
             </div>
         </div>
     `;
-    window.openModal('Vault Breakdown', html, { width: '600px' });
+    window.openModal('Vault Breakdown', html, { maxWidth: '450px', size: 'md' });
 };
 
 window.calcSellSafeKeepPayout = (formId, goldType) => {
@@ -1836,22 +1855,31 @@ window.calcSellSafeKeepPayout = (formId, goldType) => {
         }
 
         if (grams > 0 && volume > 0) {
-            density = truncate2(grams / volume);
-            form.querySelector('[name="density"]').value = density.toFixed(2);
-
-            if (density > 0) {
-                karat = truncate2(((density - 10.51) * 52.838) / density);
+            if (window.GoldMath) {
+                const calc = window.GoldMath.calculate({ grams, volume, pricePerPound: localPrice });
+                density = calc.density;
+                karat = calc.payableKarat;
+                payout = calc.totalPayout;
+                form.querySelector('[name="density"]').value = density.toFixed(2);
                 form.querySelector('[name="karat"]').value = karat.toFixed(2);
             } else {
-                form.querySelector('[name="karat"]').value = '';
+                density = truncate2(grams / volume);
+                form.querySelector('[name="density"]').value = density.toFixed(2);
+
+                if (density > 0) {
+                    karat = truncate2(((density - 10.51) * 52.838) / density);
+                    form.querySelector('[name="karat"]').value = karat.toFixed(2);
+                } else {
+                    form.querySelector('[name="karat"]').value = '';
+                }
+
+                if (karat > 0 && pounds > 0 && localPrice > 0) {
+                    payout = Math.floor(pounds * (karat / 23) * localPrice);
+                }
             }
         } else {
             form.querySelector('[name="density"]').value = '';
             form.querySelector('[name="karat"]').value = '';
-        }
-
-        if (karat > 0 && pounds > 0 && localPrice > 0) {
-            payout = Math.floor(pounds * (karat / 23) * localPrice);
         }
     }
 
@@ -1924,7 +1952,7 @@ window.openSellSafeKeepModal = (customerId, goldType, maxGrams, maxSecondaryUnit
             </div>
         </form>
     `;
-    window.openModal(`Liquidate ${goldType === 'balls' ? 'Balls' : 'Refined'}`, html, { width: '500px' });
+    window.openModal(`Liquidate ${goldType === 'balls' ? 'Balls' : 'Refined'}`, html, { maxWidth: '420px' });
 };
 
 window.submitSellSafeKeep = async (e, customerId, goldType, maxGrams) => {
