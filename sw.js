@@ -1,4 +1,4 @@
-const CACHE_NAME = 'qwik-gold-v6.1.5';
+const CACHE_NAME = 'qwik-gold-v6.1.6';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

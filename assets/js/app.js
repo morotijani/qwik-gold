@@ -547,7 +547,13 @@ document.addEventListener('DOMContentLoaded', () => {
             sidebarName.textContent = companyName;
         }
 
-        // 3. Update page title
+        // 3. Update Dashboard welcome header if currently rendered
+        const dashboardWelcome = document.getElementById('dashboard-welcome-title');
+        if (dashboardWelcome) {
+            dashboardWelcome.textContent = `Welcome back to ${companyName}`;
+        }
+
+        // 4. Update page title
         document.title = `${companyName} | Enterprise Ledger`;
     };
 

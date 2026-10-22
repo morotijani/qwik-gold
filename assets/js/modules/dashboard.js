@@ -6,7 +6,7 @@
  */
 window.addEventListener('route-changed', async (e) => {
     if (e.detail.route !== 'dashboard') return;
-    
+
     const container = e.detail.container;
 
     // Loading Skeleton
@@ -24,10 +24,12 @@ window.addEventListener('route-changed', async (e) => {
         ]);
 
         const isAdmin = typeof window.isAdmin === 'function' ? window.isAdmin() : false;
+        const companySettings = (typeof window.getCompanySettings === 'function' ? window.getCompanySettings() : {}) || {};
+        const companyName = companySettings.company_name || 'Qwik Gold';
         const cashFmt = new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(capitalData.available_cash_ghs);
         const companyTotal = (vaultData.company_owned.balls_grams + vaultData.company_owned.refined_grams).toFixed(2);
         const keeperTotal = (vaultData.keeper_held.balls_grams + vaultData.keeper_held.refined_grams).toFixed(2);
-        
+
         // Grab top 5 recent transactions
         const recentActivity = (recentTxData.transactions || []).slice(0, 5);
 
@@ -41,7 +43,7 @@ window.addEventListener('route-changed', async (e) => {
                         </div>
                         Executive Overview
                     </div>
-                    <h2 class="page-header-title">Welcome back to Qwik Gold</h2>
+                    <h2 class="page-header-title" id="dashboard-welcome-title">Welcome back to ${companyName}</h2>
                     <p class="page-header-subtitle">Here is your business performance and liquidity overview for today.</p>
                 </div>
                 ${isAdmin ? `
@@ -69,7 +71,7 @@ window.addEventListener('route-changed', async (e) => {
                         <div style="color: #64748B; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Available Liquidity</div>
                     </div>
                     <div style="font-size: 1.5rem; font-weight: 800; color: #121926; letter-spacing: -0.4px;">
-                        <span style="font-size: 0.9rem; color: #94A3B8; font-weight: 600;">GHS</span> ${capitalData.available_cash_ghs.toLocaleString(undefined, {minimumFractionDigits:2})}
+                        <span style="font-size: 0.9rem; color: #94A3B8; font-weight: 600;">GHS</span> ${capitalData.available_cash_ghs.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </div>
                 </div>
 
@@ -146,12 +148,12 @@ window.addEventListener('route-changed', async (e) => {
                         <tbody>
                             ${recentActivity.length === 0 ? '<tr><td colspan="4" style="padding: 48px; text-align: center; color: var(--text-muted); font-size: 1.05rem;">No recent activity.</td></tr>' : ''}
                             ${recentActivity.map(tx => {
-                                const isPositive = parseFloat(tx.amount_ghs) > 0;
-                                const amountColor = isPositive ? '#10b981' : '#ef4444';
-                                const displayType = tx.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                const amountSign = isPositive ? '+' : '';
+            const isPositive = parseFloat(tx.amount_ghs) > 0;
+            const amountColor = isPositive ? '#10b981' : '#ef4444';
+            const displayType = tx.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            const amountSign = isPositive ? '+' : '';
 
-                                return `
+            return `
                                 <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='white'">
                                     <td style="padding: 16px 24px; color: var(--text-main); font-weight: 500;">
                                         ${new Date(tx.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -170,7 +172,7 @@ window.addEventListener('route-changed', async (e) => {
                                     </td>
                                 </tr>
                                 `;
-                            }).join('')}
+        }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -298,7 +300,7 @@ window.showInjectCapitalModal = () => {
             </button>
         </form>
     `;
-    
+
     window.openModal('Inject External Capital', html, { maxWidth: '420px' });
 
     document.getElementById('inject-capital-form').addEventListener('submit', async (e) => {
@@ -306,7 +308,7 @@ window.showInjectCapitalModal = () => {
         const amount = document.getElementById('inject-amount').value;
         const source = document.getElementById('inject-source').value;
         const btn = e.target.querySelector('button[type="submit"]');
-        
+
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Processing...';
 
