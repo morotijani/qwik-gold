@@ -78,47 +78,25 @@ if ($goldType === 'balls') {
         sendResponse('error', 'Volume must be greater than zero', [], 400);
     }
     
-    // Calculations for refined gold
-    $truncate2 = function($num) {
-        return floor(($num + 0.00000001) * 100) / 100;
-    };
+    $discountPercent = isset($data['discount_percent']) ? (float)$data['discount_percent'] : null;
+    $formula = isset($data['formula']) ? (string)$data['formula'] : null;
+    $calc = calculate_refined_gold($pdo, $grams, $volume, $pricePerPound, $discountPercent, $formula);
 
-    $discountPercent = isset($data['discount_percent']) 
-        ? (float)$data['discount_percent'] 
-        : (float)get_system_setting($pdo, 'purity_discount_percent', 0.70);
-    
-    $density = 0;
-    if ($volume > 0) {
-        $density = $truncate2($grams / $volume);
-    }
-    
-    $pounds = $truncate2($grams / 7.75);
-    
-    $rawKarat = 0;
-    if ($density > 0) {
-        $rawKarat = $truncate2((($density - 10.51) * 52.838) / $density);
-        if ($rawKarat < 0) $rawKarat = 0;
-    }
-
-    $discountFactor = (100 - $discountPercent) / 100;
-    $payableKarat = $rawKarat > 0 
-        ? ($discountPercent > 0 ? $truncate2($rawKarat * $discountFactor) : $rawKarat) 
-        : 0;
-
-    $purityPercent = $payableKarat > 0 ? round(($payableKarat / 24) * 100, 2) : 0;
-    
-    $totalPayout = floor(($payableKarat * $pricePerPound / 23) * $pounds);
-    
     $responseData['breakdown'] = [
-        'density' => $density,
-        'pounds' => $pounds,
-        'raw_karat' => $rawKarat,
-        'payable_karat' => $payableKarat,
-        'karat' => $payableKarat,
-        'purity_percent' => $purityPercent,
-        'discount_percent' => $discountPercent
+        'formula' => $calc['formula'],
+        'density' => $calc['density'],
+        'pounds' => $calc['pounds'],
+        'raw_karat' => $calc['raw_karat'],
+        'raw_purity' => $calc['raw_purity'],
+        'payable_karat' => $calc['payable_karat'],
+        'karat' => $calc['payable_karat'],
+        'purity_percent' => $calc['purity_percent'],
+        'adjusted_price_per_pound' => $calc['adjusted_price_per_pound'],
+        'gross_payout' => $calc['gross_payout'],
+        'discount_saved' => $calc['discount_saved'],
+        'discount_percent' => $calc['discount_percent']
     ];
-    $responseData['total_payout_ghs'] = $totalPayout;
+    $responseData['total_payout_ghs'] = $calc['total_payout'];
 
 } else {
     sendResponse('error', 'Invalid gold_type. Must be balls or refined', [], 400);

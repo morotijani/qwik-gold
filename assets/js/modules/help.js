@@ -5,6 +5,13 @@
         if (e.detail.route !== 'help') return;
 
         const container = e.detail.container;
+        const activeFormula = (window.GoldMath && typeof window.GoldMath.getCalculationFormula === 'function')
+            ? window.GoldMath.getCalculationFormula()
+            : 'mayrocy';
+        const activeDiscount = (window.GoldMath && typeof window.GoldMath.getDiscountPercent === 'function')
+            ? window.GoldMath.getDiscountPercent()
+            : 0.70;
+        const activeFormulaLabel = activeFormula === 'nwdgc' ? 'NWDGC Legacy (nwdgc.vercel.app)' : 'Mayrocy Standard (Default)';
 
         const sections = {
             overview: {
@@ -95,6 +102,138 @@
                         <li><strong>From Keeper:</strong> A registered Keeper is supplying the gold.</li>
                         <li><strong>Loan Offset:</strong> A Keeper is supplying gold specifically to pay down an active loan. The system calculates the gold's cash value and applies it directly to the loan balance instead of handing cash to the Keeper.</li>
                     </ol>
+                `
+            },
+            formulas: {
+                title: 'Valuation & Formulas',
+                icon: 'calculate',
+                content: `
+                    <h3>Gold Valuation &amp; Formula Reference</h3>
+                    <p style="color: var(--text-muted);">All calculations across the Gold Calculator, Walk-In Purchases, Keepers, Loans, and Market Sales use a unified formula engine configurable in <strong>Settings &rarr; Gold Valuation &amp; Standards</strong>.</p>
+
+                    <div style="background: rgba(45, 91, 255, 0.06); border: 1px solid rgba(45, 91, 255, 0.2); border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="font-size: 0.9rem; color: var(--text-main);">
+                            <strong>Active Standard:</strong> <span style="color: var(--gold-primary); font-weight: 800;">${activeFormulaLabel}</span>
+                        </div>
+                        <div style="font-size: 0.85rem; font-weight: 700; color: #059669; background: rgba(16, 185, 129, 0.12); padding: 4px 12px; border-radius: 20px;">
+                            Purity Discount: ${Number(activeDiscount).toFixed(2)}%
+                        </div>
+                    </div>
+
+                    <h4>1. Gold Balls (Raw / Unsmelted Gold)</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem;">
+                        <tr style="border-bottom: 1px solid var(--border); background: var(--bg-main);">
+                            <th style="padding: 10px 12px; text-align: left;">Metric / Unit</th>
+                            <th style="padding: 10px 12px; text-align: left;">Formula / Conversion</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Unit Conversions</strong></td>
+                            <td style="padding: 10px 12px;"><code>1 Match = 0.08 g</code> &bull; <code>1 Blade = 0.80 g (10 matches)</code> &bull; <code>1 Pound = 8.00 g (10 blades)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Total Blades</strong></td>
+                            <td style="padding: 10px 12px;"><code>Weight (g) &divide; 0.8</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Payable Amount (GHS)</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor(Total Blades &times; Price per Blade)</code></td>
+                        </tr>
+                    </table>
+
+                    <h4>2. Refined Gold (Smelted) &mdash; Mayrocy Standard (Default)</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Used by most gold buyers in Ghana. Applies Archimedes water-displacement density with a direct percentage-point purity deduction.</p>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem;">
+                        <tr style="border-bottom: 1px solid var(--border); background: var(--bg-main);">
+                            <th style="padding: 10px 12px; text-align: left;">Step</th>
+                            <th style="padding: 10px 12px; text-align: left;">Formula</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Pounds</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor2(Weight (g) &divide; 7.75)</code> <span style="color: var(--text-muted); font-size: 0.82rem;">(truncated to 2 decimal places)</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Raw Density &amp; Display Density</strong></td>
+                            <td style="padding: 10px 12px;"><code>Raw Density = Weight &divide; Water Volume</code> &bull; <code>Display = round2(Raw Density)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Raw Karat (Without Discount)</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor2(((Raw Density &minus; 10.51) &times; 52.838) &divide; Raw Density)</code> <span style="color: var(--text-muted); font-size: 0.82rem;">(clamped 0&ndash;24)</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Raw Purity (%)</strong></td>
+                            <td style="padding: 10px 12px;"><code>round2((Raw Karat &divide; 24) &times; 100)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Discounted Purity (%)</strong></td>
+                            <td style="padding: 10px 12px;"><code>max(0, round2(Raw Purity &minus; Discount %))</code> <span style="color: var(--text-muted); font-size: 0.82rem;">(e.g. minus 0.70%)</span></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Payable Karat</strong></td>
+                            <td style="padding: 10px 12px;"><code>round2((Discounted Purity &divide; 100) &times; 24)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Effective Price per Pound</strong></td>
+                            <td style="padding: 10px 12px;"><code>round2((Payable Karat &times; Price 23kt) &divide; 23)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Payable Amount (With Discount)</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor((Payable Karat &times; Price 23kt &divide; 23) &times; Pounds)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Gross Amount (Without Discount)</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor((Raw Karat &times; Price 23kt &divide; 23) &times; Pounds)</code></td>
+                        </tr>
+                    </table>
+
+                    <div style="background: rgba(16, 185, 129, 0.06); border-left: 4px solid var(--success); padding: 14px 16px; border-radius: 4px 12px 12px 4px; margin-bottom: 24px; font-size: 0.88rem;">
+                        <strong style="color: var(--success); display: block; margin-bottom: 6px;">Worked Example (Mayrocy Standard @ 0.70% Discount)</strong>
+                        Inputs: <code>Weight = 32.59 g</code>, <code>Water = 1.77</code>, <code>Price (23kt) = GH&#8373; 11,517</code><br>
+                        &bull; Pounds: <code>floor2(32.59 / 7.75) = 4.20</code> &bull; Density: <code>round2(32.59 / 1.77) = 18.41</code><br>
+                        &bull; Raw Karat: <code>22.67 kt</code> &bull; Raw Purity: <code>94.46%</code> &rarr; Minus 0.70%: <code>93.76%</code> &rarr; Payable Karat: <code>22.50 kt</code><br>
+                        &bull; Price/lb: <code>GH&#8373; 11,266.63</code> &bull; <strong>Payable: GH&#8373; 47,319.00</strong> (Without discount: <code>GH&#8373; 47,677.00</code>, Difference: <code>-GH&#8373; 358.00</code>)
+                    </div>
+
+                    <h4>3. Formula Comparison: Mayrocy Standard vs. NWDGC Legacy</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.88rem;">
+                        <tr style="border-bottom: 1px solid var(--border); background: var(--bg-main);">
+                            <th style="padding: 10px 12px; text-align: left;">Step</th>
+                            <th style="padding: 10px 12px; text-align: left;">Mayrocy Standard (Default)</th>
+                            <th style="padding: 10px 12px; text-align: left;">NWDGC Legacy (nwdgc.vercel.app)</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Pounds</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor2(grams / 7.75)</code></td>
+                            <td style="padding: 10px 12px;"><code>floor2(grams / 7.75)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Density (Display)</strong></td>
+                            <td style="padding: 10px 12px;"><code>round2(grams / volume)</code></td>
+                            <td style="padding: 10px 12px;"><code>floor2(grams / volume)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Raw Karat</strong></td>
+                            <td style="padding: 10px 12px;">Uses full-precision <code>grams / volume</code></td>
+                            <td style="padding: 10px 12px;">Uses truncated <code>floor2(grams / volume)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Discount Applied</strong></td>
+                            <td style="padding: 10px 12px;"><strong>Subtractive on Purity %:</strong> <code>round2(rawPurity &minus; discount%)</code></td>
+                            <td style="padding: 10px 12px;"><strong>Multiplicative on Karat:</strong> <code>floor2(rawKarat &times; (100 &minus; discount%) / 100)</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Payable Karat</strong></td>
+                            <td style="padding: 10px 12px;"><code>round2((purityPercent / 100) &times; 24)</code></td>
+                            <td style="padding: 10px 12px;">Derived directly above</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 12px;"><strong>Payout</strong></td>
+                            <td style="padding: 10px 12px;"><code>floor((payableKarat &times; price23kt / 23) &times; pounds)</code></td>
+                            <td style="padding: 10px 12px;"><code>floor((payableKarat &times; price23kt / 23) &times; pounds)</code></td>
+                        </tr>
+                    </table>
+
+                    <h4>4. Market Sales &amp; Net Profit</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;"><code>Net Profit = Market Sale Payout &minus; Sum of Cost Basis (guessed_value_ghs of sold vault items)</code></p>
                 `
             },
             keepers: {

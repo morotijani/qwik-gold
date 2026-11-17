@@ -571,14 +571,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cached && (cached.company_name || cached.company_logo)) {
             window.applyCompanyProfileUI(cached);
         }
+        if (cached && window.GoldMath) {
+            if (cached.purity_discount_percent !== undefined) {
+                window.GoldMath.setDiscountPercent(parseFloat(cached.purity_discount_percent));
+            }
+            if (cached.calculation_formula) {
+                window.GoldMath.setCalculationFormula(cached.calculation_formula);
+            }
+        }
 
         try {
             const res = await window.api.get('/settings/get.php');
             if (res) {
                 const settingsData = res.data || res;
                 window.applyCompanyProfileUI(settingsData);
-                if (settingsData.purity_discount_percent !== undefined && window.GoldMath) {
-                    window.GoldMath.setDiscountPercent(parseFloat(settingsData.purity_discount_percent));
+                if (window.GoldMath) {
+                    if (settingsData.purity_discount_percent !== undefined) {
+                        window.GoldMath.setDiscountPercent(parseFloat(settingsData.purity_discount_percent));
+                    }
+                    if (settingsData.calculation_formula) {
+                        window.GoldMath.setCalculationFormula(settingsData.calculation_formula);
+                    }
                 }
                 return settingsData;
             }

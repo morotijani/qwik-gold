@@ -153,7 +153,8 @@ CREATE TABLE IF NOT EXISTS system_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT IGNORE INTO system_settings (setting_key, setting_value, description) VALUES 
-('purity_discount_percent', '0.7', 'Purity discount percentage deducted from raw karat for refined gold calculations'),
+('purity_discount_percent', '0.7', 'Purity discount percentage deducted for refined gold calculations'),
+('calculation_formula', 'mayrocy', 'Refined gold valuation calculation formula standard (mayrocy or nwdgc)'),
 ('company_name', 'Qwik Gold', 'Company Name'),
 ('company_tagline', 'Enterprise Precious Metals Ledger', 'Company Tagline / Subtitle'),
 ('company_address', 'Accra Gold Market, Greater Accra, Ghana', 'Physical Address'),

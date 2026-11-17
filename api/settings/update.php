@@ -39,6 +39,21 @@ try {
         $updatedKeys['purity_discount_percent'] = $discount;
     }
 
+    // 1b. Calculation Formula Standard
+    if (isset($input['calculation_formula'])) {
+        $formula = strtolower(trim((string)$input['calculation_formula']));
+        if ($formula !== 'mayrocy' && $formula !== 'nwdgc') {
+            sendResponse('error', 'Invalid calculation formula. Supported values: mayrocy, nwdgc', [], 400);
+        }
+        set_system_setting(
+            $pdo,
+            'calculation_formula',
+            $formula,
+            'Refined gold valuation calculation formula standard (mayrocy or nwdgc)'
+        );
+        $updatedKeys['calculation_formula'] = $formula;
+    }
+
     // 2. Company Profile Settings
     $companyFields = [
         'company_name'           => ['Company Name', 150],

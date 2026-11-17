@@ -14,6 +14,8 @@
 
     function renderCalculatorView(container) {
         const discountPercent = window.GoldMath ? window.GoldMath.getDiscountPercent() : 0.70;
+        const activeFormula = window.GoldMath ? window.GoldMath.getCalculationFormula() : 'mayrocy';
+        const formulaLabel = activeFormula === 'mayrocy' ? 'Mayrocy Standard' : 'NWDGC Standard';
 
         container.innerHTML = `
             <div class="nwdgc-container" style="padding: 10px 0 30px 0;">
@@ -172,13 +174,22 @@
                     <div class="nwdgc-payout-box">
                         <div class="nwdgc-payout-label">Amount to be paid to the seller</div>
                         <div id="calc_res_payout" class="nwdgc-payout-amount">GHS 0.00</div>
+                        ${currentGoldType === 'refined' ? `
+                            <div id="calc_res_sub_meta" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; color: #64748B; font-weight: 600;">
+                                <div>Price per pound: <strong id="calc_res_ppp" style="color: #0F172A;">GHS 0.00</strong></div>
+                                <div id="calc_res_no_disc_row" style="display: none;">
+                                    Without discount: <strong id="calc_res_no_disc" style="color: #334155;">GHS 0.00</strong>
+                                    <span id="calc_res_disc_saved" style="color: #059669; font-weight: 700; margin-left: 4px;"></span>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
 
                 <!-- Footer Text & Discount Indicator -->
                 <div style="text-align: center; margin-top: 18px;">
                     <div style="font-size: 1.05rem; font-weight: 800; color: #121926; letter-spacing: -0.2px; margin-bottom: 3px;">
-                        ${discountPercent}% Purity Discount Applied
+                        ${discountPercent}% Purity Discount Applied &bull; <span style="color: #2D5BFF;">${formulaLabel}</span>
                     </div>
                     <div style="font-size: 0.76rem; color: #94A3B8; font-weight: 600;">
                         Powered by Qwik Gold & Gold Traders
@@ -248,6 +259,10 @@
                 const elKarat = document.getElementById('calc_res_karat');
                 const elPurity = document.getElementById('calc_res_purity');
                 const elPayout = document.getElementById('calc_res_payout');
+                const elPpp = document.getElementById('calc_res_ppp');
+                const elNoDiscRow = document.getElementById('calc_res_no_disc_row');
+                const elNoDisc = document.getElementById('calc_res_no_disc');
+                const elDiscSaved = document.getElementById('calc_res_disc_saved');
                 const warnBanner = document.getElementById('calc_warn_banner');
 
                 if (elPounds) {
@@ -272,6 +287,21 @@
                         maximumFractionDigits: 2
                     });
                     elPayout.title = 'GHS ' + res.totalPayout.toLocaleString();
+                }
+                if (elPpp) {
+                    elPpp.textContent = 'GHS ' + res.adjustedPricePerPound.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+                if (elNoDiscRow && elNoDisc && elDiscSaved) {
+                    if (res.discountPercent > 0 && res.grossPayout > 0) {
+                        elNoDiscRow.style.display = 'block';
+                        elNoDisc.textContent = `GHS ${res.grossPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${res.rawPurity.toFixed(2)}% · ${res.rawKarat.toFixed(2)} kt)`;
+                        elDiscSaved.textContent = `(-GHS ${res.discountSaved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
+                    } else {
+                        elNoDiscRow.style.display = 'none';
+                    }
                 }
 
                 // Low karat banner (< 14 karat when weight & volume are present)

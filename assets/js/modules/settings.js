@@ -34,6 +34,9 @@ window.addEventListener('route-changed', async (e) => {
         if (window._currentSettings.purity_discount_percent !== undefined && window.GoldMath) {
             window.GoldMath.setDiscountPercent(parseFloat(window._currentSettings.purity_discount_percent));
         }
+        if (window._currentSettings.calculation_formula && window.GoldMath) {
+            window.GoldMath.setCalculationFormula(window._currentSettings.calculation_formula);
+        }
         if (window.applyCompanyProfileUI) {
             window.applyCompanyProfileUI(window._currentSettings);
         }
@@ -49,7 +52,8 @@ window.addEventListener('route-changed', async (e) => {
             company_currency: 'GHS',
             company_logo: 'assets/img/logo.png',
             company_receipt_footer: 'Thank you for doing business with Qwik Gold!',
-            purity_discount_percent: 0.70
+            purity_discount_percent: 0.70,
+            calculation_formula: 'mayrocy'
         };
     }
 
@@ -71,6 +75,7 @@ window.renderSettingsUI = (container) => {
     const companyLogo = s.company_logo || 'assets/img/logo.png';
     const receiptFooter = s.company_receipt_footer || 'Thank you for doing business with Qwik Gold!';
     const currentDiscount = parseFloat(s.purity_discount_percent !== undefined ? s.purity_discount_percent : 0.70);
+    const currentFormula = (s.calculation_formula === 'nwdgc') ? 'nwdgc' : 'mayrocy';
 
     const isAdmin = window.isAdmin ? window.isAdmin() : true;
 
@@ -364,8 +369,51 @@ window.renderSettingsUI = (container) => {
                                 <span class="material-symbols-outlined" style="font-size: 24px;">percent</span>
                             </div>
                             <div>
-                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0;">Refined Gold Purity Discount</h3>
-                                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">Ghana Water Density standard buyer deduction</p>
+                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0;">Refined Gold Purity Discount & Formula</h3>
+                                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">Ghana Water Density calculation standard &amp; buyer deduction</p>
+                            </div>
+                        </div>
+
+                        <!-- Calculation Standard Selector -->
+                        <div style="margin-bottom: 22px;">
+                            <label style="display: block; font-weight: 700; color: var(--text-main); margin-bottom: 10px; font-size: 0.9rem;">
+                                Calculation Formula Standard <span style="color: var(--danger);">*</span>
+                            </label>
+                            <input type="hidden" id="setting_calculation_formula" value="${currentFormula}">
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                                <!-- Mayrocy Standard -->
+                                <div id="formula_card_mayrocy" onclick="${isAdmin ? "window.selectFormulaStandard('mayrocy')" : ''}"
+                                    style="padding: 13px 15px; border-radius: 12px; cursor: ${isAdmin ? 'pointer' : 'default'}; transition: all 0.2s; border: 2px solid ${currentFormula === 'mayrocy' ? 'var(--gold-primary)' : 'var(--border)'}; background: ${currentFormula === 'mayrocy' ? 'rgba(45, 91, 255, 0.05)' : 'var(--bg-main)'};">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span id="formula_radio_mayrocy" class="material-symbols-outlined" style="font-size: 20px; color: ${currentFormula === 'mayrocy' ? 'var(--gold-primary)' : '#94a3b8'};">
+                                                ${currentFormula === 'mayrocy' ? 'radio_button_checked' : 'radio_button_unchecked'}
+                                            </span>
+                                            <span style="font-weight: 800; font-size: 0.92rem; color: var(--text-main);">Mayrocy Standard</span>
+                                        </div>
+                                        <span style="background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 20px;">DEFAULT / MARKET</span>
+                                    </div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted); padding-left: 28px; line-height: 1.45;">
+                                        Deducts discount directly from Purity % (<code>rawPurity − 0.7%</code>), displays rounded 2dp density, and computes Karat &amp; GH₵ price/lb from adjusted purity.
+                                    </div>
+                                </div>
+
+                                <!-- NWDGC Legacy Standard -->
+                                <div id="formula_card_nwdgc" onclick="${isAdmin ? "window.selectFormulaStandard('nwdgc')" : ''}"
+                                    style="padding: 13px 15px; border-radius: 12px; cursor: ${isAdmin ? 'pointer' : 'default'}; transition: all 0.2s; border: 2px solid ${currentFormula === 'nwdgc' ? 'var(--gold-primary)' : 'var(--border)'}; background: ${currentFormula === 'nwdgc' ? 'rgba(45, 91, 255, 0.05)' : 'var(--bg-main)'};">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span id="formula_radio_nwdgc" class="material-symbols-outlined" style="font-size: 20px; color: ${currentFormula === 'nwdgc' ? 'var(--gold-primary)' : '#94a3b8'};">
+                                                ${currentFormula === 'nwdgc' ? 'radio_button_checked' : 'radio_button_unchecked'}
+                                            </span>
+                                            <span style="font-weight: 800; font-size: 0.92rem; color: var(--text-main);">NWDGC Legacy (nwdgc.vercel.app)</span>
+                                        </div>
+                                        <span style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 20px;">LEGACY</span>
+                                    </div>
+                                    <div style="font-size: 0.78rem; color: var(--text-muted); padding-left: 28px; line-height: 1.45;">
+                                        Truncates density to 2dp and applies multiplicative discount directly on raw karat (<code>rawKarat × (1 − 0.7%)</code>).
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -392,7 +440,7 @@ window.renderSettingsUI = (container) => {
                                         0.50%
                                     </button>
                                     <button type="button" class="btn btn-sm" onclick="window.applyDiscountPreset(0.7)" style="background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 8px;">
-                                        ★ 0.70% (Ghana Market / NWDGC)
+                                        ★ 0.70% (Ghana Market Standard)
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline" onclick="window.applyDiscountPreset(1.0)" style="font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 8px;">
                                         1.00%
@@ -407,7 +455,7 @@ window.renderSettingsUI = (container) => {
                                 <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
                                 Why a Purity Discount?
                             </div>
-                            In the Ghanaian gold trade (e.g. <em>nwdgc.vercel.app</em> / Gold Traders), buyers apply a standard <strong>0.7% purity discount</strong> on water density calculations to buffer for smelting slag loss and assay tolerances.
+                            In the Ghanaian gold trade, buyers apply a standard <strong>0.7% purity discount</strong> on water density calculations to buffer for smelting slag loss and assay tolerances.
                             Setting this to <strong>0.00%</strong> uses the pure unadjusted Archimedes formula.
                         </div>
 
@@ -420,31 +468,36 @@ window.renderSettingsUI = (container) => {
 
                     <!-- Card 2: Interactive Real-Time Calculator Preview Sandbox -->
                     <div class="glass-panel" style="padding: 28px; border-radius: 16px; background: var(--bg-panel); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); color: #059669; display: flex; align-items: center; justify-content: center;">
-                                <span class="material-symbols-outlined" style="font-size: 24px;">calculate</span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); color: #059669; display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-outlined" style="font-size: 24px;">calculate</span>
+                                </div>
+                                <div>
+                                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0;">Live Calculation Sandbox</h3>
+                                    <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">Verify payout changes in real-time before saving</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0;">Live Calculation Sandbox</h3>
-                                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0 0;">Verify payout changes in real-time before saving</p>
-                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" onclick="window.loadSandboxSample(32.59, 1.77, 11517)" style="font-size: 0.74rem; padding: 4px 10px;">
+                                Test Sample (32.59g)
+                            </button>
                         </div>
 
                         <!-- Sandbox Inputs -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 10px; margin-bottom: 16px;">
                             <div>
                                 <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Weight (g)</label>
-                                <input type="number" step="0.01" id="sandbox_grams" value="65.01" oninput="window.updateSettingsPreview()"
+                                <input type="number" step="0.01" id="sandbox_grams" value="32.59" oninput="window.updateSettingsPreview()"
                                     style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-weight: 700; background: var(--bg-main);">
                             </div>
                             <div>
-                                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Volume (v)</label>
-                                <input type="number" step="0.01" id="sandbox_volume" value="3.70" oninput="window.updateSettingsPreview()"
+                                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Water (down)</label>
+                                <input type="number" step="0.01" id="sandbox_volume" value="1.77" oninput="window.updateSettingsPreview()"
                                     style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-weight: 700; background: var(--bg-main);">
                             </div>
                             <div>
-                                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Price/Pound (GHS)</label>
-                                <input type="number" step="1" id="sandbox_price" value="10900" oninput="window.updateSettingsPreview()"
+                                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Price (23kt GHS)</label>
+                                <input type="number" step="1" id="sandbox_price" value="11517" oninput="window.updateSettingsPreview()"
                                     style="width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-weight: 700; background: var(--bg-main);">
                             </div>
                         </div>
@@ -712,11 +765,50 @@ window.saveCompanyProfile = async () => {
 };
 
 /**
- * Save Gold Valuation & Purity Discount
+ * Select calculation formula standard ('mayrocy' or 'nwdgc')
+ */
+window.selectFormulaStandard = (formula) => {
+    const normalized = (formula === 'nwdgc') ? 'nwdgc' : 'mayrocy';
+    const hiddenInput = document.getElementById('setting_calculation_formula');
+    if (hiddenInput) hiddenInput.value = normalized;
+
+    ['mayrocy', 'nwdgc'].forEach(key => {
+        const card = document.getElementById(`formula_card_${key}`);
+        const radio = document.getElementById(`formula_radio_${key}`);
+        const active = (key === normalized);
+        if (card) {
+            card.style.borderColor = active ? 'var(--gold-primary)' : 'var(--border)';
+            card.style.background = active ? 'rgba(45, 91, 255, 0.05)' : 'var(--bg-main)';
+        }
+        if (radio) {
+            radio.textContent = active ? 'radio_button_checked' : 'radio_button_unchecked';
+            radio.style.color = active ? 'var(--gold-primary)' : '#94a3b8';
+        }
+    });
+
+    window.updateSettingsPreview();
+};
+
+/**
+ * Load quick test sample values into sandbox
+ */
+window.loadSandboxSample = (grams, volume, price) => {
+    const gEl = document.getElementById('sandbox_grams');
+    const vEl = document.getElementById('sandbox_volume');
+    const pEl = document.getElementById('sandbox_price');
+    if (gEl) gEl.value = grams;
+    if (vEl) vEl.value = volume;
+    if (pEl) pEl.value = price;
+    window.updateSettingsPreview();
+};
+
+/**
+ * Save Gold Valuation, Formula Standard & Purity Discount
  */
 window.saveValuationSettings = async () => {
     const btn = document.getElementById('btn_save_valuation');
     const discountInput = document.getElementById('setting_purity_discount');
+    const formulaInput = document.getElementById('setting_calculation_formula');
 
     if (!discountInput) return;
 
@@ -725,25 +817,31 @@ window.saveValuationSettings = async () => {
         return window.showToast('Please enter a valid discount percentage between 0% and 50%', 'error');
     }
 
+    const formulaVal = (formulaInput && formulaInput.value === 'nwdgc') ? 'nwdgc' : 'mayrocy';
+
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<span class="material-symbols-outlined spin">sync</span> Saving...';
     }
 
     try {
-        const res = await window.api.post('/settings/update.php', {
-            purity_discount_percent: discountVal
+        await window.api.post('/settings/update.php', {
+            purity_discount_percent: discountVal,
+            calculation_formula: formulaVal
         });
 
         if (window._currentSettings) {
             window._currentSettings.purity_discount_percent = discountVal;
+            window._currentSettings.calculation_formula = formulaVal;
         }
 
         if (window.GoldMath) {
             window.GoldMath.setDiscountPercent(discountVal);
+            window.GoldMath.setCalculationFormula(formulaVal);
         }
 
-        window.showToast(`Valuation settings saved! Refined gold discount is ${discountVal.toFixed(2)}%`, 'success');
+        const label = formulaVal === 'mayrocy' ? 'Mayrocy Standard' : 'NWDGC Legacy';
+        window.showToast(`Valuation saved! Formula: ${label} (${discountVal.toFixed(2)}% discount)`, 'success');
     } catch (err) {
         console.error('Settings save error:', err);
         window.showToast(err.message || 'Failed to save valuation settings', 'error');
@@ -771,6 +869,7 @@ window.saveAllSettings = async () => {
     const footerInput = document.getElementById('setting_company_receipt_footer');
     const logoInput = document.getElementById('setting_company_logo');
     const discountInput = document.getElementById('setting_purity_discount');
+    const formulaInput = document.getElementById('setting_calculation_formula');
 
     if (!nameInput || !nameInput.value.trim()) {
         return window.showToast('Company Name is required.', 'error');
@@ -780,6 +879,8 @@ window.saveAllSettings = async () => {
     if (isNaN(discountVal) || discountVal < 0 || discountVal > 50) {
         return window.showToast('Please enter a valid discount percentage between 0% and 50%', 'error');
     }
+
+    const formulaVal = (formulaInput && formulaInput.value === 'nwdgc') ? 'nwdgc' : 'mayrocy';
 
     const payload = {
         company_name: nameInput.value.trim(),
@@ -791,7 +892,8 @@ window.saveAllSettings = async () => {
         company_currency: currencyInput ? currencyInput.value.trim() : 'GHS',
         company_receipt_footer: footerInput ? footerInput.value.trim() : '',
         company_logo: logoInput ? logoInput.value.trim() : 'assets/img/logo.png',
-        purity_discount_percent: discountVal
+        purity_discount_percent: discountVal,
+        calculation_formula: formulaVal
     };
 
     if (btn) {
@@ -808,6 +910,7 @@ window.saveAllSettings = async () => {
         }
         if (window.GoldMath) {
             window.GoldMath.setDiscountPercent(discountVal);
+            window.GoldMath.setCalculationFormula(formulaVal);
         }
 
         window.showToast('All system & company settings saved successfully!', 'success');
@@ -838,6 +941,7 @@ window.applyDiscountPreset = (val) => {
  */
 window.updateSettingsPreview = () => {
     const discountInput = document.getElementById('setting_purity_discount');
+    const formulaInput = document.getElementById('setting_calculation_formula');
     const gramsInput = document.getElementById('sandbox_grams');
     const volumeInput = document.getElementById('sandbox_volume');
     const priceInput = document.getElementById('sandbox_price');
@@ -846,16 +950,18 @@ window.updateSettingsPreview = () => {
     if (!discountInput || !resultsContainer || !window.GoldMath) return;
 
     const discount = Math.max(0, parseFloat(discountInput.value) || 0);
-    const grams = parseFloat(gramsInput?.value) || 65.01;
-    const volume = parseFloat(volumeInput?.value) || 3.70;
-    const price = parseFloat(priceInput?.value) || 10900;
+    const formula = (formulaInput && formulaInput.value === 'nwdgc') ? 'nwdgc' : 'mayrocy';
+    const grams = parseFloat(gramsInput?.value) || 0;
+    const volume = parseFloat(volumeInput?.value) || 0;
+    const price = parseFloat(priceInput?.value) || 0;
 
-    // Run math using GoldMath
+    // Run math using GoldMath with the selected preview formula
     const calc = window.GoldMath.calculate({
         grams,
         volume,
         pricePerPound: price,
-        discountPercent: discount
+        discountPercent: discount,
+        formula
     });
 
     // Run gross calculation (0 discount) for comparison
@@ -863,26 +969,33 @@ window.updateSettingsPreview = () => {
         grams,
         volume,
         pricePerPound: price,
-        discountPercent: 0
+        discountPercent: 0,
+        formula
     });
 
-    const diff = calc.totalPayout - grossCalc.totalPayout;
+    const diff = grossCalc.totalPayout - calc.totalPayout;
+    const formulaBadge = formula === 'mayrocy' ? 'Mayrocy Standard' : 'NWDGC Legacy';
 
     resultsContainer.innerHTML = `
-        <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
-            Payable Amount to Seller
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.72rem;">
+            <span style="font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px;">Payable Amount to Seller</span>
+            <span style="background: rgba(45, 91, 255, 0.1); color: var(--gold-primary); padding: 2px 8px; border-radius: 12px; font-weight: 800;">${formulaBadge}</span>
         </div>
-        <div style="font-size: 2.2rem; font-weight: 800; color: var(--danger); line-height: 1.1; margin-bottom: 8px;">
-            <span style="font-size: 1.4rem; color: #94a3b8;">₵</span>${calc.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+        <div style="font-size: 2.2rem; font-weight: 800; color: var(--danger); line-height: 1.1; margin-bottom: 6px;">
+            <span style="font-size: 1.4rem; color: #94a3b8;">₵</span>${calc.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </div>
+
+        <div style="font-size: 0.8rem; color: #475569; font-weight: 600; margin-bottom: 10px;">
+            Effective Price / Pound: <strong style="color: #0f172a;">GH₵ ${calc.adjustedPricePerPound.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
         </div>
         
         ${discount > 0 ? `
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 12px;">
-                Gross Payout: ₵${grossCalc.totalPayout.toLocaleString()} &bull; 
-                <span style="color: #059669; font-weight: 700;">-${Math.abs(diff).toLocaleString()} GHS (-${discount}%)</span>
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; color: #64748b; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <span>Without discount: <strong style="color: #334155;">GH₵ ${grossCalc.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong> (${grossCalc.purityPercent.toFixed(2)}% &bull; ${grossCalc.payableKarat.toFixed(2)} kt)</span>
+                <span style="color: #059669; font-weight: 800;">-GH₵ ${Math.abs(diff).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
         ` : `
-            <div style="font-size: 0.78rem; color: #059669; font-weight: 700; margin-bottom: 12px;">
+            <div style="font-size: 0.78rem; color: #059669; font-weight: 700; margin-bottom: 14px;">
                 Standard Full Value (No Discount Deducted)
             </div>
         `}

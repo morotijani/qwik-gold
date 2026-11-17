@@ -420,13 +420,22 @@ window.renderWizardStep = () => {
                 <div class="nwdgc-payout-box">
                     <div class="nwdgc-payout-label">Amount to be paid to the seller</div>
                     <div class="nwdgc-payout-amount">GHS <span id="calc_total_payout">${state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+                    ${state.goldType === 'refined' ? `
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; color: #64748B; font-weight: 600;">
+                            <div>Price per pound: <strong id="wiz_calc_ppp" style="color: #0F172A;">GHS ${(Number(state.adjustedPricePerPound) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
+                            <div id="wiz_calc_no_disc_row" style="display: ${(Number(state.discountPercent) > 0 && Number(state.grossPayout) > 0) ? 'block' : 'none'};">
+                                Without discount: <strong id="wiz_calc_no_disc" style="color: #334155;">GHS ${(Number(state.grossPayout) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                                <span id="wiz_calc_disc_saved" style="color: #059669; font-weight: 700; margin-left: 4px;">(-GHS ${(Number(state.discountSaved) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
 
             <!-- Discount Note -->
             <div style="text-align: center; margin-top: 14px; margin-bottom: 20px;">
-                <div style="font-size: 1.05rem; font-weight: 800; color: #121926;">
-                    ${(Number(state.discountPercent) || 0.7)}% Purity Discount Applied
+                <div style="font-size: 1.05rem; font-weight: 800; color: #121926;" id="calc_discount_badge">
+                    ${(Number(state.discountPercent) || 0.7)}% Purity Discount Applied &bull; <span style="color: #2D5BFF;">${(window.GoldMath && window.GoldMath.getCalculationFormula() === 'nwdgc') ? 'NWDGC Standard' : 'Mayrocy Standard'}</span>
                 </div>
                 <div style="font-size: 0.8rem; color: #94A3B8; font-weight: 600;">
                     Powered by Qwik Gold
@@ -732,9 +741,13 @@ window.calculatePurchaseMath = () => {
         state.calculatedPounds = calc.pounds;
         state.calculatedDensity = calc.density;
         state.rawKarat = calc.rawKarat;
+        state.rawPurity = calc.rawPurity;
         state.calculatedKarat = calc.payableKarat;
         state.purityPercent = calc.purityPercent;
         state.discountPercent = calc.discountPercent;
+        state.adjustedPricePerPound = calc.adjustedPricePerPound;
+        state.grossPayout = calc.grossPayout;
+        state.discountSaved = calc.discountSaved;
         state.totalPayout = calc.totalPayout;
 
         if (document.getElementById('calc_pounds')) {
@@ -752,12 +765,25 @@ window.calculatePurchaseMath = () => {
             if (document.getElementById('calc_purity')) {
                 document.getElementById('calc_purity').innerText = state.purityPercent.toFixed(2) + '%';
             }
+            if (document.getElementById('wiz_calc_ppp')) {
+                document.getElementById('wiz_calc_ppp').innerText = 'GHS ' + state.adjustedPricePerPound.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            const wizNoDiscRow = document.getElementById('wiz_calc_no_disc_row');
+            if (wizNoDiscRow) {
+                if (state.discountPercent > 0 && state.grossPayout > 0) {
+                    wizNoDiscRow.style.display = 'block';
+                    const wizNoDisc = document.getElementById('wiz_calc_no_disc');
+                    const wizSaved = document.getElementById('wiz_calc_disc_saved');
+                    if (wizNoDisc) wizNoDisc.innerText = `GHS ${state.grossPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${state.rawPurity.toFixed(2)}% · ${state.rawKarat.toFixed(2)} kt)`;
+                    if (wizSaved) wizSaved.innerText = `(-GHS ${state.discountSaved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
+                } else {
+                    wizNoDiscRow.style.display = 'none';
+                }
+            }
             if (document.getElementById('calc_discount_badge')) {
+                const formulaLabel = calc.formula === 'nwdgc' ? 'NWDGC Standard' : 'Mayrocy Standard';
                 document.getElementById('calc_discount_badge').innerHTML = `
-                    <span style="background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); padding: 3px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px;">
-                        <span class="material-symbols-outlined" style="font-size: 14px;">verified</span>
-                        ${state.discountPercent}% Purity Discount Applied
-                    </span>
+                    ${state.discountPercent}% Purity Discount Applied &bull; <span style="color: #2D5BFF;">${formulaLabel}</span>
                 `;
             }
             document.getElementById('calc_total_payout').innerText = state.totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

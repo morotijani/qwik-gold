@@ -72,17 +72,8 @@ try {
         $estimatedCash = floor($overallBlades * $estimatedPrice);
     } else if ($goldType === 'refined') {
         if ($overallVolume > 0) {
-            $discountPercent = (float)get_system_setting($pdo, 'purity_discount_percent', 0.70);
-            $discountFactor = (100 - $discountPercent) / 100;
-
-            $density = floor(($overallGrams / $overallVolume) * 100) / 100;
-            $rawKarat = 0;
-            if ($density > 0) {
-                $rawKarat = floor(((($density - 10.51) * 52.838) / $density) * 100) / 100;
-            }
-            $karat = $rawKarat > 0 ? floor(($rawKarat * $discountFactor) * 100) / 100 : 0;
-            $pounds = floor(($overallGrams / 7.75) * 100) / 100;
-            $estimatedCash = floor(($karat * $estimatedPrice / 23) * $pounds);
+            $calc = calculate_refined_gold($pdo, $overallGrams, $overallVolume, $estimatedPrice);
+            $estimatedCash = $calc['total_payout'];
         }
     }
 
