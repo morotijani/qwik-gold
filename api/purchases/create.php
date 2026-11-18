@@ -77,7 +77,8 @@ try {
     $currentBalance = $lastLedger ? (float)$lastLedger['running_balance'] : 0.0;
     
     if ($currentBalance < $totalPaid) {
-        throw new Exception("Insufficient Office Capital. Current available capital is ₵ " . number_format($currentBalance, 2));
+        $pdo->rollBack();
+        sendResponse('error', "Insufficient Office Capital. Current available capital is ₵ " . number_format($currentBalance, 2), [], 400);
     }
     
     $deductionAmount = -1 * abs($totalPaid);
@@ -105,7 +106,9 @@ try {
     ], 201);
 
 } catch (Exception $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log("System Error: " . $e->getMessage());
     sendResponse('error', 'A system error occurred while processing your request.', [], 500);
 }

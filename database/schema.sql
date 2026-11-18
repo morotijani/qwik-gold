@@ -1,6 +1,41 @@
 CREATE DATABASE IF NOT EXISTS gold_ledger;
 USE gold_ledger;
 
+-- users
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'staff', 'salesperson') NOT NULL DEFAULT 'staff',
+    status ENUM('active', 'suspended') NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- api_tokens
+CREATE TABLE IF NOT EXISTS api_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(128) UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- audit_logs
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
+    action VARCHAR(100) NOT NULL,
+    table_affected VARCHAR(100) NOT NULL,
+    record_id INT NOT NULL DEFAULT 0,
+    old_data JSON DEFAULT NULL,
+    new_data JSON DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- customers (Individuals & Groups)
 CREATE TABLE customers (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -12,7 +47,9 @@ CREATE TABLE customers (
     phone VARCHAR(50) DEFAULT NULL,
     email VARCHAR(100) DEFAULT NULL,
     address TEXT DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    handler_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (handler_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- capital_ledger (The Single Source of Truth for Cash)
@@ -40,6 +77,7 @@ CREATE TABLE gold_vault (
     current_location ENUM('office_vault', 'sold_main_market', 'converted', 'on_hold') NOT NULL DEFAULT 'office_vault',
     guessed_value_ghs DECIMAL(15, 2) DEFAULT 0, -- Calculated formula value at the exact time of purchase
     purchase_id INT DEFAULT NULL, -- Links vault record back to its origin purchase (if bought)
+    sale_id INT DEFAULT NULL, -- Links vault record to market_sales ID
     customer_id INT DEFAULT NULL, -- NULL if company owned, linked if keeper_held
     parent_ball_id INT DEFAULT NULL, -- Links refined gold back to original balls
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -63,6 +101,7 @@ CREATE TABLE loans (
     collateral_blades DECIMAL(10, 4) DEFAULT NULL,
     notes TEXT DEFAULT NULL,
     settlement_note TEXT DEFAULT NULL,
+    is_cleared_from_profile BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     FOREIGN KEY (issued_by) REFERENCES users(id) ON DELETE SET NULL
@@ -95,19 +134,26 @@ CREATE TABLE loan_settlements (
 -- market_sales
 CREATE TABLE market_sales (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    gold_type ENUM('balls', 'refined') NOT NULL,
+    sale_uid VARCHAR(50) UNIQUE DEFAULT NULL,
+    gold_type ENUM('balls', 'refined', 'mixed') NOT NULL,
     total_grams DECIMAL(10,4) NOT NULL,
     total_blades DECIMAL(10,4) DEFAULT 0,
     total_volume DECIMAL(10,4) DEFAULT 0,
     estimated_cash DECIMAL(15,2) NOT NULL,
-    estimated_local_price DECIMAL(15,2),
-    actual_cash_brought_in DECIMAL(15,2),
+    estimated_local_price DECIMAL(15,2) DEFAULT NULL,
+    actual_local_price DECIMAL(15,2) DEFAULT NULL,
+    actual_grams_market DECIMAL(10,4) DEFAULT NULL,
+    actual_volume_market DECIMAL(10,4) DEFAULT NULL,
+    actual_blades_market DECIMAL(10,4) DEFAULT NULL,
+    actual_cash DECIMAL(15,2) DEFAULT NULL,
     net_profit_ghs DECIMAL(15,2) DEFAULT 0,
     is_merged BOOLEAN DEFAULT FALSE,
     merged_into_id INT DEFAULT NULL,
     status ENUM('pending', 'completed') DEFAULT 'pending',
-    handled_by INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    notes TEXT DEFAULT NULL,
+    handler_id INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (handler_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- gold_purchases (The Sales Desk)
@@ -121,15 +167,20 @@ CREATE TABLE gold_purchases (
     total_paid_ghs DECIMAL(15, 2) NOT NULL,
     local_price DECIMAL(15, 2) DEFAULT NULL,
     density DECIMAL(10, 2) DEFAULT NULL,
+    raw_karat DECIMAL(10, 2) DEFAULT NULL,
     karat DECIMAL(10, 2) DEFAULT NULL,
+    discount_percent DECIMAL(5, 2) DEFAULT NULL,
     pounds DECIMAL(10, 4) DEFAULT NULL,
     total_blades DECIMAL(10, 4) DEFAULT NULL,
-    origin ENUM('walk_in', 'from_keeper', 'loan_offset') NOT NULL,
+    origin ENUM('walk_in', 'from_keeper', 'loan_offset', 'collateral_offset', 'collateral_purchase') NOT NULL,
+    handler_id INT DEFAULT NULL,
     notes VARCHAR(255) DEFAULT NULL,
+    is_cleared_from_profile BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_transaction_ref (transaction_ref),
     INDEX idx_created_at (created_at),
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL,
+    FOREIGN KEY (handler_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- expenses
